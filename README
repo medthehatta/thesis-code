@@ -1,0 +1,5 @@
+Constrained Fitting for FEA Simulation of Tissue Models
+=======================================================
+The code part of my master's thesis.  Half of this will be fitting constrained models, and the other half will be figuring out, for a given model, what strain regimes satisfy the constraints.
+
+
