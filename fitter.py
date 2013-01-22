@@ -17,14 +17,15 @@ def positive_definite_cost(mat):
 
   If the matrix IS positive definite, it measures *how* positive definite
   it is by computing the sum of its *positive* minor determinants (all of
-  them will be positive).
+  them will be positive).  The answer in this case will be negative.
   """
   minors = minor_determinants(mat)
   indefinite = [-a for a in minors if a<0]
+  definite   = [-a for a in minors if a>0]
 
   if len(indefinite)!=0: #the matrix is not positive definite
     return sum(indefinite)
   else: #the matrix *is* positive definite
-    return sum(minors) 
+    return sum(definite) 
 
 
