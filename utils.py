@@ -14,5 +14,11 @@ def random_symmetric_matrix(shape):
   return (M.T + M)/2
 
 
+def test_matrix_params(*p):
+  """
+  Returns a symmetric 2x2 matrix from the specified parameters.
+  """
+  (a,b,c) = p
+  return np.array([[a,b],[b,c]])
 
 

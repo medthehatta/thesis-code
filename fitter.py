@@ -28,4 +28,3 @@ def positive_definite_cost(mat):
   else: #the matrix *is* positive definite
     return sum(definite) 
 
-

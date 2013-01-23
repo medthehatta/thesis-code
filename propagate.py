@@ -8,15 +8,18 @@ def normed(v):
   return v/np.linalg.norm(v)
 
 
-def finite_gradient(f,x0=np.zeros(3),dx=1e-5):
+def finite_gradient(f,x0=np.zeros(3),dx=1e-5,basis=None):
   """
   Computes a finite-difference approximation to the gradient of a
   scalar-valued function ``f`` at the point ``x0``.
   """ 
-  dimension = len(x0)
-  # the vectors of the standard basis are the rows of the identity matrix
-  standard_basis = np.eye(dimension)
-  return np.array([f(x0 + dx*ei) for ei in standard_basis])
+  # Default to the standard basis if none provided
+  if not basis:
+    dimension = len(x0)
+    # the vectors of the standard basis are the rows of the identity matrix
+    basis = np.eye(dimension)
+  # i hope dividing by a tiny number isn't going to give me issues
+  return np.array([f(x0 + dx*ei)/dx for ei in basis])
 
 
 def gram_schmidt(basis):
@@ -56,9 +59,11 @@ def hypersurface_basis(normal):
   # We want an orthonormal basis with one of the vectors in the direction
   #   of the normal so all the *other* basis elements are parallel to the
   #   hypersurface
-  # Start by replacing the first basis vector with the normal, and then
-  #   orthonormalize
+  # Start by replacing the first basis vector in the set with the normal, and
+  #   then orthonormalize
   skewed_basis = np.vstack([n,
                             np.eye(dimension)[1:]])
   return gram_schmidt(skewed_basis)
+
+
 
