@@ -4,6 +4,7 @@ import propagate as prop
 import scipy.optimize as so
 from imp import reload
 from functools import reduce
+import pdb
 
 def random_symmetric_matrix(shape):
   """
