@@ -28,9 +28,12 @@ def gram_schmidt(basis):
 
   def process_next_vector(basis_so_far,current_vector): 
     next_vector_result = reduce(reduction_step, basis_so_far, current_vector)
-    return np.vstack([basis_so_far, next_vector_result])
+    if len(basis_so_far)!=0:
+      return np.vstack([basis_so_far, next_vector_result])
+    else:
+      return np.array([next_vector_result])
   
-  return reduce(process_next_vector, basis[1:], basis[0])
+  return reduce(process_next_vector, basis, [])
   
 
 def hypersurface_basis(normal):
