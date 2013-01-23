@@ -1,6 +1,9 @@
 import numpy as np
 import fitter as fit
+import propagate as prop
 import scipy.optimize as so
+from imp import reload
+from functools import reduce
 
 def random_symmetric_matrix(shape):
   """
