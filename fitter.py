@@ -7,7 +7,7 @@ def minor_determinants(mat):
   """
   #TODO: Maybe this is premature optimization, but there's
   #      GOTTA be a way to use smaller minors to derive larger ones
-  return [np.linalg.det(mat[:n,:n]) for n in range(1,mat.shape[0])]
+  return [np.linalg.det(mat[:n,:n]) for n in range(1,mat.shape[0]+1)]
 
 def positive_definite_cost(mat):
   """
