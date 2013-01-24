@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.optimize as so
 from functools import reduce
 
 def normed(v):
@@ -66,4 +67,38 @@ def hypersurface_basis(normal):
   return gram_schmidt(skewed_basis)
 
 
+def naive_seed_matrices(func,dim,maxiters=1e4):
+  """
+  Given a continuous scalar function ``func`` on a vector space and ``dim``,
+  the space's dimension, finds a seed point for one connected component of the
+  zero isosurface.
+
+  We do this by randomly sampling points in the domain until two have different
+  signs.  Then we root-find along the line between the points until we find the
+  zero.  This will be a seed point of the isosurface.
+  """
+  # Select the first point and check the sign of the function
+  pt1 = np.random.random(dim)
+  sgn1 = np.sign(func(pt1))
+
+  # Rejection sample for the second point until we have the other sign
+  pt2 = np.array(None)
+  while np.sign(func(pt2))==sgn1 and maxiters:
+    pt2 = np.random.random(dim)
+    maxiters-=1
+
+  # Failed to converge quickly enough
+  if maxiters<1: return None
+
+  # Once we have the second point, parametrize the segment between the two
+  if sgn1<0:
+    chord = lambda s: pt1 + s*(pt2-pt1)
+  else:
+    chord = lambda s: pt2 + s*(pt1-pt2)
+
+  # Now root find along the segment between them
+  t0 = so.zeros.brenth(lambda t: func(chord(t)),0,1)
+
+  # Return the seed point
+  return chord(t0)
 
