@@ -67,7 +67,7 @@ def hypersurface_basis(normal):
   return gram_schmidt(skewed_basis)
 
 
-def naive_seed_matrices(func,dim,maxiters=1e4):
+def naive_seed_isosurface(func,dim,maxiters=1e4):
   """
   Given a continuous scalar function ``func`` on a vector space and ``dim``,
   the space's dimension, finds a seed point for one connected component of the
