@@ -15,13 +15,6 @@ def random_symmetric_matrix(shape):
   M = np.random.random(shape)
   return (M.T + M)/2
 
-def test_matrix_params(*p):
-  """
-  Returns a symmetric matrix made from the given parameters.
-  """
-  (a,b,c) = p
-  return np.array([[a,b],[b,c]])
-
 def ireversed(iterator):
   """
   Reverses an iterator (which usually doesn't work) and makes the result into a
