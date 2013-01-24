@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.optimize as so
+import random
 from functools import reduce
 
 def normed(v):
@@ -77,14 +78,16 @@ def naive_seed_isosurface(func,dim,maxiters=1e4,spread=10):
   signs.  Then we root-find along the line between the points until we find the
   zero.  This will be a seed point of the isosurface.
   """
+  def random_sign(): return np.array([random.choice([-1,1]) for x in range(dim)])
+
   # Select the first point and check the sign of the function
-  pt1 = spread*np.random.random(dim)
+  pt1  = random_sign()*spread*np.random.random(dim)
   sgn1 = np.sign(func(pt1))
 
   # Rejection sample for the second point until we have the other sign
-  pt2 = spread*np.random.random(dim)
+  pt2 = random_sign()*spread*np.random.random(dim)
   while np.sign(func(pt2))==sgn1 and maxiters:
-    pt2 = spread*np.random.random(dim)
+    pt2 = random_sign()*spread*np.random.random(dim)
     maxiters-=1
 
   # Failed to converge quickly enough
