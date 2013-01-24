@@ -14,7 +14,7 @@ def finite_gradient(f,x0=np.zeros(3),dx=1e-5,basis=None):
   scalar-valued function ``f`` at the point ``x0``.
   """ 
   # Default to the standard basis if none provided
-  if not basis:
+  if basis is None:
     dimension = len(x0)
     # the vectors of the standard basis are the rows of the identity matrix
     basis = np.eye(dimension)
