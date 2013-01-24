@@ -61,4 +61,3 @@ def make_symmetric_matrix(*p):
   return (utri + utri.T)/2
 
 
-
