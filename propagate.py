@@ -82,7 +82,7 @@ def naive_seed_matrices(func,dim,maxiters=1e4):
   sgn1 = np.sign(func(pt1))
 
   # Rejection sample for the second point until we have the other sign
-  pt2 = np.random.random(dim)
+  pt2 = np.array(None)
   while np.sign(func(pt2))==sgn1 and maxiters:
     pt2 = np.random.random(dim)
     maxiters-=1
