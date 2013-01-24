@@ -19,7 +19,7 @@ def finite_gradient(f,x0=np.zeros(3),dx=1e-5,basis=None):
     # the vectors of the standard basis are the rows of the identity matrix
     basis = np.eye(dimension)
   # i hope dividing by a tiny number isn't going to give me issues
-  return np.array([f(x0 + dx*ei)/dx for ei in basis])
+  return np.array([(f(x0 + dx*ei) - f(x0))/dx for ei in basis])
 
 
 def gram_schmidt(basis):
