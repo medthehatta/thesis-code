@@ -67,7 +67,7 @@ def hypersurface_basis(normal):
   return gram_schmidt(skewed_basis)
 
 
-def naive_seed_isosurface(func,dim,maxiters=1e4):
+def naive_seed_isosurface(func,dim,maxiters=1e4,spread=10):
   """
   Given a continuous scalar function ``func`` on a vector space and ``dim``,
   the space's dimension, finds a seed point for one connected component of the
@@ -78,13 +78,13 @@ def naive_seed_isosurface(func,dim,maxiters=1e4):
   zero.  This will be a seed point of the isosurface.
   """
   # Select the first point and check the sign of the function
-  pt1 = np.random.random(dim)
+  pt1 = spread*np.random.random(dim)
   sgn1 = np.sign(func(pt1))
 
   # Rejection sample for the second point until we have the other sign
-  pt2 = np.array(None)
+  pt2 = spread*np.random.random(dim)
   while np.sign(func(pt2))==sgn1 and maxiters:
-    pt2 = np.random.random(dim)
+    pt2 = spread*np.random.random(dim)
     maxiters-=1
 
   # Failed to converge quickly enough
