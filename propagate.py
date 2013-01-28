@@ -11,20 +11,21 @@ def normed(v):
   return v/np.linalg.norm(v)
 
 
-def finite_gradient(f,x0=np.zeros(3),dx=1e-5,basis=None):
+def finite_gradient(f,x0=np.zeros((3,3)),dx=1e-5,basis=None):
   """
   Computes a finite-difference approximation to the gradient of a
-  scalar-valued function ``f`` at the point ``x0``.
+  scalar-valued function ``f`` at the points in the list ``x0``.
 
-  ``f`` should be vectorized to accept a list of vectors.
+  ``f`` should be vectorized.
   """ 
   # Default to the standard basis if none provided
   if basis is None:
-    dimension = len(x0)
+    dimension = x0.shape[1]
     # the vectors of the standard basis are the rows of the identity matrix
     basis = np.eye(dimension)
-  x0s       = np.tile(x0, (len(basis),1))
-  displaced = x0s + dx*basis
+  x0s       = np.tile(x0, (dimension,1,1)).transpose((1,2,0))
+  bases     = np.tile(basis, (x0.shape[0],1,1))
+  displaced = x0s + dx*bases
   # i hope dividing by a tiny number isn't going to give me issues
   return (f(displaced) - f(x0s))/dx
 
