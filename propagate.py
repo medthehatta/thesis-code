@@ -23,9 +23,8 @@ def finite_gradient(f,x0=np.zeros((3,3)),dx=1e-5,basis=None):
     dimension = x0.shape[1]
     # the vectors of the standard basis are the rows of the identity matrix
     basis = np.eye(dimension)
-  x0s       = np.tile(x0, (dimension,1,1)).transpose((1,2,0))
-  bases     = np.tile(basis, (x0.shape[0],1,1))
-  displaced = x0s + dx*bases
+  x0s       = np.tile(x0, (dimension,1))
+  displaced = x0s + dx*basis
   # i hope dividing by a tiny number isn't going to give me issues
   return (f(displaced) - f(x0s))/dx
 
