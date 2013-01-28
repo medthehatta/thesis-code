@@ -14,6 +14,8 @@ def finite_gradient(f,x0=np.zeros(3),dx=1e-5,basis=None):
   """
   Computes a finite-difference approximation to the gradient of a
   scalar-valued function ``f`` at the point ``x0``.
+
+  ``f`` should be vectorized to accept a list of vectors.
   """ 
   # Default to the standard basis if none provided
   if basis is None:
@@ -21,7 +23,19 @@ def finite_gradient(f,x0=np.zeros(3),dx=1e-5,basis=None):
     # the vectors of the standard basis are the rows of the identity matrix
     basis = np.eye(dimension)
   # i hope dividing by a tiny number isn't going to give me issues
-  return np.array([(f(x0 + dx*ei) - f(x0))/dx for ei in basis])
+  x0s       = np.tile(x0, (1,len(basis)))
+  displaced = x0s + dx*basis
+  return (f(displaced) - f(x0s))/dx
+
+
+def finite_hessian(f,x0=np.zeros(3),dx=1e-5,basis=None):
+ """
+ Computes the hessian of a scalar-valued function ``f``.
+
+ This might get really cumbersome really fast.
+ """
+ gradient = lambda x: finite_gradient(f,x,dx,basis)
+ return finite_gradient(gradient,x0,dx,basis)
 
 
 def gram_schmidt(basis):
