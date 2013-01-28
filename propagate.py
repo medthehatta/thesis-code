@@ -20,7 +20,7 @@ def finite_gradient(f,x0=np.zeros((3,3)),dx=1e-5,basis=None):
   """ 
   # Default to the standard basis if none provided
   if basis is None:
-    dimension = x0.shape[1]
+    dimension = x0.shape[0]
     # the vectors of the standard basis are the rows of the identity matrix
     basis = np.eye(dimension)
   x0s       = np.tile(x0, (dimension,1))
