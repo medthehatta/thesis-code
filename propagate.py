@@ -2,6 +2,7 @@ import numpy as np
 import scipy.optimize as so
 import random
 from functools import reduce
+import pdb
 
 def normed(v):
   """
@@ -22,9 +23,9 @@ def finite_gradient(f,x0=np.zeros(3),dx=1e-5,basis=None):
     dimension = len(x0)
     # the vectors of the standard basis are the rows of the identity matrix
     basis = np.eye(dimension)
-  # i hope dividing by a tiny number isn't going to give me issues
-  x0s       = np.tile(x0, (1,len(basis)))
+  x0s       = np.tile(x0, (len(basis),1))
   displaced = x0s + dx*basis
+  # i hope dividing by a tiny number isn't going to give me issues
   return (f(displaced) - f(x0s))/dx
 
 
