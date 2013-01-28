@@ -77,6 +77,9 @@ def naive_seed_isosurface(func,dim,maxiters=1e4,spread=10):
   We do this by randomly sampling points in the domain until two have different
   signs.  Then we root-find along the line between the points until we find the
   zero.  This will be a seed point of the isosurface.
+
+  Of course this will only find one connected component of the isosurface.  To
+  find all the components, we need a more sophisticated algorithm.
   """
   def random_sign(): return np.array([random.choice([-1,1]) for x in range(dim)])
 
