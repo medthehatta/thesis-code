@@ -54,3 +54,9 @@ def make_symmetric_matrix(*p):
   return (utri + utri.T)/2
 
 
+def field1(x):
+  """
+  The positive-definite cost of a symmetric matrix built from a vector of
+  components
+  """
+  return fit.positive_definite_cost(make_symmetric_matrix(*x))
