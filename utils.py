@@ -60,3 +60,11 @@ def field1(x):
   components
   """
   return fit.positive_definite_cost(make_symmetric_matrix(*x))
+
+def field2(X):
+  """
+  A fake vectorized version of field1.
+  Eventually I should actually vectorize this, but I have no idea how.
+  """
+  return [field1(x) for x in X]
+
