@@ -53,6 +53,14 @@ def make_symmetric_matrix(*p):
 
   return (utri + utri.T)/2
 
+def perturb_array(A,scale=1):
+  """
+  Slightly perturb the values of an array with displacements of order
+  ``scale``.
+  """
+  sign = np.random.choice([-1,1],size=A.shape)
+  magnitude = (scale*10) #default scale is ~10^(-1)
+  return A + magnitude*sign*np.random.random(A.shape)
 
 def field1(x):
   """
@@ -67,4 +75,5 @@ def field2(XX):
   Eventually I should *actually* vectorize this, but I have no idea how.
   """
   return np.array([[field1(x) for x in X] for X in XX])
+
 
