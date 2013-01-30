@@ -3,6 +3,7 @@ import fitter as fit
 import propagate as prop
 import scipy.optimize as so
 import operator
+import marching
 from imp import reload
 from functools import reduce
 from itertools import islice, count, takewhile
