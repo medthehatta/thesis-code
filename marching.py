@@ -7,8 +7,5 @@ def linear_interpolate(lo,hi,val=0):
   """
   return (val-lo)/(hi-lo)
 
-def triangle_area(poslo,poshia,poshib,vallo,valhia,valhib):
-  a = poslo + linear_interpolate(valhia,vallo)*(poshia-poslo)
-  b = poslo + linear_interpolate(valhib,vallo)*(poshib-poslo)
+def triangle_area(a,b):
   return 0.5*np.linalg.norm(a - (np.dot(a,b)/np.linalg.norm(b))*b)
-
