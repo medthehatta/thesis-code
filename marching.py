@@ -31,13 +31,20 @@ def tri1(A,B,C,val=0,a=np.zeros(2),b=np.array([1,0]),c=np.array([0.5,np.sqrt(0.7
   terpl = np.tile(terp0,(vert.shape[-1],1)).T
   return vert+terpl*disp
 
-def iso_volume(ptvals,val=0):
+def iso_intersect_dists(ptvals,val=0):
   """
-  Computes the n-dimensional volume of the intersection of an isovolume with
-  the (vertices of) an n-simplex.
+  Computes the positions at which the isosurface intersects the edges of a
+  simplex whose vertices have values ``ptvals``.
   """
-  lows = ptvals[ptvals<val]
-  his  = ptvals[ptvals>val]
-  #TODO should check for isovalues at vertices
+  #find vertices above and below isovalue
+  lows = np.where(ptvals<val)
+  his  = np.where(ptvals>val)
+  #TODO (should check for isovalues at vertices)
+  #for each vertex below the isovalue, compute the fraction of the distance
+  # to vertices *above* the isovalue that the isovalue is at
+  ivD = np.array([[linear_interpolate(l,h) for h in ptvals[his]] for l in ptvals[lows]])
+  #return the low indices and relative distances from lows to isovalues
+  return (lows,his, ivD)
+    
 
     
