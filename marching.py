@@ -31,3 +31,13 @@ def tri1(A,B,C,val=0,a=np.zeros(2),b=np.array([1,0]),c=np.array([0.5,np.sqrt(0.7
   terpl = np.tile(terp0,(vert.shape[-1],1)).T
   return vert+terpl*disp
 
+def iso_volume(ptvals,val=0):
+  """
+  Computes the n-dimensional volume of the intersection of an isovolume with
+  the (vertices of) an n-simplex.
+  """
+  lows = ptvals[ptvals<val]
+  his  = ptvals[ptvals>val]
+  #TODO should check for isovalues at vertices
+
+    
