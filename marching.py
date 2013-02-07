@@ -50,7 +50,9 @@ def triangle_iso_area(pts,ivD,lows,his):
   # the admissible side, but then later we need to flip the answer.
   #I.E., we invert if there are fewer LOW vertices than HIGH vertices, because
   # we want to work with as few "different" vertices as possible.
-  if ivD.shape[0]<ivD.shape[1]:
+  #The shape for all HIGH vertices should be (0,3), but numpy makes this (0,).
+  # Hence, we invert (i,j) if i<j or if j is not present.
+  if len(ivD.shape)<2 or ivD.shape[0]<ivD.shape[1]:
     invert=True
     ivD = ivD.T
   else:
@@ -62,7 +64,7 @@ def triangle_iso_area(pts,ivD,lows,his):
   #
   # II - one vertex is different
   #   Return the area of the triangle bounded by the isosurface
-  if 3 in ivD.shape:
+  if 0 in ivD.shape:
     translated_verts = pts - pts[0]
     area = triangle_area(*translated_verts[1:])
   else:
