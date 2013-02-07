@@ -20,7 +20,10 @@ def triangle_area(a,b):
   Returns the area of a triangle with one vertex at the origin and other two
   vertices at ``a`` and ``b``.
   """
-  return 0.5*np.linalg.norm(a - (np.dot(a,b)/np.linalg.norm(b))*b)
+  base = np.linalg.norm(b)
+  perpendicular = a - (np.dot(a,b)/np.dot(b,b))*b
+  height = np.linalg.norm(perpendicular)
+  return 0.5*base*height
 
 def iso_intersect_dists(ptvals,val=0):
   """
