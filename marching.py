@@ -16,6 +16,10 @@ def linear_interpolate(lo,hi,val=0):
       return r
 
 def triangle_area(a,b):
+  """
+  Returns the area of a triangle with one vertex at the origin and other two
+  vertices at ``a`` and ``b``.
+  """
   return 0.5*np.linalg.norm(a - (np.dot(a,b)/np.linalg.norm(b))*b)
 
 def tri1(A,B,C,val=0,a=np.zeros(2),b=np.array([1,0]),c=np.array([0.5,np.sqrt(0.75)])):
