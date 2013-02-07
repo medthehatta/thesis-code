@@ -22,19 +22,6 @@ def triangle_area(a,b):
   """
   return 0.5*np.linalg.norm(a - (np.dot(a,b)/np.linalg.norm(b))*b)
 
-def tri1(A,B,C,val=0,a=np.zeros(2),b=np.array([1,0]),c=np.array([0.5,np.sqrt(0.75)])):
-  """
-  Takes vertex values (with vertices on an equilateral triangle with one edge
-  parallel to the x-axis) and returns the vertices of the triangular region in
-  the partition by the isovalue.
-  """
-  vert = np.array([a,b,c])
-  disp = np.roll(vert,-1,axis=0) - vert
-  terp = [linear_interpolate(v,w,val) for (v,w) in [(A,B),(B,C),(C,A)]]
-  terp0 = [(x or 0) for x in terp]
-  terpl = np.tile(terp0,(vert.shape[-1],1)).T
-  return vert+terpl*disp
-
 def iso_intersect_dists(ptvals,val=0):
   """
   Computes the positions at which the isosurface intersects the edges of a
@@ -49,6 +36,5 @@ def iso_intersect_dists(ptvals,val=0):
   ivD = np.array([[linear_interpolate(l,h) for h in ptvals[his]] for l in ptvals[lows]])
   #return the low indices and relative distances from lows to isovalues
   return (lows,his, ivD)
-    
 
-    
+
