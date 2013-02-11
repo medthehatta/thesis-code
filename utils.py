@@ -82,6 +82,9 @@ def field2(XX):
 def field3(XX):
   return np.array([field1(x) for x in XX])
 
+def field4(XX):
+  return np.array([fit.is_positive_definite(make_symmetric_matrix(*x)) for x in XX])
+
 def draw_triangle(pts,vals=[0,0,0],labels=count()):
   """
   Plots a triangle with colored vertices
