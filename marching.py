@@ -49,11 +49,11 @@ def triangle_iso_area(pts,ivD,lows,his):
   #We want to find the area of the simplest region, either the admissible or
   # inadmissible side.  If the inadmissible side is easier, compute as if it was
   # the admissible side, but then later we need to flip the answer.
-  #I.E., we invert if there are fewer LOW vertices than HIGH vertices, because
+  #I.E., we invert if there are fewer HIGH vertices than LOW vertices, because
   # we want to work with as few "different" vertices as possible.
   #The shape for all HIGH vertices should be (0,3), but numpy makes this (0,).
   # Hence, we invert (i,j) if i<j or if j is not present.
-  if len(ivD.shape)<2 or ivD.shape[0]<ivD.shape[1]:
+  if len(ivD.shape)<2 or ivD.shape[0]>ivD.shape[1]:
     invert=True
     ivD = ivD.T
   else:
@@ -70,17 +70,19 @@ def triangle_iso_area(pts,ivD,lows,his):
     area = triangle_area(*translated_verts[1:])
   else:
     #Determine the different vertex.  If we haven't inverted, this will be the
-    # sole HIGH vertex.  If we DID invert, this will be the sole LOW vertex.
+    # sole LOW vertex.  If we DID invert, this will be the sole HIGH vertex.
     if invert:
-      vtx0 = lows[0]
-    else:
       vtx0 = his[0]
+    else:
+      vtx0 = lows[0]
     #Now translate the triangle so the different vertex is at the origin
-    pts0 = pts - vtx0
+    pts0 = pts - pts[vtx0]
+    #Remove the vertex at the origin
+    pts1 = np.array([p for p in pts0 if p.any()])
     #Scale the lengths of the other edges to the isosurface distance
-    pts1 = pts0*ivD.T
+    pts2 = pts1*ivD
     #Compute the area of this triangle
-    area = triangle_area(*pts1[1:])
+    area = triangle_area(*pts2)
 
   #Uninvert if necessary, and return the area
   if invert:
