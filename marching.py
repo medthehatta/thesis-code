@@ -1,4 +1,5 @@
 import numpy as np
+import pdb
 
 def linear_interpolate(lo,hi,val=0):
   """
@@ -6,8 +7,8 @@ def linear_interpolate(lo,hi,val=0):
   point at which the value ``val`` occurs.
   """
   # perturb the value if it intersects a vertex
-  if lo==val: val = val + 1e-8*val
-  if hi==val: val = val - 1e-8*val
+  if lo==val: val = val + 1e-8*val + 1e-9
+  if hi==val: val = val - 1e-8*val - 1e-9
 
   # make sure no divide by zero
   if hi!=lo:
