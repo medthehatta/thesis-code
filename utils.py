@@ -4,6 +4,7 @@ import propagate as prop
 import scipy.optimize as so
 import operator
 import marching
+import matplotlib.pyplot as plt
 from imp import reload
 from functools import reduce
 from itertools import islice, count, takewhile
@@ -77,4 +78,16 @@ def field2(XX):
   """
   return np.array([[field1(x) for x in X] for X in XX])
 
+def draw_triangle(pts,vals=[0,0,0]):
+  """
+  Plots a triangle with colored vertices
+  """
+  plt.scatter(pts.T[0],pts.T[1],c=plt.cm.bwr_r(10*vals),vmin=-10,vmax=10,s=120)
+  plt.plot(pts.T[0].tolist()+[pts.T[0][0]], pts.T[1].tolist()+[pts.T[1][0]],'k-')
+
+  osx=np.max(pts.T[0])
+  osy=np.max(pts.T[1])
+  for (i,p) in zip(count(),pts):
+    plt.text(p[0]+0.01*osx,p[1]+0.01*osy,str(i),fontsize=14,weight='bold')
+  plt.show()
 
