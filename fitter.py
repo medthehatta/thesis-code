@@ -28,3 +28,10 @@ def positive_definite_cost(mat):
   else: #the matrix *is* positive definite
     return sum(definite) 
 
+def is_positive_definite(mat):
+  try:
+    np.linalg.cholesky(mat)
+    return True
+  except np.linalg.LinAlgError:
+    return False
+
