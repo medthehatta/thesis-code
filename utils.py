@@ -2,6 +2,7 @@ import numpy as np
 import fitter as fit
 import propagate as prop
 import scipy.optimize as so
+from scipy.spatial import Delaunay
 import operator
 import marching
 import matplotlib.pyplot as plt
@@ -78,16 +79,72 @@ def field2(XX):
   """
   return np.array([[field1(x) for x in X] for X in XX])
 
-def draw_triangle(pts,vals=[0,0,0]):
+def draw_triangle(pts,vals=[0,0,0],labels=count()):
   """
   Plots a triangle with colored vertices
   """
   plt.scatter(pts.T[0],pts.T[1],c=plt.cm.bwr_r(10*vals),vmin=-10,vmax=10,s=120)
   plt.plot(pts.T[0].tolist()+[pts.T[0][0]], pts.T[1].tolist()+[pts.T[1][0]],'k-')
 
-  osx=np.max(pts.T[0])
-  osy=np.max(pts.T[1])
-  for (i,p) in zip(count(),pts):
-    plt.text(p[0]+0.01*osx,p[1]+0.01*osy,str(i),fontsize=14,weight='bold')
+  for (i,p) in zip(labels,pts):
+    plt.text(p[0]+0.05,p[1]+0.05,str(i),fontsize=14,weight='bold')
+
+def area_monte_carlo_triangles_test(pts=None,hirect=np.ones(2),lorect=np.array([1e-5,1e-5]),numpts=0):
+  """
+  Finds the area of the admissible region in a given rectangle.
+  Assumptions:
+  - isovalue is 0
+  - fitness field is field2
+  """
+  #clear the plot display
+  plt.cla()
+
+  #if points provided, just use those.  otherwise, compute
+  if pts is None:
+    #mesh the rectangle, adding ``numpts`` interior points if desired
+    e1 = np.array([1,0])
+    e2 = np.array([0,1])
+    samples = lorect + np.random.random((numpts,2))*(hirect-lorect)
+    pts = np.vstack([lorect,
+                     hirect,
+                     e1*lorect+e2*hirect,
+                     e2*lorect+e1*hirect,
+                     samples])
+  #triangulate the point cloud
+  triangulation = Delaunay(pts)
+
+  #compute the admissible function for the vertices
+  vals = field2([pts])[0]
+
+  #visit each triangle in the triangulation and compute the admissible area
+  sum_area = 0
+  sum_triarea = 0
+  for T in triangulation.vertices:
+    tpts           = np.array([pts[i] for i in T])
+    tvals          = np.array([vals[i] for i in T])
+    (ivD,lows,his) = marching.iso_intersect_dists(tvals)
+    area           = marching.triangle_iso_area(tpts,ivD,lows,his)
+    triarea        = marching.triangle_area(*(tpts-tpts[0])[1:])
+    sum_area+=area
+    sum_triarea+=triarea
+
+    #print debug info
+    global_lows = [T[i] for i in lows[0]]
+    global_his  = [T[i] for i in his[0]]
+    if len(global_lows)==0 or len(global_his)==0:
+      printable_ivD = np.array([[]])
+    else:
+      printable_ivD  = np.vstack([[-111]+global_his, 
+                                  np.hstack([np.transpose([global_lows]),ivD])])
+    print("\nTriangle: {0}\nDistances: {1}\n{2}\nArea: {3}%".format(T,ivD.shape,printable_ivD,100*area/triarea))
+    #add a triangle to the plot
+    draw_triangle(tpts,tvals,labels=T)
+
+  #display the triangulation
   plt.show()
+
+  return {'points':pts, 'values':vals, 'admissible area':sum_area, 'total area':sum_triarea}
+
+
+  
 
