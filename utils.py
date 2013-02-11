@@ -79,6 +79,9 @@ def field2(XX):
   """
   return np.array([[field1(x) for x in X] for X in XX])
 
+def field3(XX):
+  return np.array([field1(x) for x in XX])
+
 def draw_triangle(pts,vals=[0,0,0],labels=count()):
   """
   Plots a triangle with colored vertices
@@ -88,6 +91,9 @@ def draw_triangle(pts,vals=[0,0,0],labels=count()):
 
   for (i,p) in zip(labels,pts):
     plt.text(p[0]+0.05,p[1]+0.05,str(i),fontsize=14,weight='bold')
+
+def points_within_rectangle(lowcorner=np.zeros(2), hicorner=np.ones(2), numpts=50):
+  return lowcorner + np.random.random([numpts]+list(lowcorner.shape))*(hicorner-lowcorner)
 
 def area_monte_carlo_triangles_test(pts=None,hirect=np.ones(2),lorect=np.array([1e-5,1e-5]),numpts=0):
   """
@@ -143,7 +149,7 @@ def area_monte_carlo_triangles_test(pts=None,hirect=np.ones(2),lorect=np.array([
   #display the triangulation
   plt.show()
 
-  return {'points':pts, 'values':vals, 'admissible area':sum_area, 'total area':sum_triarea}
+  return {'points':pts, 'values':vals, 'admissible area':sum_area, 'total area':sum_triarea, 'area ratio':(sum_area/sum_triarea)}
 
 
   
