@@ -53,7 +53,7 @@ def triangle_iso_area(pts,ivD,lows,his):
   # we want to work with as few "different" vertices as possible.
   #The shape for all HIGH vertices should be (0,3), but numpy makes this (0,).
   # Hence, we invert (i,j) if i<j or if j is not present.
-  if len(ivD.shape)<2 or ivD.shape[0]>ivD.shape[1]:
+  if len(ivD.shape)>1 and ivD.shape[0]>ivD.shape[1]:
     invert=True
     ivD = ivD.T
   else:
