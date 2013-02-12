@@ -98,6 +98,18 @@ def draw_triangle(pts,vals=[0,0,0],labels=count()):
 def points_within_rectangle(lowcorner=np.zeros(2), hicorner=np.ones(2), numpts=50):
   return lowcorner + np.random.random([numpts]+list(lowcorner.shape))*(hicorner-lowcorner)
 
+def monte_carlo_area_test(pts=None,lowcorner=np.zeros(2),hicorner=np.ones(2),numpts=1000,condition=field4):
+  """
+  Estimates the volume of the area in the rectangle given by ``lowcorner`` and
+  ``hicorner`` which satisfies the vectorized condition ``condition``.
+  Optionally, explicit points to test can be passed via ``pts``, or the number
+  of samples to be taken in the rectangular region can be passed via
+  ``numpts``.
+  """
+  if pts is None: pts = points_within_rectangle(lowcorner,hicorner,numpts)
+  admissibles = condition(pts)
+  return len(admissibles[admissibles==True])/len(admissibles)
+
 def area_monte_carlo_triangles_test(pts=None,hirect=np.ones(2),lorect=np.array([1e-5,1e-5]),numpts=0):
   """
   Finds the area of the admissible region in a given rectangle.
