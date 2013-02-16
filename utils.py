@@ -18,6 +18,31 @@ def random_symmetric_matrix(shape):
   M = np.random.random(shape)
   return (M.T + M)/2
 
+def np_voigt(A):
+  """
+  NumPy Voigt
+  Compute the Voigt version of a higher-rank tensor, but with sequential
+  ordering of the sets of indices.
+  """
+  rk = len(A.shape)
+  # this only works if it has positive, even rank
+  if rk==0 or (rk%2)!=0: raise Exception("Argument's rank must be positive and even.")
+  # get the dimension of the space
+  dim = A.shape[0]
+  # this only works if it's square
+  if not (np.array(A.shape)==dim).all(): raise Exception("Argument's indices must all have the same range.")
+  # compute the "half-rank"; this will tell us how many indices we're combining
+  rk2 = int(rk/2)
+  # combine and return
+  return np.reshape(A,(dim**rk2,dim**rk2))
+
+def is_symmetric(A):
+  """
+  Checks if the even-rank tensor A has major symmetry.
+  """
+  Anv = np_voigt(A)
+  return Anv == Anv.T
+
 def ireversed(iterator):
   """
   Reverses an iterator (which usually doesn't work) and makes the result into a
