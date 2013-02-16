@@ -1,6 +1,12 @@
 import numpy as np
 import pdb
 
+def tensor(A,B):
+  """
+  Return the tensor product of matrices A and B
+  """
+  return np.einsum('ij,kl->ijkl',A,B)
+
 def holzapfel(F,c,k1,k2,A1=np.outer([1,0,0],[1,0,0]),A2=np.outer([0,1,0],[0,1,0])):
   """
   Returns the strain energy given the deformation, ``F``, and the model
@@ -23,69 +29,78 @@ def holzapfel_D(F,c,k1,k2,A1=np.outer([1,0,0],[1,0,0]),A2=np.outer([0,1,0],[0,1,
   Returns the tangent stiffness given the deformation, ``F``, and the model
   parameters.
   A1 and A2 are the structure tensors for the fibers.
+
+  Description of convenience variables:
+  W = psi0 + psi1 + psi2
+  psi0 = c/2 (I0-3)
+  psii = k1/(2k2)Ei
+  Ei = exp(k2Hi^2)
+  Hi = Ii-1
+  I0 = GS
+  Ii = GSi
+  G = det(F)^(-2/3)
+  S = tr(F^TF)
+  Si = tr(F^TFAi)
   """
   # simple invariants of F, or joint invariants of F and a structure tensor
   J  = np.linalg.det(F)
-  J23 = np.power(J,-2/3.)
-  trFF   = np.einsum('ij,ij',F,F)
-  trFFA1 = np.einsum('ji,jk,ki',F,F,A1)
-  trFFA2 = np.einsum('ji,jk,ki',F,F,A2)
-  I1 = J23*trFF
-  I4 = J23*trFFA1
-  I6 = J23*trFFA2
+  G = np.power(J,-2/3.)
+  S = np.einsum('ij,ij',F,F)
+  S1 = np.einsum('ji,jk,ki',F,F,A1)
+  S2 = np.einsum('ji,jk,ki',F,F,A1)
+  I0 = G*S
+  I1 = G*S1
+  I2 = G*S2
 
-  # tensors involving inverses of F
-  Fi = np.linalg.inv(F)
-  dFiTdF = -np.einsum('ij,kl->lijk',Fi,Fi) 
-  FxFi = np.einsum('ij,kl->ijkl',F,Fi)
+  # inverse transpose of F
+  Finv = np.linalg.inv(F)
+  FiT  = Finv.T
 
   # some identity tensors
   dim = len(F)
   I   = np.eye(dim)
   II  = np.einsum('ij,kl->ikjl',I,I)
 
-  # parts of Gamma for the first set of fibers
-  a4  = I4 - 1
-  b4  = np.exp(k2*(I4-1)*(I4-1))
-  g14 = trFFA1
-  g24 = Fi.T
-  g4  = np.dot(F,A1) - g14*g24/3.
-  # derivatives of parts of Gamma for the first set of fibers
-  da4 = 2*J23*(np.dot(F,A1) - trFFA1*Fi.T)
-  db4 = 2*k2*(I4-1)*da4
-  dg04 = np.einsum('ik,mn->imnk',I,A1)
-  dg14 = 2*np.dot(F,A1)
-  dg24 = dFiTdF
-  dg4  = dg04 - np.einsum('ik,mn->ikmn',g24,dg14)/3. - g14*dg24/3.
+  # H and E
+  H1 = I1-1
+  H2 = I2-1
+  E1 = np.exp(k2*H1*H1)
+  E2 = np.exp(k2*H2*H2)
 
-  # parts of Gamma for the second set of fibers
-  a6  = I6 - 1 
-  b6  = np.exp(k2*(I6-1)*(I6-1)) 
-  g16 = trFFA2  
-  g26 = Fi.T 
-  g6  = np.dot(F,A2) - g16*g26/3. 
-  # derivatives of parts of Gamma for the second set of fibers
-  da6 = 2*J23*(np.dot(F,A2) - trFFA2*Fi.T) 
-  db6 = 2*k2*(I6-1)*da6 
-  dg06 = np.einsum('ik,mn->imnk',I,A2)
-  dg16 = 2*np.dot(F,A2) 
-  dg26 = dFiTdF 
-  dg6  = dg06 - np.einsum('ik,mn->ikmn',g26,dg16)/3. - g16*dg26/3.
+  # first derivatives
+  dG = -2/3.*G*FiT
+  dS = 2*F
+  # uh oh... dS1 and dS2 are not symmetric
+  dS1 = 2*np.dot(F,A1)
+  dS2 = 2*np.dot(F,A2)
+  dI0 = dG*S + G*dS
+  dI1 = dG*S1 + G*dS1
+  dI2 = dG*S2 + G*dS2
+  dH1 = dI1
+  dH2 = dI2
+  dE1 = 2*k2*H1*dI1
+  dE2 = 2*k2*H2*dI2
+  dF  = II
+  dFiT = np.einsum('ij,kl->lijk',Finv,Finv)
 
-  # Gammas
-  G0 = c*F - c*trFF/3.*Fi.T
-  G1 = a4*b4*g4
-  G2 = a6*b6*g6
-  # derivatives of Gammas
-  dG0 = c*II - c/3.*(2*FxFi + trFF*dFiTdF)
-  dG1 = b4*np.einsum('ij,kl->ijkl',da4,g4) + a4*np.einsum('ij,kl->ijkl',db4,g4) + a4*b4*dg4
-  dG2 = b6*np.einsum('ij,kl->ijkl',da6,g6) + a6*np.einsum('ij,kl->ijkl',db6,g6) + a6*b6*dg6
+  # second derivatives
+  ddG = -2/3.*tensor(dG,FiT) - 2/3.*G*dFiT
+  ddS = 2*dF
+  ddS1 = 2*np.einsum('mn,ik->imnk',I,A1) #2*dF.A1
+  ddS2 = 2*np.einsum('mn,ik->imnk',I,A2) #2*dF.A2
+  #FIXME make sure the tensor products are correct (not commuted)
+  # (I think these are right)
+  ddI0 = ddG*S + tensor(dG,dS) + tensor(dS,dG) + G*ddS
+  ddI1 = ddG*S1 + tensor(dG,dS1) + tensor(dS1,dG) + G*ddS1
+  ddI2 = ddG*S2 + tensor(dG,dS2) + tensor(dS2,dG) + G*ddS2
 
-  # the actual tangent stiffness is in two parts
-  D10 = -2/3.*J23*Fi.T
-  D11 = (G0 + 2*k1*G1 + 2*k1*G2)
-  D1  = np.einsum('ij,kl->ijkl',D10,D11)
-  D2  = J23*(dG0 + 2*k1*dG1 + 2*k1*dG2)
+  # second derivatives of the psis
+  ddpsi0 = c/2.*ddI0
+  #FIXME make sure the tensor products are correct (not commuted)
+  # (I think these are right)
+  ddpsi1 = k1*E1*tensor(dH1,dI1) + k1*H1*tensor(dE1,dI1) + k1*H1*E1*ddI1
+  ddpsi2 = k2*E2*tensor(dH2,dI2) + k2*H2*tensor(dE2,dI2) + k2*H2*E2*ddI2
 
-  return D1 + D2
+  return ddpsi0 + ddpsi1 + ddpsi2
+
 
