@@ -7,12 +7,15 @@ def tensor(A,B):
   """
   return np.einsum('ij,kl->ijkl',A,B)
 
-def holzapfel(F,c,k1,k2,A1=np.outer([1,0,0],[1,0,0]),A2=np.outer([0,1,0],[0,1,0])):
+def holzapfel(F,c,k1,k2,a1=np.array([1,0,0]),a2=np.array([0,1,0])):
   """
   Returns the strain energy given the deformation, ``F``, and the model
   parameters.
   A1 and A2 are the structure tensors for the fibers.
   """
+  A1 = np.outer(a1,a1)
+  A2 = np.outer(a2,a2)
+
   J  = np.linalg.det(F)
   I1 = np.power(J,-2/3.) * np.trace(np.dot(F.T,F))
   I4 = np.power(J,-2/3.) * np.einsum('ji,ik,kj',F.T,F,A1)
@@ -24,7 +27,7 @@ def holzapfel(F,c,k1,k2,A1=np.outer([1,0,0],[1,0,0]),A2=np.outer([0,1,0],[0,1,0]
 
   return W1+W2+W3
 
-def holzapfel_D(F,c,k1,k2,A1=np.outer([1,0,0],[1,0,0]),A2=np.outer([0,1,0],[0,1,0])):
+def holzapfel_D(F,c,k1,k2,a1=np.array([1,0,0]),a2=np.array([0,1,0])):
   """
   Returns the tangent stiffness given the deformation, ``F``, and the model
   parameters.
@@ -42,6 +45,10 @@ def holzapfel_D(F,c,k1,k2,A1=np.outer([1,0,0],[1,0,0]),A2=np.outer([0,1,0],[0,1,
   S = tr(F^TF)
   Si = tr(F^TFAi)
   """
+  # structure tensors from fiber directions
+  A1 = np.outer(a1,a1)
+  A2 = np.outer(a2,a2)
+
   # simple invariants of F, or joint invariants of F and a structure tensor
   J  = np.linalg.det(F)
   G = np.power(J,-2/3.)
