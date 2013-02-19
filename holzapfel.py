@@ -14,9 +14,9 @@ def holzapfel(F,c,k1,k2,A1=np.outer([1,0,0],[1,0,0]),A2=np.outer([0,1,0],[0,1,0]
   A1 and A2 are the structure tensors for the fibers.
   """
   J  = np.linalg.det(F)
-  I1 = J**(-2/3.) * np.trace(np.dot(F.T,F))
-  I4 = J**(-2/3.) * np.einsum('ji,ik,kj',F.T,F,A1)
-  I6 = J**(-2/3.) * np.einsum('ji,ik,kj',F.T,F,A2)
+  I1 = np.power(J,-2/3.) * np.trace(np.dot(F.T,F))
+  I4 = np.power(J,-2/3.) * np.einsum('ji,ik,kj',F.T,F,A1)
+  I6 = np.power(J,-2/3.) * np.einsum('ji,ik,kj',F.T,F,A2)
 
   W1 = c*(I1-3)/2.
   W2 = k1/(2*k2) * (np.exp(k2*(I4-1)*(I4-1))-1)
@@ -47,7 +47,7 @@ def holzapfel_D(F,c,k1,k2,A1=np.outer([1,0,0],[1,0,0]),A2=np.outer([0,1,0],[0,1,
   G = np.power(J,-2/3.)
   S = np.einsum('ij,ij',F,F)
   S1 = np.einsum('ji,jk,ki',F,F,A1)
-  S2 = np.einsum('ji,jk,ki',F,F,A1)
+  S2 = np.einsum('ji,jk,ki',F,F,A2)
   I0 = G*S
   I1 = G*S1
   I2 = G*S2
@@ -70,36 +70,27 @@ def holzapfel_D(F,c,k1,k2,A1=np.outer([1,0,0],[1,0,0]),A2=np.outer([0,1,0],[0,1,
   # first derivatives
   dG = -2/3.*G*FiT
   dS = 2*F
-  # uh oh... dS1 and dS2 are not symmetric
   dS1 = 2*np.dot(F,A1)
   dS2 = 2*np.dot(F,A2)
-  dI0 = dG*S + G*dS
-  dI1 = dG*S1 + G*dS1
-  dI2 = dG*S2 + G*dS2
-  dH1 = dI1
-  dH2 = dI2
-  dE1 = 2*k2*H1*dI1
-  dE2 = 2*k2*H2*dI2
+  dI0 = S*dG + G*dS
+  dI1 = S1*dG + G*dS1
+  dI2 = S2*dG + G*dS2
   dF  = II
   dFiT = np.einsum('ij,kl->lijk',Finv,Finv)
 
   # second derivatives
-  ddG = -2/3.*tensor(dG,FiT) - 2/3.*G*dFiT
+  ddG = -2/3.*G*dFiT - 4/9.*G*tensor(FiT,FiT)
   ddS = 2*dF
-  ddS1 = 2*np.einsum('mn,ik->imnk',I,A1) #2*dF.A1
-  ddS2 = 2*np.einsum('mn,ik->imnk',I,A2) #2*dF.A2
-  #FIXME make sure the tensor products are correct (not commuted)
-  # (I think these are right)
-  ddI0 = ddG*S + tensor(dG,dS) + tensor(dS,dG) + G*ddS
-  ddI1 = ddG*S1 + tensor(dG,dS1) + tensor(dS1,dG) + G*ddS1
-  ddI2 = ddG*S2 + tensor(dG,dS2) + tensor(dS2,dG) + G*ddS2
+  ddS1 = 2*np.einsum('ij,jklm',A1,dF) #2*A1.dF
+  ddS2 = 2*np.einsum('ij,jklm',A2,dF) #2*A2.dF
+  ddI0 = S*ddG + tensor(dG,dS) + tensor(dS,dG) + G*ddS
+  ddI1 = S1*ddG + tensor(dG,dS1) + tensor(dS1,dG) + G*ddS1
+  ddI2 = S2*ddG + tensor(dG,dS2) + tensor(dS2,dG) + G*ddS2
 
   # second derivatives of the psis
   ddpsi0 = c/2.*ddI0
-  #FIXME make sure the tensor products are correct (not commuted)
-  # (I think these are right)
-  ddpsi1 = k1*E1*tensor(dH1,dI1) + k1*H1*tensor(dE1,dI1) + k1*H1*E1*ddI1
-  ddpsi2 = k2*E2*tensor(dH2,dI2) + k2*H2*tensor(dE2,dI2) + k2*H2*E2*ddI2
+  ddpsi1 = k1*E1*((2*k2*H1*H1+1)*tensor(dI1,dI1) + H1*ddI1)
+  ddpsi2 = k1*E2*((2*k2*H2*H2+1)*tensor(dI2,dI2) + H2*ddI2)
 
   return ddpsi0 + ddpsi1 + ddpsi2
 
