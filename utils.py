@@ -5,6 +5,8 @@ import scipy.optimize as so
 from scipy.spatial import Delaunay
 import operator
 import marching
+import holzapfel as holz
+import strain
 import matplotlib.pyplot as plt
 from imp import reload
 from functools import reduce
@@ -116,6 +118,10 @@ def field3(XX):
 def field4(XX):
   return np.array([fit.is_positive_definite(make_symmetric_matrix(*x)) for x in XX])
 
+def field5(p=[-1.0,0.2,0.1],strain=strain.simple_extension,lo=0.0,hi=1.0):
+  condition = lambda XX: np.array([fit.is_positive_definite(np_voigt(holz.holzapfel_D(strain(x),*p))) for x in XX])
+  return monte_carlo_area_test(lowcorner=np.array(lo),hicorner=np.array(hi),condition=condition,numpts=200)
+
 def draw_triangle(pts,vals=[0,0,0],labels=count()):
   """
   Plots a triangle with colored vertices
@@ -141,13 +147,11 @@ def monte_carlo_area_test(pts=None,lowcorner=np.zeros(2),hicorner=np.ones(2),num
   if pts is None: 
     if numpts is None:
       numpts = ptsdensity*np.product(hicorner-lowcorner)
+      if numpts<1: raise Exception("The domain is too small for a point density of {0}.  With this density, {1} points are being generated.  Increase the density or manually set numpts.".format(ptsdensity,numpts))
     pts = points_within_rectangle(lowcorner,hicorner,numpts)
 
   admissibles = condition(pts)
-  if len(admissibles)==0:
-    return -1
-  else:
-    return len(admissibles[admissibles==True])/len(admissibles)
+  return len(admissibles[admissibles==True])/len(pts)
 
 def area_monte_carlo_triangles_test(pts=None,hirect=np.ones(2),lorect=np.array([1e-5,1e-5]),numpts=0):
   """
