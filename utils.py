@@ -43,6 +43,12 @@ def is_symmetric(A):
   Anv = np_voigt(A)
   return Anv == Anv.T
 
+def antisymmetric(A):
+  """
+  Returns (twice) the antisymmetric part of A.
+  """
+  return A - A.T
+
 def ireversed(iterator):
   """
   Reverses an iterator (which usually doesn't work) and makes the result into a
