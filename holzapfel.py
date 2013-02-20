@@ -11,7 +11,7 @@ def holzapfel(F,c,k1,k2,a1=np.array([1,0,0]),a2=np.array([0,1,0])):
   """
   Returns the strain energy given the deformation, ``F``, and the model
   parameters.
-  A1 and A2 are the structure tensors for the fibers.
+  a1 and a2 are the fiber directions.
   """
   A1 = np.outer(a1,a1)
   A2 = np.outer(a2,a2)
@@ -31,8 +31,9 @@ def holzapfel_D(F,c,k1,k2,a1=np.array([1,0,0]),a2=np.array([0,1,0])):
   """
   Returns the tangent stiffness given the deformation, ``F``, and the model
   parameters.
-  A1 and A2 are the structure tensors for the fibers.
-
+  a1 and a2 are fiber directions.
+  """
+  """
   Description of convenience variables:
   W = psi0 + psi1 + psi2
   psi0 = c/2 (I0-3)
