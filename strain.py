@@ -1,3 +1,9 @@
+"""
+strain.py
+
+Strain modes.  These are parametrizations of typical useful deformation
+gradients.
+"""
 import numpy as np
 
 def simple_shear(gamma,e1=np.array([1,0,0]),e2=np.array([0,1,0])):
