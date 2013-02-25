@@ -12,7 +12,7 @@ def points_within_rectangle(lowcorner=np.zeros(2), hicorner=np.ones(2), numpts=5
   """
   return lowcorner + np.random.random([numpts]+list(lowcorner.shape))*(hicorner-lowcorner)
 
-def monte_carlo_area_test(pts=None,lowcorner=np.zeros(2),hicorner=np.ones(2),numpts=None,ptsdensity=0.2,condition=field4):
+def area_test(pts=None,lowcorner=np.zeros(2),hicorner=10*np.ones(2),numpts=None,ptsdensity=0.2,condition=lambda x: np.array([True])):
   """
   Estimates the volume of the area in the rectangle given by ``lowcorner`` and
   ``hicorner`` which satisfies the vectorized condition ``condition``.
