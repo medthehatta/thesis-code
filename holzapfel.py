@@ -3,14 +3,9 @@ holzapfel.py
 
 Strain energy density and tangent stiffness for the Holzapfel aorta model.
 """
+import lintools as lin
 import numpy as np
 import pdb
-
-def tensor(A,B):
-  """
-  Return the tensor product of matrices A and B
-  """
-  return np.einsum('ij,kl->ijkl',A,B)
 
 def holzapfel(F,c,k1,k2,a1=np.array([1,0,0]),a2=np.array([0,1,0])):
   """
@@ -92,18 +87,18 @@ def holzapfel_D(F,c,k1,k2,a1=np.array([1,0,0]),a2=np.array([0,1,0])):
   dFiT = np.einsum('ij,kl->lijk',Finv,Finv)
 
   # second derivatives
-  ddG = -2/3.*G*dFiT - 4/9.*G*tensor(FiT,FiT)
+  ddG = -2/3.*G*dFiT - 4/9.*G*lin.tensor(FiT,FiT)
   ddS = 2*dF
   ddS1 = 2*np.einsum('ij,jklm',A1,dF) #2*A1.dF
   ddS2 = 2*np.einsum('ij,jklm',A2,dF) #2*A2.dF
-  ddI0 = S*ddG + tensor(dG,dS) + tensor(dS,dG) + G*ddS
-  ddI1 = S1*ddG + tensor(dG,dS1) + tensor(dS1,dG) + G*ddS1
-  ddI2 = S2*ddG + tensor(dG,dS2) + tensor(dS2,dG) + G*ddS2
+  ddI0 = S*ddG + lin.tensor(dG,dS) + lin.tensor(dS,dG) + G*ddS
+  ddI1 = S1*ddG + lin.tensor(dG,dS1) + lin.tensor(dS1,dG) + G*ddS1
+  ddI2 = S2*ddG + lin.tensor(dG,dS2) + lin.tensor(dS2,dG) + G*ddS2
 
   # second derivatives of the psis
   ddpsi0 = c/2.*ddI0
-  ddpsi1 = k1*E1*((2*k2*H1*H1+1)*tensor(dI1,dI1) + H1*ddI1)
-  ddpsi2 = k1*E2*((2*k2*H2*H2+1)*tensor(dI2,dI2) + H2*ddI2)
+  ddpsi1 = k1*E1*((2*k2*H1*H1+1)*lin.tensor(dI1,dI1) + H1*ddI1)
+  ddpsi2 = k1*E2*((2*k2*H2*H2+1)*lin.tensor(dI2,dI2) + H2*ddI2)
 
   return ddpsi0 + ddpsi1 + ddpsi2
 

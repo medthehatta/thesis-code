@@ -84,3 +84,10 @@ def normed(v):
   """
   return v/np.linalg.norm(v)
 
+
+def tensor(A,B):
+  """
+  Return the tensor product of matrices A and B
+  """
+  return np.einsum('ij,kl->ijkl',A,B)
+
