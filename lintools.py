@@ -91,3 +91,9 @@ def tensor(A,B):
   """
   return np.einsum('ij,kl->ijkl',A,B)
 
+
+def matrix_norm(A):
+  """
+  Return the matrix norm: tr(AA^T)
+  """
+  return np.trace(np.dot(A,T.T))
