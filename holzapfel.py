@@ -1,3 +1,8 @@
+"""
+holzapfel.py
+
+Strain energy density and tangent stiffness for the Holzapfel aorta model.
+"""
 import numpy as np
 import pdb
 
