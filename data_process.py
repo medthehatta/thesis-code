@@ -6,14 +6,17 @@ vs. Deformation Gradient.
 """
 import numpy as np
 
-def relative_to_first(arrays):
+def relative_to_first(arrays,axis=0):
   """
   Given a list of arrays, subtracts the first array from all the others --
   effectively "translating" the other arrays to the first -- and pops the first
   array from the list (since now we know its value will be zero relative to
   itself).
+  The ``axis`` argument specifies the axis to translate.
   """
-  return (arrays - arrays[0])[1:]
+  transposed = arrays.swapaxes(0,axis)
+  translated = (transposed - transposed[0])[1:]
+  return translated.swapaxes(0,axis)
 
 def translate_simplices(simplices):
   """
@@ -29,11 +32,5 @@ def translate_simplices(simplices):
   # We need to subtract the first vertex from each of the other vertices, so we
   # transpose the array so the vertex index is first, return the array
   # relative_to_first, and then transpose back.
-  transposed = simplices.swapaxes(0,1)
-
-  # Translate
-  translated = relative_to_first(transposed)
-
-  # Untranspose and return
-  return translated.swapaxes(0,1)
+  return relative_to_first(simplices,axis=1)
 
