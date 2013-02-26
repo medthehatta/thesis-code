@@ -94,6 +94,13 @@ def tensor(A,B):
 
 def matrix_norm(A):
   """
-  Return the matrix norm: tr(AA^T)
+  Return the (squared) matrix norm: tr(AA^T)
   """
   return np.trace(np.dot(A,T.T))
+
+
+def tensor_norm(A):
+  """
+  Return the (squared) tensor norm: A_ij...k A_ij...k
+  """
+  return np.tensordot(A,A,[range(len(A.shape))]*2)
