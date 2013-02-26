@@ -4,6 +4,7 @@ datafit.py
 Routines for performing the constrained fit on stress/strain data.
 """
 import numpy as np
+import lintools as lin
 
 def data_leastsqr(Fs,Ps,model,*params):
   """
@@ -17,7 +18,7 @@ def data_leastsqr(Fs,Ps,model,*params):
 
   # this might be a squared sum of squared deviations, but it shouldn't matter
   # as long as it's monotone and not too steep
-  return np.einsum('mnp,mnp',deviations,deviations)
+  return lin.tensor_norm(deviations)
 
 
 
