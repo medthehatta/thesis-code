@@ -1,6 +1,7 @@
 # coding: utf-8
 from imp import reload
 import numpy as np
+import lintools as lin
 import data_process
 import xlrd
 import matplotlib.pyplot as plt
@@ -47,4 +48,8 @@ F   = np.einsum('...ij,...jk',F1,F0i)
 # find piola kirchhoff stress from force and areas
 pressures = [Lx*Lz,Ly*Lz]*forces
 PK1       = np.array([np.diagflat(f) for f in forces])
+
+# make them 3d (for now just direct sum with 1)
+F   = np.array([lin.direct_sum(f,np.eye(1)) for f in F])
+PK1 = np.array([lin.direct_sum(p,np.eye(1)) for p in PK1])
 
