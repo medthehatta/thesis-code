@@ -20,5 +20,10 @@ def data_leastsqr(Fs,Ps,model,*params):
   # as long as it's monotone and not too steep
   return lin.tensor_norm(deviations)
 
-
+def data_leastsqr_fn(Fs,Ps,model):
+  """
+  Returns ``data_leastsqr`` as a function of parameters.
+  Simple wrapper for use with minimization algorithms.
+  """
+  return lambda p: data_leastsqr(Fs,Ps,model,*p)
 
