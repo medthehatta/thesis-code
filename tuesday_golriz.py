@@ -6,7 +6,7 @@ import data_process
 import xlrd
 import matplotlib.pyplot as plt
 
-book = xlrd.open_workbook("/home/med/re/data/golriz-biaxial/h4t1.xls")
+book = xlrd.open_workbook("golriz-biaxial/h4t1.xls")
 
 nolo_pqrs = [1,-1]*np.reshape(book.sheet_by_name("NoLoPQRS").row_values(0),(4,2))
 
