@@ -40,3 +40,26 @@ def translate_simplices(simplices):
   # relative_to_first, and then transpose back.
   return relative_to_first(simplices,axis=1)
 
+def split_string_with_delimiters(string,delimiters,retype=str):
+  """
+  Given a list of ``delimiters`` in hierarchical order, splits ``string`` into
+  a nested list of strings.
+  """
+  if len(delimiters)>0:
+    return [split_string_with_delimiters(s,delimiters[1:],retype) for 
+            s in string.split(delimiters[0])]
+  else:
+    return retype(string)
+
+def numpy_array_from_file(filename,delimiters):
+  """
+  Given a ``filename`` and a list of ``delimiters``, reads that file into a
+  ``len(delimiters)``-dimensional numpy array.
+
+  This routine assumes the data consists of floating-point numbers.
+  """
+  data = open(filename).readlines()
+  if data:
+    nested_list = split_string_with_delimiters(''.join(data).strip(),
+                                               delimiters,retype=float)
+    return np.array(nested_list)
