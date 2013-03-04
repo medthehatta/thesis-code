@@ -63,3 +63,17 @@ def numpy_array_from_file(filename,delimiters):
     nested_list = split_string_with_delimiters(''.join(data).strip(),
                                                delimiters,retype=float)
     return np.array(nested_list)
+
+def join_with_nested_delimiters(arr,delims):
+  """
+  Inverse of split_string_with_delimiters.
+
+  Join a nested array with delimiters for each level.
+  """
+  if len(delim)>1:
+    return delim[-1].join([join_with_nested_delimiters(a,delim[:-1]) for a in arr])
+  else:
+    return delim[-1].join(map(str,arr))
+
+
+
