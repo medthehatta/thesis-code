@@ -1,0 +1,10 @@
+module: /home/med/re/fit-stable/fung.py
+function: model_isotropic
+initial: |
+  1.e-2 1.e-2
+  1.e-1 1.e-1
+  1. 1.
+  1.e+1 1.e+1
+  1.e+2 1.e+2
+
+
