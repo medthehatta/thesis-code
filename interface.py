@@ -52,7 +52,7 @@ def argument_parse(argv=None):
                parsed.model]
 
   [bounds, deformations, stresses, initial] = \
-      [dat.numpy_array_from_file(open(p).readlines(),STD_DELIMITERS) for p in arguments[:-1]]
+      [dat.numpy_array_from_file(p,STD_DELIMITERS) for p in arguments[:-1]]
 
   model = imp.load_source("model", arguments[-1])
 
