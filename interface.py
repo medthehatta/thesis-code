@@ -4,7 +4,11 @@ interface.py
 Handles option parsing and general user interaction.
 """
 import argparse
-import data_process
+import data_process as dat
+import datafit as fit
+import imp
+import scipy.optimize as so
+from operator import and_
 
 def argument_parse(argv=None):
   """
@@ -32,8 +36,53 @@ def argument_parse(argv=None):
                       help='File containing functions for computing stress '\
                            'and stiffness of the desired model.')
 
+  parser.add_argument('-I','--initial',
+                      help='File containing initial guesses for the '\
+                           'paramter vector')
+
   if argv is not None:
-    return parser.parse_args(argv)
+    parsed =  parser.parse_args(argv)
   else:
-    return parser.parse_args()
+    parsed = parser.parse_args()
+
+  STD_DELIMITERS = ['\n\n','\n',' ']
+
+  arguments = [parsed.bounds, parsed.deformation, 
+               parsed.stress, parsed.initial,
+               parsed.model]
+
+  [bounds, deformations, stresses, initial] = \
+      [dat.numpy_array_from_file(open(p).readlines(),STD_DELIMITERS) for p in arguments[:-1]]
+
+  model = imp.load_source("model", arguments[-1])
+
+  return {'bounds':bounds, 'deformations':deformations, 
+          'stresses':stresses, 'model':model, 'initial':initial}
+
+def perform_fit(argv=None):
+  """
+  Tries to do the requested fit.
+
+  TODO: The fit doesn't converge in general, and also doesn't support the
+  penalty method yet.
+  """
+  setup = argument_parse(argv)
+
+  # Convenient names
+  F = setup['deformations']
+  P = setup['stresses']
+  B = setup['bounds']
+  I = setup['initial']
+  M = setup['model']
+
+  # We need everything for this to work
+  if reduce(and_, [x is not None for x in [F,P,B,I,M]]):
+    cost = lambda p: fit.data_leastsqr(F,P,M.model,*p)
+    results = [so.fmin(cost,*i,retall=True) for i in I]
+
+  return results
+  
+
+
+
 
