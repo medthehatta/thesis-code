@@ -36,8 +36,8 @@ def direct_sum(A,B):
   """
   Returns the direct sum of two matrices.
   """
-  return np.bmat([[A,np.zeros((A.shape[0],B.shape[1]))],
-                  [np.zeros((B.shape[0],A.shape[1])),B]])
+  return np.array(np.bmat([[A,np.zeros((A.shape[0],B.shape[1]))],
+                          [np.zeros((B.shape[0],A.shape[1])),B]]))
 
 
 def perturb_array(A,scale=1):
@@ -104,3 +104,15 @@ def tensor_norm(A):
   Return the (squared) tensor norm: A_ij...k A_ij...k
   """
   return np.tensordot(A,A,[range(len(A.shape))]*2)
+
+
+def reorder_matrix(matrix,permutation):
+  """
+  Given a permutation of the basis vectors, reorder the matrix rows and
+  columns to put the matrix in the reordered basis.
+  """
+  P = np.eye(matrix.shape[-1])[permutation]
+  return np.einsum('ab,bc,cd',P,matrix,P.T)
+
+VOIGT_ORDER = [0,4,8,5,6,1,7,2,3]
+VOIGT_ORDER_INVERSE = [0,5,7,8,1,3,4,6,2]
