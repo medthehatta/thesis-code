@@ -51,7 +51,7 @@ def split_string_with_delimiters(string,delimiters,retype=str):
   else:
     return retype(string)
 
-def numpy_array_from_string(string,delimiters):
+def numpy_array_from_string(string,delimiters=STD_DELIMITERS):
   """
   Given a ``string`` and a list of ``delimiters``, reads that string into a
   ``len(delimiters)``-dimensional numpy array.
@@ -62,7 +62,7 @@ def numpy_array_from_string(string,delimiters):
                                              delimiters,retype=float)
   return np.array(nested_list)
 
-def numpy_array_from_file(filename,delimiters):
+def numpy_array_from_file(filename,delimiters=STD_DELIMITERS):
   """
   Given a ``filename`` and a list of ``delimiters``, reads that file into a
   ``len(delimiters)``-dimensional numpy array.
@@ -73,7 +73,7 @@ def numpy_array_from_file(filename,delimiters):
   if data:
     return numpy_array_from_string(data,delimiters)
 
-def join_with_nested_delimiters(arr,delim):
+def join_with_nested_delimiters(arr,delim=STD_DELIMITERS):
   """
   Inverse of split_string_with_delimiters.
 
@@ -85,4 +85,4 @@ def join_with_nested_delimiters(arr,delim):
     return delim[0].join(map(str,arr))
 
 
-
+STD_DELIMITERS = ['\n\n','\n',' ']
