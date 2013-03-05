@@ -7,6 +7,18 @@ import lintools as lin
 import numpy as np
 import pdb
 
+def model(F,*params):
+  """
+  Exposed holzapfel_P.
+  """
+  return holzapfel_P(F,*params)
+
+def model_D(F,*params):
+  """
+  Exposed holzapfel_D.
+  """
+  return holzapfel_D(F,*params)
+
 def holzapfel(F,c,k1,k2,a1=np.array([1,0,0]),a2=np.array([0,1,0])):
   """
   Returns the strain energy given the deformation, ``F``, and the model
