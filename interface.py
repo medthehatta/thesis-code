@@ -38,7 +38,7 @@ def argument_parse(argv=None):
 
   parser.add_argument('-I','--initial',
                       help='File containing initial guesses for the '\
-                           'paramter vector')
+                           'parameter vector')
 
   if argv is not None:
     parsed =  parser.parse_args(argv)
