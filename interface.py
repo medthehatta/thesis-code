@@ -37,11 +37,3 @@ def argument_parse(argv=None):
   else:
     return parser.parse_args()
 
-def load_data(deformation_file, stress_file):
-  """
-  Returns arrays of deformation gradient and PK1 stress tensors.
-  """
-  F = data_process.numpy_array_from_file(deformation_file)
-  P = data_process.numpy_array_from_file(stress_file)
-  return (F,P)
-
