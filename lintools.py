@@ -89,7 +89,7 @@ def tensor(A,B):
   """
   Return the tensor product of matrices A and B
   """
-  return np.einsum('ij,kl->ijkl',A,B)
+  return np.einsum('...ij,...kl->...ijkl',A,B)
 
 
 def matrix_norm(A):
