@@ -46,9 +46,20 @@ def orthotropic_stiffness(Ex,Ey,Ez,nyz,nzx,nxy,Gyz,Gzx,Gxy):
 
 def model(F,*params):
   """
-  Exposed fung_P.
+  Exposed fung_P with fully orthotropic stiffness.
   """
   return fung_P(F,params[0],orthotropic_stiffness(*params[1:]))
+
+
+def model_isotropic(F,*params):
+  """
+  Exposed fung_P with isotropic stiffness.
+  Params are Young's modulus and Poisson's ratio.
+  """
+  (E,n) = params
+  G = E/(2*(1+n))
+  return fung_P(F,params[0],orthotropic_stiffness(E,E,E,n,n,n,G,G,G))
+
 
 def fung(F,c,CC):
   """
