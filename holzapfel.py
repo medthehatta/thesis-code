@@ -120,28 +120,30 @@ def holzapfel_D(F,c,k1,k2,a1=np.array([1,0,0]),a2=np.array([0,1,0])):
   S = tr(F^TF)
   Si = tr(F^TFAi)
   """
-  # structure tensors from fiber directions
-  A1 = np.outer(a1,a1)
-  A2 = np.outer(a2,a2)
+  if len(F.shape)>2:
+    I = np.tile(np.eye(F.shape[-1]), (F.shape[0],1,1))
+    J = np.array([np.linalg.det(f) for f in F])
+    # structure tensors from fiber directions
+    A1 = np.tile(np.outer(a1,a1), (F.shape[0],1,1))
+    A2 = np.tile(np.outer(a2,a2), (F.shape[0],1,1))
+    Finv = np.array([np.linalg.inv(f) for f in F])
+    FiT = Finv.swapaxes(1,2)
+  else:
+    I = np.eye(F.shape[-1])
+    J = np.linalg.det(F)
+    A1 = np.outer(a1,a1)
+    A2 = np.outer(a2,a2)
+    Finv = np.linalg.inv(F)
+    FiT  = Finv.T
 
   # simple invariants of F, or joint invariants of F and a structure tensor
-  J  = np.linalg.det(F)
   G = np.power(J,-2/3.)
-  S = np.einsum('ij,ij',F,F)
-  S1 = np.einsum('ji,jk,ki',F,F,A1)
-  S2 = np.einsum('ji,jk,ki',F,F,A2)
+  S = np.einsum('...ij,...ij',F,F)
+  S1 = np.einsum('...ji,...jk,...ki',F,F,A1)
+  S2 = np.einsum('...ji,...jk,...ki',F,F,A2)
   I0 = G*S
   I1 = G*S1
   I2 = G*S2
-
-  # inverse transpose of F
-  Finv = np.linalg.inv(F)
-  FiT  = Finv.T
-
-  # some identity tensors
-  dim = len(F)
-  I   = np.eye(dim)
-  II  = np.einsum('ij,kl->ikjl',I,I)
 
   # H and E
   H1 = I1-1
@@ -150,29 +152,32 @@ def holzapfel_D(F,c,k1,k2,a1=np.array([1,0,0]),a2=np.array([0,1,0])):
   E2 = np.exp(k2*H2*H2)
 
   # first derivatives
-  dG = -2/3.*G*FiT
+  dG = -2/3.*(G*FiT.T).T
   dS = 2*F
-  dS1 = 2*np.dot(F,A1)
-  dS2 = 2*np.dot(F,A2)
-  dI0 = S*dG + G*dS
-  dI1 = S1*dG + G*dS1
-  dI2 = S2*dG + G*dS2
+  dS1 = 2*np.einsum('...ab,...bc',F,A1)
+  dS2 = 2*np.einsum('...ab,...bc',F,A2)
+  dI0 = (S*dG.T).T + (G*dS.T).T
+  dI1 = (S1*dG.T).T + (G*dS1.T).T
+  dI2 = (S2*dG.T).T + (G*dS2.T).T
+
+  # The 4th rank identity tensor
+  II = np.einsum('...ij,...kl->...ikjl',I,I)
   dF  = II
-  dFiT = np.einsum('ij,kl->lijk',Finv,Finv)
+  dFiT = np.einsum('...ij,...kl->...lijk',Finv,Finv)
 
   # second derivatives
-  ddG = -2/3.*G*dFiT - 4/9.*G*lin.tensor(FiT,FiT)
+  ddG = -2/3.*(G*dFiT.T).T - 4/9.*(G*lin.tensor(FiT,FiT).T).T
   ddS = 2*dF
-  ddS1 = 2*np.einsum('ij,jklm',A1,dF) #2*A1.dF
-  ddS2 = 2*np.einsum('ij,jklm',A2,dF) #2*A2.dF
-  ddI0 = S*ddG + lin.tensor(dG,dS) + lin.tensor(dS,dG) + G*ddS
-  ddI1 = S1*ddG + lin.tensor(dG,dS1) + lin.tensor(dS1,dG) + G*ddS1
-  ddI2 = S2*ddG + lin.tensor(dG,dS2) + lin.tensor(dS2,dG) + G*ddS2
+  ddS1 = 2*np.einsum('...ij,...jklm',A1,dF) #2*A1.dF
+  ddS2 = 2*np.einsum('...ij,...jklm',A2,dF) #2*A2.dF
+  ddI0 = (S*ddG.T).T + lin.tensor(dG,dS) + lin.tensor(dS,dG) + (G*ddS.T).T
+  ddI1 = (S1*ddG.T).T + lin.tensor(dG,dS1) + lin.tensor(dS1,dG) + (G*ddS1.T).T
+  ddI2 = (S2*ddG.T).T + lin.tensor(dG,dS2) + lin.tensor(dS2,dG) + (G*ddS2.T).T
 
   # second derivatives of the psis
   ddpsi0 = c/2.*ddI0
-  ddpsi1 = k1*E1*((2*k2*H1*H1+1)*lin.tensor(dI1,dI1) + H1*ddI1)
-  ddpsi2 = k1*E2*((2*k2*H2*H2+1)*lin.tensor(dI2,dI2) + H2*ddI2)
+  ddpsi1 = k1*(E1*((2*k2*H1*H1+1)*lin.tensor(dI1,dI1).T + H1*ddI1.T)).T
+  ddpsi2 = k1*(E2*((2*k2*H2*H2+1)*lin.tensor(dI2,dI2).T + H2*ddI2.T)).T
 
   return ddpsi0 + ddpsi1 + ddpsi2
 
