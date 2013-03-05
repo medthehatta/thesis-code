@@ -51,6 +51,17 @@ def split_string_with_delimiters(string,delimiters,retype=str):
   else:
     return retype(string)
 
+def numpy_array_from_string(string,delimiters):
+  """
+  Given a ``string`` and a list of ``delimiters``, reads that string into a
+  ``len(delimiters)``-dimensional numpy array.
+
+  This routine assumes the data consists of floating-point numbers.
+  """
+  nested_list = split_string_with_delimiters(string.strip(),
+                                             delimiters,retype=float)
+  return np.array(nested_list)
+
 def numpy_array_from_file(filename,delimiters):
   """
   Given a ``filename`` and a list of ``delimiters``, reads that file into a
@@ -58,11 +69,9 @@ def numpy_array_from_file(filename,delimiters):
 
   This routine assumes the data consists of floating-point numbers.
   """
-  data = open(filename).readlines()
+  data = ''.join(open(filename))
   if data:
-    nested_list = split_string_with_delimiters(''.join(data).strip(),
-                                               delimiters,retype=float)
-    return np.array(nested_list)
+    return numpy_array_from_string(data,delimiters)
 
 def join_with_nested_delimiters(arr,delim):
   """
