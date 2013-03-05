@@ -13,13 +13,22 @@ def holzapfel(F,c,k1,k2,a1=np.array([1,0,0]),a2=np.array([0,1,0])):
   parameters.
   a1 and a2 are the fiber directions.
   """
-  A1 = np.outer(a1,a1)
-  A2 = np.outer(a2,a2)
+  
+  if len(F.shape)>2:
+    J = np.array([np.linalg.det(f) for f in F])
+    # TODO I'm assuming the structure tensors are constant (Lagrangian).  Is
+    # this right?
+    A1 = np.tile(np.outer(a1,a1), (F.shape[0],1,1))
+    A2 = np.tile(np.outer(a2,a2), (F.shape[0],1,1))
+  else:
+    J = np.linalg.det(F)
+    A1 = np.outer(a1,a1)
+    A2 = np.outer(a2,a2)
 
-  J  = np.linalg.det(F)
-  I1 = np.power(J,-2/3.) * np.trace(np.dot(F.T,F))
-  I4 = np.power(J,-2/3.) * np.einsum('ji,ik,kj',F.T,F,A1)
-  I6 = np.power(J,-2/3.) * np.einsum('ji,ik,kj',F.T,F,A2)
+  G = np.power(J,-2/3.)
+  I1 = G*np.einsum('...ab,...ab',F,F)
+  I4 = G*np.einsum('...ab,...ac,...bc',F,F,A1)
+  I6 = G*np.einsum('...ab,...ac,...bc',F,F,A2)
 
   W1 = c*(I1-3)/2.
   W2 = k1/(2*k2) * (np.exp(k2*(I4-1)*(I4-1))-1)
@@ -46,23 +55,28 @@ def holzapfel_P(F,c,k1,k2,a1=np.array([1,0,0]),a2=np.array([0,1,0])):
   S = tr(F^TF)
   Si = tr(F^TFAi)
   """
-  # structure tensors from fiber directions
-  A1 = np.outer(a1,a1)
-  A2 = np.outer(a2,a2)
+  if len(F.shape)>2:
+    J = np.array([np.linalg.det(f) for f in F])
+    # structure tensors from fiber directions
+    A1 = np.tile(np.outer(a1,a1), (F.shape[0],1,1))
+    A2 = np.tile(np.outer(a2,a2), (F.shape[0],1,1))
+    Finv = np.array([np.linalg.inv(f) for f in F])
+    FiT = Finv.swapaxes(1,2)
+  else:
+    J = np.linalg.det(F)
+    A1 = np.outer(a1,a1)
+    A2 = np.outer(a2,a2)
+    Finv = np.linalg.inv(F)
+    FiT  = Finv.T
 
   # simple invariants of F, or joint invariants of F and a structure tensor
-  J  = np.linalg.det(F)
   G = np.power(J,-2/3.)
-  S = np.einsum('ij,ij',F,F)
-  S1 = np.einsum('ji,jk,ki',F,F,A1)
-  S2 = np.einsum('ji,jk,ki',F,F,A2)
+  S = np.einsum('...ij,...ij',F,F)
+  S1 = np.einsum('...ji,...jk,...ki',F,F,A1)
+  S2 = np.einsum('...ji,...jk,...ki',F,F,A2)
   I0 = G*S
   I1 = G*S1
   I2 = G*S2
-
-  # inverse transpose of F
-  Finv = np.linalg.inv(F)
-  FiT  = Finv.T
 
   # H and E
   H1 = I1-1
@@ -71,18 +85,18 @@ def holzapfel_P(F,c,k1,k2,a1=np.array([1,0,0]),a2=np.array([0,1,0])):
   E2 = np.exp(k2*H2*H2)
 
   # first derivatives
-  dG = -2/3.*G*FiT
+  dG = -2/3.*(G*FiT.T).T
   dS = 2*F
-  dS1 = 2*np.dot(F,A1)
-  dS2 = 2*np.dot(F,A2)
-  dI0 = S*dG + G*dS
-  dI1 = S1*dG + G*dS1
-  dI2 = S2*dG + G*dS2
+  dS1 = 2*np.einsum('...ab,...bc',F,A1)
+  dS2 = 2*np.einsum('...ab,...bc',F,A2)
+  dI0 = (S*dG.T).T + (G*dS.T).T
+  dI1 = (S1*dG.T).T + (G*dS1.T).T
+  dI2 = (S2*dG.T).T + (G*dS2.T).T
 
   # first derivatives of the psis
   dpsi0 = c/2.*dI0
-  dpsi1 = k1*H1*E1*dI1
-  dpsi2 = k1*H2*E2*dI2
+  dpsi1 = (k1*H1*E1*dI1.T).T
+  dpsi2 = (k1*H2*E2*dI2.T).T
 
   return dpsi0 + dpsi1 + dpsi2
 
