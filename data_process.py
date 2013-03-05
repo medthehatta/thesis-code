@@ -64,7 +64,7 @@ def numpy_array_from_file(filename,delimiters):
                                                delimiters,retype=float)
     return np.array(nested_list)
 
-def join_with_nested_delimiters(arr,delims):
+def join_with_nested_delimiters(arr,delim):
   """
   Inverse of split_string_with_delimiters.
 
