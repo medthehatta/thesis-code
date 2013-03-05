@@ -71,9 +71,9 @@ def join_with_nested_delimiters(arr,delims):
   Join a nested array with delimiters for each level.
   """
   if len(delim)>1:
-    return delim[-1].join([join_with_nested_delimiters(a,delim[:-1]) for a in arr])
+    return delim[0].join([join_with_nested_delimiters(a,delim[1:]) for a in arr])
   else:
-    return delim[-1].join(map(str,arr))
+    return delim[0].join(map(str,arr))
 
 
 
