@@ -36,9 +36,9 @@ def penalty_admissible_region(lowcorner,hicorner,condition,*params,ptsdensity=0.
   admissibles = condition(pts,*params)
   return len(admissibles[admissibles])/len(pts)
 
-def admissible_penalty_cost(Fs,Ps,model,lowcorner,hicorner,condition,ptsdensity=0.2):
+def admissible_penalty_cost(Fs,Ps,model,lowcorner,hicorner,condition,lam=1.0,ptsdensity=0.2):
   """
   Returns ``data_leastsqr`` as a function of parameters.
   Simple wrapper for use with minimization algorithms.
   """
-  return lambda p: data_leastsqr(Fs,Ps,model,*p) + penalty_admissible_region(lowcorner,hicorner,condition,*p,ptsdensity=ptsdensity)
+  return lambda p: data_leastsqr(Fs,Ps,model,*p) + lam*penalty_admissible_region(lowcorner,hicorner,condition,*p,ptsdensity=ptsdensity)
