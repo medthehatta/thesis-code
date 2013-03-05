@@ -48,16 +48,16 @@ def argument_parse(argv=None):
   STD_DELIMITERS = ['\n\n','\n',' ']
 
   arguments = [parsed.bounds, parsed.deformation, 
-               parsed.stress, parsed.initial,
+               parsed.stress,
                parsed.model]
 
-  [bounds, deformations, stresses, initial] = \
+  [bounds, deformations, stresses] = \
       [dat.numpy_array_from_file(p,STD_DELIMITERS) for p in arguments[:-1]]
 
   model = imp.load_source("model", arguments[-1])
 
   return {'bounds':bounds, 'deformations':deformations, 
-          'stresses':stresses, 'model':model, 'initial':initial}
+          'stresses':stresses, 'model':model}
 
 def perform_fit(argv=None):
   """
