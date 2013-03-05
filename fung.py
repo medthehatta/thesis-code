@@ -79,18 +79,23 @@ def fung_P(F,c,CC):
   parameters.
   """
   dimension = F.shape[-1]
-  I = np.eye(dimension)
-  E = 0.5*np.dot(F.T,F) - 0.5*I
-  Q = np.einsum('abcd,ab,cd',CC,E,E)
+  if len(F.shape)>2:
+    I = np.tile(np.eye(dimension),(F.shape[0],1,1))
+    CC = np.tile(CC,(F.shape[0],1,1,1,1))
+  else:
+    I = np.eye(dimension)
+  E = 0.5*np.einsum('...ab,...ac',F,F) - 0.5*I
+  Q = np.einsum('...abcd,...ab,...cd',CC,E,E)
 
   # Derivative of Q wrt E: (rank 2)
-  dQdE = 2*np.einsum('abcd,cd',CC,E)
+  dQdE = 2*np.einsum('...abcd,...cd',CC,E)
   # Derivative of E wrt F: (rank 4)
-  dEdF = 0.5*np.einsum('ab,cd->adcb',I,F) + 0.5*np.einsum('ab,cd->bdca',I,F)
+  dEdF = 0.5*np.einsum('...ab,...cd->...adcb',I,F) + 0.5*np.einsum('...ab,...cd->...bdca',I,F)
   # Derivative of Q wrt F: (dQdE)ij (dEdF)ijkl (rank 2)
-  dQdF = np.einsum('ij,ijkl',dQdE,dEdF)
+  dQdF = np.einsum('...ij,...ijkl',dQdE,dEdF)
   # Return value: c/2 exp(Q) dQdF
-  return 0.5*c*np.exp(Q)*dQdF
+  # (numpy needs dQdF.T to properly multiply with np.exp(Q))
+  return 0.5*c*(np.exp(Q)*dQdF.T).T
 
 def fung_D(F,c,CC):
   """
