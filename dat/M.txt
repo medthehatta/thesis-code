@@ -2,13 +2,25 @@
 module: /home/med/re/fit-stable/fung.py
 function: model_isotropic
 initial: 0.001 0.001
-low: 0.0 0.0
-high: 1.0 1.0
+low: |
+  0.0 0.0 0.0
+  0.0 0.0 0.0
+  0.0 0.0 0.0
+high: |
+  2.0 0.5 0.5
+  0.5 2.0 0.5
+  0.5 0.5 2.0
 
 ---
 module: /home/med/re/fit-stable/fung.py
 function: model_isotropic
 initial: 0.01 0.01
-low: 0.0 0.0
-high: 1.0 1.0
+strain-low: |
+  0.0 0.0 0.0
+  0.0 0.0 0.0
+  0.0 0.0 0.0
+strain-high: |
+  2.0 0.5 0.5
+  0.5 2.0 0.5
+  0.5 0.5 2.0
 
