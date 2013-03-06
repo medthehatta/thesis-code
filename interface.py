@@ -3,6 +3,7 @@ interface.py
 
 Handles option parsing and general user interaction.
 """
+import yaml
 import argparse
 import data_process as dat
 import datafit as fit
@@ -29,60 +30,25 @@ def argument_parse(argv=None):
                       default='F.txt',
                       help='File containing deformation data.')
 
-  parser.add_argument('-B','--bounds',
-                      help='File containing desired stable F rectangle.')
-
   parser.add_argument('-M','--model',
                       help='File containing functions for computing stress '\
                            'and stiffness of the desired model.')
-
-  parser.add_argument('-I','--initial',
-                      help='File containing initial guesses for the '\
-                           'parameter vector')
 
   if argv is not None:
     parsed =  parser.parse_args(argv)
   else:
     parsed = parser.parse_args()
 
-  STD_DELIMITERS = ['\n\n','\n',' ']
+  # Read in the actual data: stress vs. strain
+  DELIMS = ['\n\n','\n',' ']
+  stresses = dat.numpy_array_from_file(parsed.stress,DELIMS)
+  deformations = dat.numpy_array_from_file(parsed.deformation,DELIMS)
 
-  arguments = [parsed.bounds, parsed.deformation, 
-               parsed.stress,
-               parsed.model]
+  # Read in the models that will be tried.  Each "model" consists of the actual
+  # model itself (file and function), initial parameter guesses, and
+  # deformation bounds.
+  models = yaml.load(open(parsed.model))
 
-  [bounds, deformations, stresses] = \
-      [dat.numpy_array_from_file(p,STD_DELIMITERS) for p in arguments[:-1]]
-
-  model = imp.load_source("model", arguments[-1])
-
-  return {'bounds':bounds, 'deformations':deformations, 
-          'stresses':stresses, 'model':model}
-
-def perform_fit(argv=None):
-  """
-  Tries to do the requested fit.
-
-  TODO: The fit doesn't converge in general, and also doesn't support the
-  penalty method yet.
-  """
-  setup = argument_parse(argv)
-
-  # Convenient names
-  F = setup['deformations']
-  P = setup['stresses']
-  B = setup['bounds']
-  I = setup['initial']
-  M = setup['model']
-
-  # We need everything for this to work
-  if reduce(and_, [x is not None for x in [F,P,B,I,M]]):
-    cost = lambda p: fit.data_leastsqr(F,P,M.model,*p)
-    results = [so.fmin(cost,*i,retall=True) for i in I]
-
-  return results
-  
-
-
+  return (stresses, deformations, models)
 
 
