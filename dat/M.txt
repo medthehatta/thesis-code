@@ -3,11 +3,11 @@
   ignore: true
   module: &fung /home/med/re/fit-stable/fung.py
   function: &isotropic model_isotropic
-  low: &zeros |
+  strain-low: &zeros |
     0.0 0.0 0.0
     0.0 0.0 0.0
     0.0 0.0 0.0
-  high: &default-high |
+  strain-high: &default-high |
     2.0 0.5 0.5
     0.5 2.0 0.5
     0.5 0.5 2.0
