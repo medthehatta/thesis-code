@@ -65,22 +65,29 @@ def run_from_args(stresses, deformations, models):
       model_module = imp.load_source('model',m['model module'])
       model = getattr(model_module,m['model stress'])
       model_D = getattr(model_module,m['model stiffness'])
+
       # Get the deformation parameterization
       defmap_module = imp.load_source('defmap',m['strain module'])
       defmap = getattr(defmap_module,m['strain function'])
+
       # Set the desired stable deformation region
       low = dat.numpy_array_from_string(m['strain low'],DELIMS)
       high = dat.numpy_array_from_string(m['strain high'],DELIMS)
+
       # Set the monte carlo sample density
       pts_density = float(m['sample density'])
+
       # Get the lagrange multiplier for the penalty function
       lam = float(m['lagrange multiplier'])
+
       # Define the cost function for the optimization
       cost = lambda p: fit.data_leastsqr(deformations,stresses,model,*p) +\
                        lam*fit.positive_definite_penalty(model_D,defmap,low,high,*p,
                                          ptsdensity=pts_density)
+
       # Set the initial guess for the fit
       initial = dat.numpy_array_from_string(m['initial'],DELIMS)
+
       # Perform the fit and store the data
       FITS[m['name']]=so.fmin(cost,initial,retall=True)
 
