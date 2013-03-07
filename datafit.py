@@ -62,5 +62,5 @@ def positive_definite_penalty(model_D, deformation_map, lowcorner, hicorner,
 
   # Return lambda * the fraction of sampled points which were positive-definite
   num_acceptable = acceptable[acceptable].shape[0]
-  return (deformations,tangent_stiffnesses,num_acceptable/num_pts)
+  return num_acceptable/num_pts
 
