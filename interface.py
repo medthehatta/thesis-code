@@ -4,6 +4,7 @@ interface.py
 Handles option parsing and general user interaction.
 """
 import yaml
+import pickle
 import argparse
 import data_process as dat
 import datafit as fit
@@ -51,7 +52,7 @@ def argument_parse(argv=None):
   # deformation bounds.
   models = yaml.load(open(parsed.model))
 
-  return (stresses, deformations, models, parser.outfile)
+  return (stresses, deformations, models, parsed.outfile)
 
 def run_from_args(stresses, deformations, models, outfile=None):
   """
@@ -107,8 +108,9 @@ def run_from_args(stresses, deformations, models, outfile=None):
       # Save data to pickle file
       # TODO: this should be saved in a format matlab can read
       if outfile is not None:
-        print("Saving output to: {0}".format(outfile+m['name'].replace(' ','_')))
-        pickle.dump(open(outfile,'wb'))
+        outfile_each = outfile+'__'+m['name'].replace(' ','_')
+        print("Saving output to: {0}".format(outfile_each))
+        pickle.dump(FITS[m['name']],open(outfile_each,'wb'))
 
   return FITS
 
