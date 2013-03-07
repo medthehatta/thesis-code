@@ -24,11 +24,9 @@ def argument_parse(argv=None):
   parser = argparse.ArgumentParser(description=parser_description)
 
   parser.add_argument('-P','--stress',
-                      default='P.txt', 
                       help='File containing stress data.')
 
   parser.add_argument('-F','--deformation',
-                      default='F.txt',
                       help='File containing deformation data.')
 
   parser.add_argument('-M','--model',
