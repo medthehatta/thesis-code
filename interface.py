@@ -33,6 +33,9 @@ def argument_parse(argv=None):
                       help='File containing functions for computing stress '\
                            'and stiffness of the desired model.')
 
+  parser.add_argument('-o','--outfile',
+                      help='Pickle filename to store data in.')
+
   if argv is not None:
     parsed =  parser.parse_args(argv)
   else:
@@ -48,9 +51,9 @@ def argument_parse(argv=None):
   # deformation bounds.
   models = yaml.load(open(parsed.model))
 
-  return (stresses, deformations, models)
+  return (stresses, deformations, models, parser.outfile)
 
-def run_from_args(stresses, deformations, models):
+def run_from_args(stresses, deformations, models, outfile=None):
   """
   Perform a fit for each given model with the given stress and deformation
   data.  Presumably this is called with the return value from
@@ -89,7 +92,23 @@ def run_from_args(stresses, deformations, models):
       initial = dat.numpy_array_from_string(m['initial'],DELIMS)
 
       # Perform the fit and store the data
-      FITS[m['name']]=so.fmin(cost,initial,retall=True)
+      print("\n\n")
+      print("Performing fit for {0}:".format(m['name']))
+      print("{0}\n".format(m))
+      fit_data = so.fmin(cost,initial,retall=True)
+      FITS[m['name']]={'name':m['name'],
+                       'parameters':fit_data,
+                       'model':model,
+                       'model_D':model_D,
+                       'deformations':deformations,
+                       'stresses':stresses}
+      print("Final parameter values: {0}".format(fit_data[0]))
+
+      # Save data to pickle file
+      # TODO: this should be saved in a format matlab can read
+      if outfile is not None:
+        print("Saving output to: {0}".format(outfile+m['name'].replace(' ','_')))
+        pickle.dump(open(outfile,'wb'))
 
   return FITS
 
