@@ -132,12 +132,7 @@ def run_from_args(stresses, deformations, models, outfile=None):
 if __name__=="__main__":
   parsed = argument_parse()
   if parsed is not None:
-    if run_from_args(parsed):
-      return 0
-    else:
-      return 1
-  else:
-    return 1
+    run_from_args(parsed)
 
     
   
