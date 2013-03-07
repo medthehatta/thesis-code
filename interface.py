@@ -1,3 +1,4 @@
+#!/usr/bin/python
 """
 interface.py
 
@@ -15,10 +16,10 @@ def argument_parse(argv=None):
   """
   Returns the argument namespace from the given values.
   """
-  parser_description = 'Performs a constrained least-squares fit to'\
-                       'tissue data provided in a PK1 stress file and'\
+  parser_description = 'Performs a constrained least-squares fit to '\
+                       'tissue data provided in a PK1 stress file and '\
                        'a deformation gradient file aligned with it.  '\
-                       'Attempts to produce a fit which is Drucker stable'\
+                       'Attempts to produce a fit which is Drucker stable '\
                        'in the strain regime specified.'
   parser = argparse.ArgumentParser(description=parser_description)
 
@@ -41,6 +42,20 @@ def argument_parse(argv=None):
     parsed =  parser.parse_args(argv)
   else:
     parsed = parser.parse_args()
+
+  if parsed.stress is None:
+    print("No stress file specified!")
+    print(parser.print_usage())
+    return 1
+
+  if parsed.deformation is None:
+    print("No deformation file specified!")
+    print(parser.print_usage())
+    return 1
+
+  if parsed.model is None:
+    print("No model test file specified!")
+    print(parser.print_usage())
 
   # Read in the actual data: stress vs. strain
   DELIMS = ['\n\n','\n',' ']
@@ -116,4 +131,5 @@ def run_from_args(stresses, deformations, models, outfile=None):
 
 
 
-
+if __name__=="__main__":
+  run_from_args(*argument_parse())
