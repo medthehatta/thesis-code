@@ -9,7 +9,6 @@ import data_process as dat
 import datafit as fit
 import imp
 import scipy.optimize as so
-from operator import and_
 
 def argument_parse(argv=None):
   """
@@ -77,5 +76,7 @@ def run_from_args(stresses, deformations, models):
       FITS[m['name']]=so.fmin(cost,initial,retall=True)
 
   return FITS
+
+
 
 
