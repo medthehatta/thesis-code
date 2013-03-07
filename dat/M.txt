@@ -5,7 +5,7 @@
   model stress: &isotropic model_isotropic
   model stiffness: &isostiff model_isotropic_D
   strain module: &strains /home/med/re/fit-stable/strain.py
-  strain function: &biaxial biaxial_extension
+  strain function: &biaxial biaxial_extension_vec #vectorized biaxial
   strain low: &low 0.2 0.2
   strain high: &high 1.5 1.5
   sample density: &samples 5
