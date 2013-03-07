@@ -2,59 +2,77 @@
   name: defaults
   ignore: true
   model-module: &fung /home/med/re/fit-stable/fung.py
-  model-function: &isotropic model_isotropic
+  model-stress: &isotropic model_isotropic
+  model-stiffness: &isostiff model_isotropic_D
   strain-module: &strains /home/med/re/fit-stable/strain.py
   strain-function: &biaxial biaxial_extension
   strain-low: &low 0.2 0.2
   strain-high: &high 1.5 1.5
+  sample-density: &samples 5
+  lagrange-multiplier: &lambda 10.0
 
 - 
   name: isotropic fung -2
   model-module: *fung
-  model-function: *isotropic
+  model-stress: *isotropic
+  model-stiffness: *isostiff
   strain-module: *strains
   strain-function: *biaxial
   strain-low: *low
   strain-high: *high
+  sample-density: *samples
+  lagrange-multiplier: *lambda
   initial: 0.001 0.001
 
 - 
   name: isotropic fung -1
   model-module: *fung
-  model-function: *isotropic
+  model-stress: *isotropic
+  model-stiffness: *isostiff
   strain-module: *strains
   strain-function: *biaxial
   strain-low: *low
   strain-high: *high
+  sample-density: *samples
+  lagrange-multiplier: *lambda
   initial: 0.01 0.01
 
 - 
   name: isotropic fung 0
   model-module: *fung
-  model-function: *isotropic
+  model-stress: *isotropic
+  model-stiffness: *isostiff
   strain-module: *strains
   strain-function: *biaxial
   strain-low: *low
   strain-high: *high
+  sample-density: *samples
+  lagrange-multiplier: *lambda
   initial: 1.0 1.0
 
 - 
   name: isotropic fung +1
   model-module: *fung
-  model-function: *isotropic
+  model-stress: *isotropic
+  model-stiffness: *isostiff
   strain-module: *strains
   strain-function: *biaxial
   strain-low: *low
   strain-high: *high
+  sample-density: *samples
+  lagrange-multiplier: *lambda
   initial: 10.0 10.0
 
 - 
   name: isotropic fung +2
   model-module: *fung
-  model-function: *isotropic
+  model-stress: *isotropic
+  model-stiffness: *isostiff
   strain-module: *strains
   strain-function: *biaxial
   strain-low: *low
   strain-high: *high
+  sample-density: *samples
+  lagrange-multiplier: *lambda
   initial: 100.0 100.0
 
