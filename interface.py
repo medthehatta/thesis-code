@@ -49,7 +49,7 @@ def argument_parse(argv=None):
   if parsed.deformation is None:
     print("No deformation file specified!")
     print(parser.print_usage())
-    return 1
+    return None
 
   if parsed.model is None:
     print("No model test file specified!")
@@ -130,4 +130,14 @@ def run_from_args(stresses, deformations, models, outfile=None):
 
 
 if __name__=="__main__":
-  run_from_args(*argument_parse())
+  parsed = argument_parse()
+  if parsed is not None:
+    if run_from_args(parsed):
+      return 0
+    else:
+      return 1
+  else:
+    return 1
+
+    
+  
