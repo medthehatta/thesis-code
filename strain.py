@@ -44,7 +44,9 @@ def biaxial_extension_vec(stretches):
   projections = np.einsum('...i,...j',axes,axes)
 
   # Compute the stretch matrices for each stretch
-  stretch_operators = normalized_r*projections
+  # This will just be sum of the products of the normalized stretches with
+  # their respective projection operators
+  stretch_operators = np.sum(normalized_r*projections, axis=1)
 
   # Add these to the identity to get the total deformations
   return np.eye(3) + stretch_operators
