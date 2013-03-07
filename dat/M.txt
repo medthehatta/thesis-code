@@ -1,53 +1,60 @@
 - 
   name: defaults
   ignore: true
-  module: &fung /home/med/re/fit-stable/fung.py
-  function: &isotropic model_isotropic
-  strain-low: &zeros |
-    0.0 0.0 0.0
-    0.0 0.0 0.0
-    0.0 0.0 0.0
-  strain-high: &default-high |
-    2.0 0.5 0.5
-    0.5 2.0 0.5
-    0.5 0.5 2.0
+  model-module: &fung /home/med/re/fit-stable/fung.py
+  model-function: &isotropic model_isotropic
+  strain-module: &strains /home/med/re/fit-stable/strain.py
+  strain-function: &biaxial biaxial_extension
+  strain-low: &low 0.2 0.2
+  strain-high: &high 1.5 1.5
 
 - 
   name: isotropic fung -2
-  module: *fung
-  function: *isotropic
-  strain-low: *zeros
-  strain-high: *default-high
+  model-module: *fung
+  model-function: *isotropic
+  strain-module: *strains
+  strain-function: *biaxial
+  strain-low: *low
+  strain-high: *high
   initial: 0.001 0.001
 
 - 
   name: isotropic fung -1
-  module: *fung
-  function: *isotropic
-  strain-low: *zeros
-  strain-high: *default-high
+  model-module: *fung
+  model-function: *isotropic
+  strain-module: *strains
+  strain-function: *biaxial
+  strain-low: *low
+  strain-high: *high
   initial: 0.01 0.01
 
 - 
   name: isotropic fung 0
-  module: *fung
-  function: *isotropic
-  strain-low: *zeros
-  strain-high: *default-high
+  model-module: *fung
+  model-function: *isotropic
+  strain-module: *strains
+  strain-function: *biaxial
+  strain-low: *low
+  strain-high: *high
   initial: 1.0 1.0
 
 - 
   name: isotropic fung +1
-  module: *fung
-  function: *isotropic
-  strain-low: *zeros
-  strain-high: *default-high
+  model-module: *fung
+  model-function: *isotropic
+  strain-module: *strains
+  strain-function: *biaxial
+  strain-low: *low
+  strain-high: *high
   initial: 10.0 10.0
 
 - 
   name: isotropic fung +2
-  module: *fung
-  function: *isotropic
-  strain-low: *zeros
-  strain-high: *default-high
+  model-module: *fung
+  model-function: *isotropic
+  strain-module: *strains
+  strain-function: *biaxial
+  strain-low: *low
+  strain-high: *high
   initial: 100.0 100.0
+
