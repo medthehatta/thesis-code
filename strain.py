@@ -19,3 +19,11 @@ def simple_extension(stretch,axis=np.array([1,0,0])):
   """
   return np.eye(3) + (stretch-1)*np.outer(axis,axis)
 
+def biaxial_extension(stretch1,stretch2,
+                      e1=np.array([1,0,0]),e2=np.array([0,1,0])):
+  """
+  Biaxial extension with x-stretch ``stretch1`` and y-stretch ``stretch2``.
+  """
+  return np.eye(3) + (stretch1-1)*np.outer(e1,e1) + \
+                     (stretch2-1)*np.outer(e2,e2)
+
