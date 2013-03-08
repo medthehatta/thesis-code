@@ -48,8 +48,8 @@ def positive_definite_penalty(model_D, deformation_map, lowcorner, hicorner,
   # This generates ``numpts`` random numbers between 0 and 1 and reshapes the
   # array so it can be multiplied by the difference between ``lowcorner`` and
   # ``hicorner``.
-  unit_pts = np.random.random(num_pts).reshape([num_pts] + \
-                                               [1]*len(lowcorner.shape))
+  unit_pts = np.random.random([num_pts]+list(lowcorner.shape))
+
   # Generate the points
   pts = lowcorner + (hicorner-lowcorner)*unit_pts
   deformations = deformation_map(pts)
