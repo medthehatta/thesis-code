@@ -5,7 +5,6 @@ Routines for performing the constrained fit on stress/strain data.
 """
 import numpy as np
 import lintools as lin
-import monte_carlo
 
 def data_leastsqr(Fs,Ps,model,*params):
   """
