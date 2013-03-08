@@ -56,7 +56,7 @@ def positive_definite_penalty(model_D, deformation_map, lowcorner, hicorner,
 
   # Check positive-definiteness of tangent stiffnesses at each point
   tangent_stiffnesses = model_D(deformations, *params)
-  acceptable = np.array([lin.is_positive_definite(d) for 
+  acceptable = np.array([lin.is_positive_definite(lin.np_voigt(d)) for 
                          d in tangent_stiffnesses])
 
   # Return lambda * the fraction of sampled points which were positive-definite
