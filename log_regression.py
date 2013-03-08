@@ -4,6 +4,7 @@ log_regression.py
 Logistic regression binary classifier.
 """
 import numpy as np
+import scipy.optimize as so
 
 def sigmoid(X):
     """Compute the sigmoid function"""
@@ -55,13 +56,11 @@ def compute_grad(theta, X, y, lam=0.0):
     dJ = (1.0/m)*(np.dot((h - y),X) + reg)
     return dJ
 
+def calibrate_logistic(X, y, lam=0.0):
+    """
+    Train a linear logistic classifier.  Return the parameter vector.
+    """
+    cost = lambda t: compute_cost(t,X,y,lam)
+    dcost = lambda t: compute_grad(t,X,y,lam)
+    return so.fmin(cost,np.ones(X.shape[-1]),dcost)
 
-def predict(theta, X, thresh=0.5):
-    """
-    Using a calibrated logistic classifier, predict whether the samples ``X``
-    are in the 1 or 0 category.
-    """
-    classes = sigmoid(np.dot(X,theta))>thresh
-    classes[classes==True] = 1
-    classes[classes==False] = 0
-    return classes
