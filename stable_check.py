@@ -3,6 +3,7 @@ stable_check.py
 
 Find boundaries between the stable and unstable regions for a given model.
 """
+import log_regression as reg
 import numpy as np
 import lintools as lin
 
@@ -42,10 +43,12 @@ def positive_definite_samples(model_D, deformation_map, lowcorner, hicorner,
 
   # Check positive-definiteness of tangent stiffnesses at each point
   tangent_stiffnesses = model_D(deformations, *params)
-  acceptable = np.array([lin.is_positive_definite(d) for 
+  acceptable = np.array([lin.is_positive_definite(lin.np_voigt(d)) for 
                          d in tangent_stiffnesses])
 
   # Return stable and unstable points in two separate arrays
   return (tangent_stiffnesses[acceptable==True,:,:],
           tangent_stiffnesses[acceptable==False,:,:])
+
+
 
