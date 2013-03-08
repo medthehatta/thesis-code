@@ -56,6 +56,7 @@ def compute_grad(theta, X, y, lam=0.0):
     dJ = (1.0/m)*(np.dot((h - y),X) + reg)
     return dJ
 
+
 def calibrate_logistic(X, y, lam=0.0):
     """
     Train a linear logistic classifier.  Return the parameter vector.
