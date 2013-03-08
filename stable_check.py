@@ -47,8 +47,8 @@ def positive_definite_samples(model_D, deformation_map, lowcorner, hicorner,
                          d in tangent_stiffnesses])
 
   # Return stable and unstable points in two separate arrays
-  return (tangent_stiffnesses[acceptable==True,:,:],
-          tangent_stiffnesses[acceptable==False,:,:])
+  return (pts[acceptable==True,:],
+          pts[acceptable==False,:])
 
 
 
