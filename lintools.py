@@ -6,6 +6,7 @@ Some miscellaneous array / linear algebra tricks.
 import numpy as np
 
 
+
 def np_voigt(A):
   """
   NumPy Voigt
@@ -23,6 +24,25 @@ def np_voigt(A):
   rk2 = int(rk/2)
   # combine and return
   return np.reshape(A,(dim**rk2,dim**rk2))
+
+
+def np_voigt_vec(A):
+  """
+  Same as np_voigt, but takes a list of tensors and does each.
+  """
+  rk = len(A.shape) - 1
+  # this only works if each entry has positive, even rank
+  if rk==0 or (rk%2)!=0: raise Exception("Argument's rank must be positive and even.")
+  # get the dimension of the space
+  dim = A.shape[-1]
+  # this only works if it's square
+  if not (np.array(A.shape)[1:]==dim).all(): raise Exception("Argument's indices must all have the same range.")
+  # compute the "half-rank"; this will tell us how many indices we're combining
+  rk2 = int(rk/2)
+  # combine and return
+  return np.reshape(A,(A.shape[0],dim**rk2,dim**rk2))
+
+
 
 
 def antisymmetric(A):
