@@ -63,5 +63,5 @@ def calibrate_logistic(X, y, lam=0.0):
     """
     cost = lambda t: compute_cost(t,X,y,lam)
     dcost = lambda t: compute_grad(t,X,y,lam)
-    return so.fmin(cost,np.ones(X.shape[-1]),dcost)
+    return so.fmin_bfgs(cost,np.ones(X.shape[-1]),dcost)
 
