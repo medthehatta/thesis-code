@@ -9,14 +9,14 @@ def test_logistic(pts,normal,lam=0.0):
    plt.scatter(*firsts[:,1:].T,color='green')
    plt.scatter(*seconds[:,1:].T,color='red')
    result = reg.calibrate_logistic(np.vstack([firsts,seconds]),
-                                       np.hstack([trues,falses]),
-                                       lam=lam)
+                                   np.hstack([trues,falses]),
+                                   lam=lam)
    if len(result)==3:
      x = np.arange(0,2,0.1)
      y = np.arange(0,1,0.1)
      (X,Y) = np.meshgrid(x,y)
      XY = np.array([np.ones(X.shape),X,Y])
-     TH = np.tile(result,[1]+list(XY.shape[1:]))
+     TH = np.tile(result,[1,1]+list(XY.shape[1:]))
      # TODO: tile result so TH has XY.shape
      DOTS = np.einsum('i...,i...',TH,XY)
      Z = reg.sigmoid(DOTS)
