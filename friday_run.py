@@ -16,8 +16,7 @@ def test_logistic(pts,normal,lam=0.0):
      y = np.arange(0,1,0.1)
      (X,Y) = np.meshgrid(x,y)
      XY = np.array([np.ones(X.shape),X,Y])
-     TH = np.tile(result,[1,1]+list(XY.shape[1:]))
-     # TODO: tile result so TH has XY.shape
+     TH = np.tile(result,list(XY.shape[1:])+[1]).transpose((2,0,1))
      DOTS = np.einsum('i...,i...',TH,XY)
      Z = reg.sigmoid(DOTS)
      plt.contour(X,Y,Z)
