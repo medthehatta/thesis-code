@@ -71,7 +71,7 @@ def model_isotropic_D(F,*params):
   Exposed fung_D with isotropic stiffness.
   Params are Young's modulus and Poisson's ratio.
   """
-  (E,n) = params
+  E=params[0]; n=params[1];
   G = E/(2*(1+n))
   return fung_D(F,params[0],orthotropic_stiffness(E,E,E,n,n,n,G,G,G))
 
@@ -90,7 +90,7 @@ def fung(F,c,CC):
   else:
     I = np.eye(dim)
   E = 0.5*np.einsum('...ab,...ac',F,F) - 0.5*I
-  Q = np.einsum('...abcd,...ab,...cd',CC,E,E)
+  Q = np.einsum('...abcd,...abcd',CC,np.einsum('...ab,...cd',E,E))
   return 0.5*c*(np.exp(Q) - 1)
 
 def fung_P(F,c,CC):
@@ -105,7 +105,7 @@ def fung_P(F,c,CC):
   else:
     I = np.eye(dimension)
   E = 0.5*np.einsum('...ab,...ac',F,F) - 0.5*I
-  Q = np.einsum('...abcd,...ab,...cd',CC,E,E)
+  Q = np.einsum('...abcd,...abcd',CC,np.einsum('...ab,...cd',E,E))
 
   # Derivative of Q wrt E: (rank 2)
   dQdE = 2*np.einsum('...abcd,...cd',CC,E)
@@ -129,7 +129,7 @@ def fung_D(F,c,CC):
   else:
     I = np.eye(dimension)
   E = 0.5*np.einsum('...ab,...ac',F,F) - 0.5*I
-  Q = np.einsum('...abcd,...ab,...cd',CC,E,E)
+  Q = np.einsum('...abcd,...abcd',CC,np.einsum('...ab,...cd',E,E))
 
   # Derivative of Q wrt E: (rank 2)
   dQdE = 2*np.einsum('...abcd,...cd',CC,E)
@@ -146,7 +146,7 @@ def fung_D(F,c,CC):
 
   # Each term of 3-part product rule
   ddW1 = lin.tensor(dQdF,dQdF)
-  ddW2 = np.einsum('...ijkl,...ijmn,...klpq',ddQdEdE,dEdF,dEdF)
+  ddW2 = np.einsum('...ijkl,...ijmnklpq',ddQdEdE,np.einsum('...ijmn,...klpq',dEdF,dEdF))
   ddW3 = np.einsum('...ij,...ijklmn',dQdE,ddEdFdF)
   # Return the sum of these, all times c/2 exp(Q)
   return 0.5*c*(np.exp(Q)*(ddW1 + ddW2 + ddW3).T).T
