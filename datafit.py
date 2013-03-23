@@ -59,7 +59,7 @@ def positive_definite_penalty(model_D, deformation_map, lowcorner, hicorner,
   acceptable = np.array([lin.is_positive_definite(lin.np_voigt(d)) for 
                          d in tangent_stiffnesses])
 
-  # Return lambda * the fraction of sampled points which were positive-definite
+  # Return the reciprocal fraction of sampled points which were positive-definite
   num_acceptable = acceptable[acceptable].shape[0]
-  return num_acceptable/num_pts
+  return num_pts/num_acceptable
 
