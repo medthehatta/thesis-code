@@ -146,7 +146,7 @@ def fung_D(F,c,CC):
 
   # Each term of 3-part product rule
   ddW1 = lin.tensor(dQdF,dQdF)
-  ddW2 = np.einsum('...ijkl,...ijmnklpq',ddQdEdE,np.einsum('...ijmn,...klpq',dEdF,dEdF))
+  ddW2 = np.einsum('...ijkl,...ijmnklpq',ddQdEdE,np.einsum('...ijmn,...klpq',dEdF,dEdF)
   ddW3 = np.einsum('...ij,...ijklmn',dQdE,ddEdFdF)
   # Return the sum of these, all times c/2 exp(Q)
   return 0.5*c*(np.exp(Q)*(ddW1 + ddW2 + ddW3).T).T
