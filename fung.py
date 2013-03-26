@@ -41,7 +41,7 @@ def orthotropic_stiffness(Ex,Ey,Ez,nyz,nzx,nxy,Gyz,Gzx,Gxy):
   C = lin.direct_sum(N,lin.direct_sum(shear_part,shear_part))
 
   # Now we need to turn this into a bona-fide 4th rank tensor
-  return lin.reorder_matrix(C,lin.VOIGT_ORDER).reshape((3,3,3,3))
+  return lin.reorder_matrix(C,lin.VOIGT_ORDER_INVERSE).reshape((3,3,3,3))
 
 
 def model(F,*params):
