@@ -62,18 +62,18 @@ def model_isotropic(F,*params):
   Exposed fung_P with isotropic stiffness.
   Params are Young's modulus and Poisson's ratio.
   """
-  (E,n) = params
+  (c,E,n) = params
   G = E/(2*(1+n))
-  return fung_P(F,params[0],orthotropic_stiffness(E,E,E,n,n,n,G,G,G))
+  return fung_P(F,c,orthotropic_stiffness(E,E,E,n,n,n,G,G,G))
 
 def model_isotropic_D(F,*params):
   """
   Exposed fung_D with isotropic stiffness.
   Params are Young's modulus and Poisson's ratio.
   """
-  E=params[0]; n=params[1];
+  (c,E,n) = params
   G = E/(2*(1+n))
-  return fung_D(F,params[0],orthotropic_stiffness(E,E,E,n,n,n,G,G,G))
+  return fung_D(F,c,orthotropic_stiffness(E,E,E,n,n,n,G,G,G))
 
 
 def fung(F,c,CC):
