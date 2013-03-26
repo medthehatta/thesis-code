@@ -56,7 +56,10 @@ def positive_definite_penalty(model_D, deformation_map, lowcorner, hicorner,
 
   # Check positive-definiteness of tangent stiffnesses at each point
   tangent_stiffnesses = model_D(deformations, *params)
-  acceptable = np.array([lin.is_positive_definite(lin.np_voigt(d)) for 
+  # Convenience function for finding Voigt representation of a 4th rk tensor
+  def voigt(d):
+    return lin.reorder_matrix(lin.np_voigt(d),lin.VOIGT_ORDER)
+  acceptable = np.array([lin.is_positive_definite(voigt(d)) for 
                          d in tangent_stiffnesses])
 
   # Return the reciprocal fraction of sampled points which were positive-definite
