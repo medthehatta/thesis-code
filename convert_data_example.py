@@ -53,3 +53,6 @@ PK1       = np.array([np.diagflat(f) for f in forces])
 F   = np.array([lin.direct_sum(f,np.eye(1)) for f in F])
 PK1 = np.array([lin.direct_sum(p,np.eye(1)) for p in PK1])
 
+# NOTE:
+# I'm pretty sure the units of P here are in N/mm^2
+
