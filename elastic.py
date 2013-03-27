@@ -43,7 +43,7 @@ def isotropic_stiffness(E,n):
   Given Young's modulus and Poisson's ratio, returns an isotropic stiffness
   tensor.
   """
-  G = E/(2*(1+n)
+  G = E/(2*(1+n))
   return orthotropic_stiffness(E,E,E,n,n,n,G,G,G)
 
 
