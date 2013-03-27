@@ -38,9 +38,8 @@ def orthotropic_stiffness(Ex,Ey,Ez,nyz,nzx,nxy,Gyz,Gzx,Gxy):
   N23 = (nzy + nzx*nxy)/(Ez*Ex*D)
   N33 = (1 - nxy*nyz)/(Ex*Ey*D)
 
-  # Put in the triangle and then symmetrize
-  N0 = np.array([[N11,2*N12,2*N13],[0,N22,2*N23],[0,0,N33]])
-  N = (N0 + N0.T)/2.
+  # Put the triangle into a a real matrix
+  N = np.array([[N11,N12,N13],[N12,N22,N23],[N13,N23,N33]])
 
   # The whole Voigt stiffness (but expanded to be fully 9x9) is given by
   shear_part = np.diagflat(shear_moduli)
