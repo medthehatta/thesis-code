@@ -1,6 +1,18 @@
 import numpy as np
 import lintools as lin
 
+def manual_stiffness(normals,shears):
+  """
+  Returns a 4th rank stiffness tensor given the Voigt matrix for the normal
+  stresses (the upper left block) and the Voigt matrix for the shears (the
+  lower right block).
+  """
+  # The shears appear twice, because we want a 9x9, not 6x6 stiffness matrix
+  shear_part = lin.direct_sum(shears,shears)
+  voigt_mat = lin.direct_sum(normals,shear_part)
+  return lin.reorder_matrix(voigt_mat,VOIGT_ORDER_INVERSE).reshape((3,3,3,3))
+
+
 def orthotropic_stiffness(Ex,Ey,Ez,nyz,nzx,nxy,Gyz,Gzx,Gxy):
   """
   Returns an orthotropic stiffness tensor with the given parameters.
@@ -32,10 +44,7 @@ def orthotropic_stiffness(Ex,Ey,Ez,nyz,nzx,nxy,Gyz,Gzx,Gxy):
 
   # The whole Voigt stiffness (but expanded to be fully 9x9) is given by
   shear_part = np.diagflat(shear_moduli)
-  C = lin.direct_sum(N,lin.direct_sum(shear_part,shear_part))
-
-  # Now we need to turn this into a bona-fide 4th rank tensor
-  return lin.reorder_matrix(C,VOIGT_ORDER_INVERSE).reshape((3,3,3,3))
+  return manual_stiffness(N,shear_part)
 
 
 def isotropic_stiffness(E,n):
