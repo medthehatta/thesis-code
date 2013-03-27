@@ -43,7 +43,11 @@ def np_voigt_vec(A):
   return np.reshape(A,(A.shape[0],dim**rk2,dim**rk2))
 
 
-
+def symmetric(A):
+  """
+  Returns the symmetric part of A.
+  """
+  return (A + A.T)/2.
 
 def antisymmetric(A):
   """
