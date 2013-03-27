@@ -4,57 +4,21 @@ fung.py
 Strain energy density and tangent stiffness for the Fung tissue model.
 """
 import lintools as lin
+import elastic as el
 import numpy as np
 import pdb
-
-def orthotropic_stiffness(Ex,Ey,Ez,nyz,nzx,nxy,Gyz,Gzx,Gxy):
-  """
-  Returns an orthotropic stiffness tensor with the given parameters.
-  """
-  shear_moduli = 2*np.array([Gyz,Gzx,Gxy])
-  
-  # The formula for the stiffness tensor that I have uses all kinds of weird
-  # versions of the poisson ratios, so we do the conversion first in order to
-  # use the formula verbatim
-  nzy = Ez/Ey*nyz
-  nxz = Ex/Ez*nzx
-  nyx = Ey/Ex*nxy
-
-  # Another intermediate variable
-  D = (1 - nxy*nyx - nyz*nzy - nzx*nxz - 2*nxy*nyz*nzx)/(Ex*Ey*Ez)
-
-  # Construct the upper triangle of the "normal" stress block in Voigt
-  # notation
-  N11 = (1 - nzy*nzy)/(Ey*Ez*D)
-  N12 = (nyx + nzx*nyz)/(Ey*Ez*D)
-  N13 = (nzx + nyz*nzy)/(Ey*Ez*D)
-  N22 = (1 - nzx*nxz)/(Ez*Ez*D)
-  N23 = (nzy + nzx*nxy)/(Ez*Ex*D)
-  N33 = (1 - nxy*nyz)/(Ex*Ey*D)
-
-  # Put in the triangle and then symmetrize
-  N0 = np.array([[N11,2*N12,2*N13],[0,N22,2*N23],[0,0,N33]])
-  N = (N0 + N0.T)/2.
-
-  # The whole Voigt stiffness (but expanded to be fully 9x9) is given by
-  shear_part = np.diagflat(shear_moduli)
-  C = lin.direct_sum(N,lin.direct_sum(shear_part,shear_part))
-
-  # Now we need to turn this into a bona-fide 4th rank tensor
-  return lin.reorder_matrix(C,lin.VOIGT_ORDER_INVERSE).reshape((3,3,3,3))
-
 
 def model(F,*params):
   """
   Exposed fung_P with fully orthotropic stiffness.
   """
-  return fung_P(F,params[0],orthotropic_stiffness(*params[1:]))
+  return fung_P(F,params[0],el.orthotropic_stiffness(*params[1:]))
 
 def model_D(F,*params):
   """
   Exposed fung_D with fully orthotropic stiffness.
   """
-  return fung_D(F,params[0],orthotropic_stiffness(*params[1:]))
+  return fung_D(F,params[0],el.orthotropic_stiffness(*params[1:]))
 
 
 def model_isotropic(F,*params):
@@ -64,7 +28,7 @@ def model_isotropic(F,*params):
   """
   (c,E,n) = params
   G = E/(2*(1+n))
-  return fung_P(F,c,orthotropic_stiffness(E,E,E,n,n,n,G,G,G))
+  return fung_P(F,c,el.orthotropic_stiffness(E,E,E,n,n,n,G,G,G))
 
 def model_isotropic_D(F,*params):
   """
@@ -73,7 +37,7 @@ def model_isotropic_D(F,*params):
   """
   (c,E,n) = params
   G = E/(2*(1+n))
-  return fung_D(F,c,orthotropic_stiffness(E,E,E,n,n,n,G,G,G))
+  return fung_D(F,c,el.orthotropic_stiffness(E,E,E,n,n,n,G,G,G))
 
 
 def fung(F,c,CC):
