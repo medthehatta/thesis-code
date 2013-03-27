@@ -74,7 +74,8 @@ def fung_P(F,c,CC):
   # Derivative of Q wrt E: (rank 2)
   dQdE = 2*np.einsum('...abcd,...cd',CC,E)
   # Derivative of E wrt F: (rank 4)
-  dEdF = 0.5*np.einsum('...ab,...cd->...adcb',I,F) + 0.5*np.einsum('...ab,...cd->...bdca',I,F)
+  dEdF = 0.5*np.einsum('...ab,...cd->...adcb',I,F) + 
+         0.5*np.einsum('...ab,...cd->...bdca',I,F)
   # Derivative of Q wrt F: (dQdE)ij (dEdF)ijkl (rank 2)
   dQdF = np.einsum('...ij,...ijkl',dQdE,dEdF)
   # Return value: c/2 exp(Q) dQdF
@@ -98,7 +99,8 @@ def fung_D(F,c,CC):
   # Derivative of Q wrt E: (rank 2)
   dQdE = 2*np.einsum('...abcd,...cd',CC,E)
   # Derivative of E wrt F: (rank 4)
-  dEdF = 0.5*(np.einsum('...ab,...cd->...adcb',I,F) + np.einsum('...ab,...cd->...bdca',I,F))
+  dEdF = 0.5*(np.einsum('...ab,...cd->...adcb',I,F) + 
+              np.einsum('...ab,...cd->...bdca',I,F))
   # Derivative of Q wrt F: (dQdE)ij (dEdF)ijkl (rank 2)
   dQdF = np.einsum('...ij,...ijkl',dQdE,dEdF)
 
@@ -110,7 +112,8 @@ def fung_D(F,c,CC):
 
   # Each term of 3-part product rule
   ddW1 = lin.tensor(dQdF,dQdF)
-  ddW2 = np.einsum('...ijkl,...ijmnklpq',ddQdEdE,np.einsum('...ijmn,...klpq',dEdF,dEdF))
+  ddW2 = np.einsum('...ijkl,...ijmnklpq',ddQdEdE,
+                                        np.einsum('...ijmn,...klpq',dEdF,dEdF))
   ddW3 = np.einsum('...ij,...ijklmn',dQdE,ddEdFdF)
   # Return the sum of these, all times c/2 exp(Q)
   return 0.5*c*(np.exp(Q)*(ddW1 + ddW2 + ddW3).T).T
