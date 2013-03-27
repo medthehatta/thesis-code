@@ -131,8 +131,13 @@ def reorder_matrix(matrix,permutation):
   Given a permutation of the basis vectors, reorder the matrix rows and
   columns to put the matrix in the reordered basis.
   """
-  P = np.eye(matrix.shape[-1])[permutation]
-  return np.einsum('ab,bc,cd',P,matrix,P.T)
+  p = np.eye(matrix.shape[-1])[permutation]
 
-VOIGT_ORDER = [0,4,8,5,6,1,7,2,3]
-VOIGT_ORDER_INVERSE = [0,5,7,8,1,3,4,6,2]
+  # Allow for either a list of matrices or just a matrix
+  if len(matrix.shape)>2:
+    P = np.tile(p,(mat_len,1,1))
+  else:
+    P = p
+
+  return np.einsum('...ab,...bc,...dc',P,matrix,P)
+
