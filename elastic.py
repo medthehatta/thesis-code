@@ -38,6 +38,28 @@ def orthotropic_stiffness(Ex,Ey,Ez,nyz,nzx,nxy,Gyz,Gzx,Gxy):
   return lin.reorder_matrix(C,VOIGT_ORDER_INVERSE).reshape((3,3,3,3))
 
 
+def isotropic_stiffness(E,n):
+  """
+  Given Young's modulus and Poisson's ratio, returns an isotropic stiffness
+  tensor.
+  """
+  G = E/(2*(1+n)
+  return orthotropic_stiffness(E,E,E,n,n,n,G,G,G)
+
+
+def voigt(A):
+  """
+  Returns the voigt-ified version of a 4th or 2nd rank tensor.
+  (Uses a 9-component, not 6-component form for the 2nd rank tensors.)
+  """
+  return lin.reorder_matrix(lin.np_voigt(A),VOIGT_ORDER)
+
+def voigt_vec(A):
+  """
+  Returns the voigt-ified version of a *list* of 4th or 2nd rank tensors.
+  """
+  return lin.reorder_matrix(lin.np_voigt_vec(A),VOIGT_ORDER)
+
 VOIGT_ORDER = [0,4,8,5,6,1,7,2,3]
 VOIGT_ORDER_INVERSE = [0,5,7,8,1,3,4,6,2]
 
