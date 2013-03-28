@@ -8,6 +8,18 @@ import elastic as el
 import numpy as np
 import pdb
 
+def make_quad_form(b1,b2,b3,b4,b5,b6,b7,b8,b9):
+  """
+  Returns the quadratic form for the Fung model with the appropriate convention
+  for the material parameters.
+  The order of the strain components is assumed to be Theta, Z, R.
+  """
+  normals = lin.symmetric(np.diagflat([b1,b2,b3]) + 
+                          2*np.diagflat([b4,b5],1) +
+                          2*np.diagflat([b6],2))
+  return el.manual_stiffness(normals,np.diagflat([b7,b8,b9]))
+  
+
 def model(F,*params):
   """
   Exposed fung_P with fully orthotropic stiffness.
@@ -74,7 +86,7 @@ def fung_P(F,c,CC):
   # Derivative of Q wrt E: (rank 2)
   dQdE = 2*np.einsum('...abcd,...cd',CC,E)
   # Derivative of E wrt F: (rank 4)
-  dEdF = 0.5*np.einsum('...ab,...cd->...adcb',I,F) + 
+  dEdF = 0.5*np.einsum('...ab,...cd->...adcb',I,F) + \
          0.5*np.einsum('...ab,...cd->...bdca',I,F)
   # Derivative of Q wrt F: (dQdE)ij (dEdF)ijkl (rank 2)
   dQdF = np.einsum('...ij,...ijkl',dQdE,dEdF)
