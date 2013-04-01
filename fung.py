@@ -130,3 +130,13 @@ def fung_D(F,c,CC):
   # Return the sum of these, all times c/2 exp(Q)
   return 0.5*c*(np.exp(Q)*(ddW1 + ddW2 + ddW3).T).T
 
+def fung_D_E(E,c,CC):
+  """
+  Returns the tangent stiffness with respect to the Lagrangian strain ``E`` and
+  the model parameters.
+  """
+  CE = np.einsum('abcd,cd',CC,E)
+  Q = np.einsum('ab,ab',CE,E)
+  CExCE = np.einsum('ab,cd->abcd',CE,CE)
+  return c*np.exp(Q)*(2*CExCE + CC)
+
