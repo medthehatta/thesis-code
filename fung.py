@@ -135,8 +135,9 @@ def fung_D_E(E,c,CC):
   Returns the tangent stiffness with respect to the Lagrangian strain ``E`` and
   the model parameters.
   """
-  CE = np.einsum('abcd,cd',CC,E)
-  Q = np.einsum('ab,ab',CE,E)
-  CExCE = np.einsum('ab,cd->abcd',CE,CE)
+  C = np.tile(CC,(E.shape[0],1,1,1,1))
+  CE = np.einsum('...abcd,...cd',C,E)
+  Q = np.einsum('...ab,...ab',CE,E)
+  CExCE = np.einsum('...ab,...cd->...abcd',CE,CE)
   return c*np.exp(Q)*(2*CExCE + CC)
 
