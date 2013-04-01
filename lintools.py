@@ -154,3 +154,9 @@ def utri_flat(matrix):
   nested = [[matrix[i,i:].tolist()] for i in range(len(matrix))]
   return np.array(sum(nested))
 
+
+def minor_dets(matrix):
+  """
+  Returns all the minor determinants.
+  """
+  return [np.linalg.det(matrix[:i,:i]) for i in range(1,len(M)+1)]
