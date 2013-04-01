@@ -145,3 +145,12 @@ def reorder_matrix(matrix,permutation):
 
   return np.einsum('...ab,...bc,...dc',P,matrix,P)
 
+
+def utri_flat(matrix):
+  """
+  Returns the upper triangle of a symmetric matrix in a flat list, ordered left
+  to right.
+  """
+  nested = [[matrix[i,i:].tolist()] for i in range(len(matrix))]
+  return np.array(sum(nested))
+
