@@ -47,13 +47,13 @@ def symmetric(A):
   """
   Returns the symmetric part of A.
   """
-  return (A + A.T)/2.
+  return (A + A.swapaxes(-1,-2))/2.
 
 def antisymmetric(A):
   """
   Returns the antisymmetric part of A.
   """
-  return (A - A.T)/2.
+  return (A - A.swapaxes(-1,-2))/2.
 
 
 def direct_sum(A,B):
