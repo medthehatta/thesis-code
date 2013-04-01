@@ -139,5 +139,5 @@ def fung_D_E(E,c,CC):
   CE = np.einsum('...abcd,...cd',C,E)
   Q = np.einsum('...ab,...ab',CE,E)
   CExCE = np.einsum('...ab,...cd->...abcd',CE,CE)
-  return c*np.exp(Q)*(2*CExCE + CC)
+  return c*(np.exp(Q)*(2*CExCE + CC).T).T
 
