@@ -10,7 +10,7 @@ def manual_stiffness(normals,shears):
   # The shears appear twice, because we want a 9x9, not 6x6 stiffness matrix
   shear_part = lin.direct_sum(shears,shears)
   voigt_mat = lin.direct_sum(normals,shear_part)
-  return lin.reorder_matrix(voigt_mat,VOIGT_ORDER_INVERSE).reshape((3,3,3,3))
+  return unvoigt(voigt_mat)
 
 
 def orthotropic_stiffness(Ex,Ey,Ez,nyz,nzx,nxy,Gyz,Gzx,Gxy):
@@ -67,6 +67,19 @@ def voigt_vec(A):
   Returns the voigt-ified version of a *list* of 4th or 2nd rank tensors.
   """
   return lin.reorder_matrix(lin.np_voigt_vec(A),VOIGT_ORDER)
+
+def unvoigt(CC):
+  """
+  Double the rank of a voigt matrix to a 4th rank tensor, or vector -> matrix.
+  """
+  inrank = len(CC.shape)
+  # Better be an even rank
+  if (inrank%2) == 0:
+    dim = np.sqrt(CC.shape[-1])
+    # Better be a square number of rows/columns
+    if int(dim)==float(dim):
+      newshape = [dim]*(2*inrank)
+      return lin.reorder_matrix(CC,VOIGT_ORDER_INVERSE).reshape(newshape)
 
 VOIGT_ORDER = [0,4,8,5,6,1,7,2,3]
 VOIGT_ORDER_INVERSE = [0,5,7,8,1,3,4,6,2]
