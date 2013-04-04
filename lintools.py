@@ -139,7 +139,7 @@ def reorder_matrix(matrix,permutation):
 
   # Allow for either a list of matrices or just a matrix
   if len(matrix.shape)>2:
-    P = np.tile(p,(mat_len,1,1))
+    P = np.tile(p,(matrix.shape[0],1,1))
   else:
     P = p
 
@@ -151,8 +151,8 @@ def utri_flat(matrix):
   Returns the upper triangle of a symmetric matrix in a flat list, ordered left
   to right.
   """
-  nested = [[matrix[i,i:].tolist()] for i in range(len(matrix))]
-  return np.array(sum(nested))
+  nested = [matrix[i,i:].tolist() for i in range(len(matrix))]
+  return np.array(sum(nested,[]))
 
 
 def minor_dets(matrix):
