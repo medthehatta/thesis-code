@@ -134,10 +134,17 @@ def fung_D_E(E,c,CC):
   """
   Returns the tangent stiffness with respect to the Lagrangian strain ``E`` and
   the model parameters.
+  I actually don't need the whole tangent stiffness: I just need the factor
+  that can fail to be positive definite.  (So we throw out the exponential):
   """
   C = np.tile(CC,(E.shape[0],1,1,1,1))
   CE = np.einsum('...abcd,...cd',C,E)
   Q = np.einsum('...ab,...ab',CE,E)
   CExCE = np.einsum('...ab,...cd->...abcd',CE,CE)
-  return c*(np.exp(Q)*(2*CExCE + CC).T).T
+  return c*(2*CExCE + CC)
 
+
+# Model parameters from Holzapfel which give a model that is convex in E(bar)
+# The units of the first parameter is: kPa, and the last two 1's are arbitrary
+# guesses.
+STABLE_IN_E = (26.95, [0.9925,0.4180,0.0089,0.0749,0.0295,0.0193,5.0,1.0,1.0])
