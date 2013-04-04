@@ -1,4 +1,10 @@
 # coding: utf-8
+"""
+fung_D.py
+
+Doesn't actually compute the tangent stiffness *per se*, but computes that part
+of the tangent stiffness that could be nonpositive-definite.
+"""
 import numpy as np
 import sympy as sp
 
