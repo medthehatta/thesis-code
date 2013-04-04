@@ -38,5 +38,5 @@ for i in range(9):
         D_numeric[j,i] = D_numeric[i,j]
 
 # Take the arguments to be passed to each function "component" of the tangent stiffness
-def D_function(*args): return np.array([[D[i,j](*args) for D in DD] for DD in D_numeric])
+def D_function(*args): return np.array([[D(*args) for D in DD] for DD in D_numeric])
 
