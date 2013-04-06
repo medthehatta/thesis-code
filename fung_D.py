@@ -16,29 +16,30 @@ def initialize():
     """
     Returns the tangent stiffness function, computed symbolically at runtime.
     """
+    # Construct the quadratic form
+    Q = np.empty((6,6),dtype=object)
+    for i in range(6):
+        for j in range(i,6):
+            Q[i,j]=sp.symbols('q_{i}{j}'.format(i=i,j=j))
+            Q[j,i]=Q[i,j]
+    # Flat list of independent entries of Q
+    q = sum([Q[i,i:].tolist() for i in range(len(Q))],[])
+
+    # Construct the Lagrangian strain (E) as a *vector* (e)
+    f = [sp.symbols('f_{i}'.format(i=i)) for i in range(9)]
+    F = np.reshape(f,(3,3))
+    E = 0.5*(np.dot(F.T,F) - np.eye(3))
+    e = np.array(sum([E[i,i:].tolist() for i in range(len(E))],[]))
+
+    # Expand the quadratic form's action on e
+    Qee = np.dot(e,np.dot(Q,e))
+
     # Attempt to load this from a pickle file
     try:
         D_symbolic = pickle.load(open("fung_D_compute.pkl",'rb'))
 
     # Otherwise, just recompute it
     except Exception:
-        # Construct the quadratic form
-        Q = np.empty((6,6),dtype=object)
-        for i in range(6):
-            for j in range(i,6):
-                Q[i,j]=sp.symbols('q_{i}{j}'.format(i=i,j=j))
-                Q[j,i]=Q[i,j]
-        # Flat list of independent entries of Q
-        q = sum([Q[i,i:].tolist() for i in range(len(Q))],[])
-
-        # Construct the Lagrangian strain (E) as a *vector* (e)
-        f = [sp.symbols('f_{i}'.format(i=i)) for i in range(9)]
-        F = np.reshape(f,(3,3))
-        E = 0.5*(np.dot(F.T,F) - np.eye(3))
-        e = np.array(sum([E[i,i:].tolist() for i in range(len(E))],[]))
-
-        # Expand the quadratic form's action on e
-        Qee = np.dot(e,np.dot(Q,e))
 
         # Construct the tangent stiffness as a symbolic expression
         D_symbolic = np.empty((9,9),dtype=object)
@@ -46,7 +47,7 @@ def initialize():
             for j in range(i,9):
                 D_symbolic[i,j] = sp.diff(Qee,f[i])*sp.diff(Qee,f[j])+sp.diff(Qee,f[i],f[j])
                 D_symbolic[j,i] = D_symbolic[i,j]
-        pickle.dump(D_symbolic, open("fung_D_compute",'wb'))
+        pickle.dump(D_symbolic, open("fung_D_compute.pkl",'wb'))
 
     # Transform each symbolic expression into a python function
     D_numeric = np.empty((9,9),dtype=object)
