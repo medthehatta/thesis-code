@@ -28,7 +28,9 @@ def initialize():
     # Construct the Lagrangian strain (E) as a *vector* (e)
     f = [sp.symbols('f_{i}'.format(i=i)) for i in range(9)]
     F = np.reshape(f,(3,3))
-    E = 0.5*(np.dot(F.T,F) - np.eye(3))
+    J = sp.Matrix(F.tolist()).det()
+    # TODO: Is this supposed to be J**(-4/3) or J**(-2/3)?
+    E = 0.5*(J**(-2/3)*np.dot(F.T,F) - np.eye(3))
     e = np.array(sum([E[i,i:].tolist() for i in range(len(E))],[]))
 
     # Expand the quadratic form's action on e
