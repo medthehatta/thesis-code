@@ -8,6 +8,7 @@ import holzapfel
 import strain
 import log_regression as log
 import datafit as fit
+import matplotlib.pyplot as plt
 
 from imp import reload
 
