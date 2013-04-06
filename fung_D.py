@@ -38,7 +38,7 @@ def initialize():
 
     # Attempt to load this from a pickle file
     try:
-        D_symbolic = pickle.load(open("fung_D_compute.pkl",'rb'))
+        D_symbolic = pickle.load(open("fung_D_symbolic.pkl",'rb'))
 
     # Otherwise, just recompute it
     except Exception:
@@ -47,14 +47,19 @@ def initialize():
         D_symbolic = np.empty((9,9),dtype=object)
         for i in range(9):
             for j in range(i,9):
-                D_symbolic[i,j] = sp.diff(Qee,f[i])*sp.diff(Qee,f[j])+sp.diff(Qee,f[i],f[j])
+                print("Symbolic D_{0}{1}".format(i,j))
+                dQi = sp.diff(Qee,f[i])
+                dQj = sp.diff(Qee,f[j])
+                dQij = sp.diff(dQi,f[j])
+                D_symbolic[i,j] = dQi*dQj + dQij
                 D_symbolic[j,i] = D_symbolic[i,j]
-        pickle.dump(D_symbolic, open("fung_D_compute.pkl",'wb'))
+        pickle.dump(D_symbolic, open("fung_D_symbolic.pkl",'wb'))
 
     # Transform each symbolic expression into a python function
     D_numeric = np.empty((9,9),dtype=object)
     for i in range(9):
         for j in range(i,9):
+            print("Numeric D_{0}{1}".format(i,j))
             D_numeric[i,j] = sp.lambdify(q+f,D_symbolic[i,j],np)
             D_numeric[j,i] = D_numeric[i,j]
     return (D_symbolic,D_numeric)
