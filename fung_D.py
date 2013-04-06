@@ -55,12 +55,10 @@ def initialize():
     return (D_symbolic,D_numeric)
 
 # Pass a deformation F and a set of parameters (c,b1...b9)
-def D(F,c,bs,D_numeric_l=None):
-    if D_numeric_l is None:
-        D_numeric_l = D_numeric
+def D(F,c,bs,D_numeric):
     f = F.ravel()
     C = fung.make_quad_form(*bs)
     CC = lin.utri_flat(el.voigt(C))
     arglist = CC.tolist() + f.tolist()
-    return np.array([[D(*arglist) for D in DD] for DD in D_numeric_l])
+    return np.array([[D(*arglist) for D in DD] for DD in D_numeric])
 
