@@ -21,7 +21,7 @@ def initialize():
         D_symbolic = pickle.load(open("fung_D_compute.pkl",'rb'))
 
     # Otherwise, just recompute it
-    except IOError:
+    except Exception:
         # Construct the quadratic form
         Q = np.empty((6,6),dtype=object)
         for i in range(6):
