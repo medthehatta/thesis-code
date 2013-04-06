@@ -18,10 +18,10 @@ def initialize():
     """
     # Attempt to load this from a pickle file
     try:
-        (D_symbolic,D_numeric) = pickle.load(open("fung_D_compute",'rb'))
+        D_symbolic = pickle.load(open("fung_D_compute.pkl",'rb'))
 
     # Otherwise, just recompute it
-    except Exception:
+    except IOError:
         # Construct the quadratic form
         Q = np.empty((6,6),dtype=object)
         for i in range(6):
@@ -42,23 +42,25 @@ def initialize():
 
         # Construct the tangent stiffness as a symbolic expression
         D_symbolic = np.empty((9,9),dtype=object)
-        D_numeric = np.empty((9,9),dtype=object)
         for i in range(9):
             for j in range(i,9):
                 D_symbolic[i,j] = sp.diff(Qee,f[i])*sp.diff(Qee,f[j])+sp.diff(Qee,f[i],f[j])
                 D_symbolic[j,i] = D_symbolic[i,j]
-                # Transform each symbolic expression into a python function
-                D_numeric[i,j] = sp.lambdify(q+f,D_symbolic[i,j],np)
-                D_numeric[j,i] = D_numeric[i,j]
-        pickle.dump((D_symbolic,D_numeric), open("fung_D_compute",'wb'))
+        pickle.dump(D_symbolic, open("fung_D_compute",'wb'))
 
+    # Transform each symbolic expression into a python function
+    D_numeric = np.empty((9,9),dtype=object)
+    for i in range(9):
+        for j in range(i,9):
+            D_numeric[i,j] = sp.lambdify(q+f,D_symbolic[i,j],np)
+            D_numeric[j,i] = D_numeric[i,j]
     return (D_symbolic,D_numeric)
 
 # Pass a deformation F and a set of parameters (c,b1...b9)
 def D(F,c,bs,D_numeric):
     f = F.ravel()
     C = fung.make_quad_form(*bs)
-    CC = lin.utri_flat(el.voigt(C))
+    CC = lin.utri_flat(el.voigt(C)[:6,:6])
     arglist = CC.tolist() + f.tolist()
     return np.array([[D(*arglist) for D in DD] for DD in D_numeric])
 
