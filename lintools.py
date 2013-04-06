@@ -159,4 +159,4 @@ def minor_dets(matrix):
   """
   Returns all the minor determinants.
   """
-  return [np.linalg.det(matrix[:i,:i]) for i in range(1,len(M)+1)]
+  return [np.linalg.det(matrix[:i,:i]) for i in range(1,len(matrix)+1)]
