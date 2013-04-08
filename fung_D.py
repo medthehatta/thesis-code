@@ -11,6 +11,7 @@ import elastic as el
 import lintools as lin
 import fung
 import pickle
+import sys
 
 def initialize():
     """
@@ -62,10 +63,12 @@ def initialize():
                 # products of f components
                 print("  Simplifying...")
                 print("  J  ",end="")
+                sys.stdout.flush()
                 D_symbolic[i,j].subs(J,sp.symbols('J'))
                 for k in range(9):
                     for l in range(k,9):
                         print("f{}f{}".format(k,l),end="  ")
+                        sys.stdout.flush()
                         pair_symbol = sp.symbols('ff_{0}{1}'.format(k,l))
                         D_symbolic[i,j].subs(f[k]*f[l],pair_symbol)
                 # Since D will be symmetric, assign the symmetric components
