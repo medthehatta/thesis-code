@@ -104,16 +104,18 @@ def make_numeric(Dsym):
         # arguments
         arguments = [ob.tolist() for ob in [q,f,ff]] + \
                     [sp.symbols('J')]
-        Dnum[i,j] = sp.lambdify(arguments,Dsym[i,j])
+        Dnum[i,j] = sp.lambdify(sum(arguments,[]),Dsym[i,j])
         Dnum[j,i] = Dnum[i,j]
 
     return Dnum
 
 # Pass a deformation F and a set of parameters (c,b1...b9)
 def D(F,c,bs,Dnum):
+    J = np.linalg.det(F)
     f = F.ravel()
+    ff = lin.utri_flat(np.outer(f,f))
     C = fung.make_quad_form(*bs)
-    CC = lin.utri_flat(el.voigt(C)[:6,:6])
-    arglist = CC.tolist() + f.tolist()
-    return np.array([[D(*arglist) for D in DD] for DD in Dnum])
+    q = lin.utri_flat(el.voigt(C)[:6,:6])
+    arglist = sum([ob.tolist() for ob in [q,f,ff]+[[J]]],[])
+    return c*np.array([[dnum(*arglist) for dnum in DD] for DD in Dnum])
 
