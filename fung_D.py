@@ -23,7 +23,7 @@ def initialize():
             Q[i,j]=sp.symbols('q_{i}{j}'.format(i=i,j=j))
             Q[j,i]=Q[i,j]
     # Flat list of independent entries of Q
-    q = sum([Q[i,i:].tolist() for i in range(len(Q))],[])
+    q = lin.utri_flat(Q)
 
     # Construct the Lagrangian strain (E) as a *vector* (e)
     f = [sp.symbols('f_{i}'.format(i=i)) for i in range(9)]
@@ -31,7 +31,7 @@ def initialize():
     J = sp.Matrix(F.tolist()).det()
     # TODO: Is this supposed to be J**(-4/3) or J**(-2/3)?
     E = 0.5*(J**sp.Rational(-2,3)*np.dot(F.T,F) - np.eye(3))
-    e = np.array(sum([E[i,i:].tolist() for i in range(len(E))],[]))
+    e = lin.utri_flat(E)
 
     # Expand the quadratic form's action on e
     Qee = np.dot(e,np.dot(Q,e))
@@ -44,23 +44,44 @@ def initialize():
     except Exception:
 
         # Construct the tangent stiffness as a symbolic expression
+        # Calculate first derivatives
+        dQ = np.empty(9,dtype=object)
+        for i in range(9):
+            print("Symbolic dQ_{}".format(i))
+            dQ[i] = sp.diff(Qee,f[i])
+        # Calculate second derivatives
         D_symbolic = np.empty((9,9),dtype=object)
         for i in range(9):
             for j in range(i,9):
-                print("Symbolic D_{0}{1}".format(i,j))
-                dQi = sp.diff(Qee,f[i])
-                dQj = sp.diff(Qee,f[j])
+                print("Symbolic ddQ_{0}{1}".format(i,j))
+                dQi = dQ[i]
+                dQj = dQ[j]
                 dQij = sp.diff(dQi,f[j])
                 D_symbolic[i,j] = dQi*dQj + dQij
+                # Optimize the derivative by substituting for J, and for
+                # products of f components
+                print("  Simplifying...")
+                print("  J  ",end="")
+                D_symbolic[i,j].subs(J,sp.symbols('J'))
+                for k in range(9):
+                    for l in range(k,9):
+                        print("f{}f{}".format(k,l),end="  ")
+                        pair_symbol = sp.symbols('ff_{0}{1}'.format(k,l))
+                        D_symbolic[i,j].subs(f[k]*f[l],pair_symbol)
+                # Since D will be symmetric, assign the symmetric components
+                print("\nSymmetrizing...")
                 D_symbolic[j,i] = D_symbolic[i,j]
+        # This computation is pretty costly, so let's save it
         pickle.dump(D_symbolic, open("fung_D_symbolic.pkl",'wb'))
 
     # Transform each symbolic expression into a python function
+    # We'll need the products of f components
+    ff = lin.utri_flat(np.outer(f,f)).tolist()
     D_numeric = np.empty((9,9),dtype=object)
     for i in range(9):
         for j in range(i,9):
             print("Numeric D_{0}{1}".format(i,j))
-            D_numeric[i,j] = sp.lambdify(q+f,D_symbolic[i,j],np)
+            D_numeric[i,j] = sp.lambdify(q+f+ff+sp.symbols('J'),D_symbolic[i,j])
             D_numeric[j,i] = D_numeric[i,j]
     return (D_symbolic,D_numeric)
 
