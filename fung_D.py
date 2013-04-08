@@ -23,8 +23,8 @@ def make_symbolic(symfile_path="fung_Dsym"):
 
     # We also need its matrix form
     Q = np.empty((6,6),dtype=object)
-    for (i,j) in lin.utri_indices(6):
-        Q[i,j] = q[i,j]
+    for (k,(i,j)) in zip(range(len(q)),lin.utri_indices(6)):
+        Q[i,j] = q[k]
         Q[j,i] = Q[i,j]
 
     # Construct the Lagrangian strain (E) as a *vector* (e)
@@ -123,4 +123,5 @@ def D(F,c,bs,Dnum):
     q = lin.utri_flat(el.voigt(C)[:6,:6])
     arglist = sum([ob.tolist() for ob in [q,f,ff]]+[[J]],[])
     return c*np.array([[dnum(*arglist) for dnum in DD] for DD in Dnum])
+
 
