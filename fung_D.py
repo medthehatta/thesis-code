@@ -116,6 +116,6 @@ def D(F,c,bs,Dnum):
     ff = lin.utri_flat(np.outer(f,f))
     C = fung.make_quad_form(*bs)
     q = lin.utri_flat(el.voigt(C)[:6,:6])
-    arglist = sum([ob.tolist() for ob in [q,f,ff]+[[J]]],[])
+    arglist = sum([ob.tolist() for ob in [q,f,ff]]+[[J]],[])
     return c*np.array([[dnum(*arglist) for dnum in DD] for DD in Dnum])
 
