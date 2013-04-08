@@ -27,7 +27,7 @@ def initialize():
     q = lin.utri_flat(Q)
 
     # Construct the Lagrangian strain (E) as a *vector* (e)
-    f = [sp.symbols('f_{i}'.format(i=i)) for i in range(9)]
+    f = np.array([sp.symbols('f_{i}'.format(i=i)) for i in range(9)])
     F = np.reshape(f,(3,3))
     J = sp.Matrix(F.tolist()).det()
     # TODO: Is this supposed to be J**(-4/3) or J**(-2/3)?
@@ -43,15 +43,17 @@ def initialize():
 
     # Otherwise, just recompute it
     except Exception:
-
         # Construct the tangent stiffness as a symbolic expression
+
         # Calculate first derivatives
         dQ = np.empty(9,dtype=object)
         for i in range(9):
             print("Symbolic dQ_{}".format(i))
             dQ[i] = sp.diff(Qee,f[i])
+
         # Calculate second derivatives
         D_symbolic = np.empty((9,9),dtype=object)
+        symfile = open("fung_D_symbolic.pkl",'wb')
         for i in range(9):
             for j in range(i,9):
                 print("Symbolic ddQ_{0}{1}".format(i,j))
@@ -59,6 +61,7 @@ def initialize():
                 dQj = dQ[j]
                 dQij = sp.diff(dQi,f[j])
                 D_symbolic[i,j] = dQi*dQj + dQij
+
                 # Optimize the derivative by substituting for J, and for
                 # products of f components
                 print("  Simplifying...")
@@ -70,21 +73,23 @@ def initialize():
                         print("f{}f{}".format(k,l),end="  ")
                         sys.stdout.flush()
                         pair_symbol = sp.symbols('ff_{0}{1}'.format(k,l))
-                        D_symbolic[i,j].subs(f[k]*f[l],pair_symbol)
+                        D_symbolic[i,j] = D_symbolic[i,j].subs(f[k]*f[l],pair_symbol)
                 # Since D will be symmetric, assign the symmetric components
-                print("\nSymmetrizing...")
+                print("\n  Symmetrizing...")
                 D_symbolic[j,i] = D_symbolic[i,j]
-        # This computation is pretty costly, so let's save it
-        pickle.dump(D_symbolic, open("fung_D_symbolic.pkl",'wb'))
+                # This computation is pretty costly, so let's save it frequently
+                pickle.dump(D_symbolic, symfile)
+        symfile.close()
 
     # Transform each symbolic expression into a python function
     # We'll need the products of f components
-    ff = lin.utri_flat(np.outer(f,f)).tolist()
+    ff = lin.utri_flat(np.outer(f,f))
     D_numeric = np.empty((9,9),dtype=object)
     for i in range(9):
         for j in range(i,9):
             print("Numeric D_{0}{1}".format(i,j))
-            D_numeric[i,j] = sp.lambdify(q+f+ff+sp.symbols('J'),D_symbolic[i,j])
+            arguments = [ob.tolist() for ob in [q,f,ff]] + [sp.symbols('J')]
+            D_numeric[i,j] = sp.lambdify(arguments,D_symbolic[i,j])
             D_numeric[j,i] = D_numeric[i,j]
     return (D_symbolic,D_numeric)
 
