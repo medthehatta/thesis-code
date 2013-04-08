@@ -13,7 +13,7 @@ import fung
 import pickle
 import sys
 
-def initialize():
+def initialize(symfile_path="fung_Dsym.pkl"):
     """
     Returns the tangent stiffness function, computed symbolically at runtime.
     """
@@ -39,7 +39,7 @@ def initialize():
 
     # Attempt to load this from a pickle file
     try:
-        Dsym = pickle.load(open("fung_Dsym.pkl",'rb'))
+        Dsym = pickle.load(open(symfile_path,'rb'))
 
     # Otherwise, just recompute it
     except Exception:
@@ -53,7 +53,7 @@ def initialize():
 
         # Calculate second derivatives
         Dsym = np.empty((9,9),dtype=object)
-        symfile = open("fung_Dsym.pkl",'wb')
+        symfile = open(symfile_path,'wb')
         for i in range(9):
             for j in range(i,9):
                 print("Symbolic ddQ_{0}{1}".format(i,j))
