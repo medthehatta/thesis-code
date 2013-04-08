@@ -160,3 +160,11 @@ def minor_dets(matrix):
   Returns all the minor determinants.
   """
   return [np.linalg.det(matrix[:i,:i]) for i in range(1,len(matrix)+1)]
+
+
+def utri_indices(size):
+  """
+  Returns a flat list of the indices of an upper triangle from a matrix of
+  shape ``size``x``size``.
+  """
+  return utri_flat(np.indices((size,size)).transpose(1,2,0))
