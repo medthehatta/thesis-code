@@ -18,7 +18,7 @@ def initialize(symfile_path="fung_Dsym.pkl"):
     Returns the tangent stiffness function, computed symbolically at runtime.
     """
     # Construct the quadratic form as a flat list of independent entries
-    q = np.array([sp.symbols('q_{}{}'.format(i,j) for 
+    q = np.array([sp.symbols('q_{}{}'.format(i,j)) for 
                   (i,j) in lin.utri_indices(6)])
 
     # Construct the Lagrangian strain (E) as a *vector* (e)
@@ -61,7 +61,7 @@ def initialize(symfile_path="fung_Dsym.pkl"):
             print("  Simplifying...")
             print("  J  ",end="")
             sys.stdout.flush()
-            Dsym[i,j].subs(J,sp.symbols('J'))
+            Dsym[i,j] = Dsym[i,j].subs(J,sp.symbols('J'))
             for (k,l) in lin.utri_indices(9):
                 print("f{}f{}".format(k,l),end="  ")
                 sys.stdout.flush()
@@ -93,7 +93,7 @@ def make_numeric(Dsym):
     f = np.array([sp.symbols('f_{i}'.format(i=i)) for i in range(9)])
 
     # Products of F components
-    ff = lin.utri_flat(np.outer(f,f))
+    ff = np.array([sp.symbols('ff_{}{}'.format(i,j)) for (i,j) in lin.utri_indices(9)])
 
     # Put everything into the numeric array
     Dnum = np.empty((9,9),dtype=object)
@@ -103,7 +103,7 @@ def make_numeric(Dsym):
         # This will take the quadratic form, f, products of f, and J as
         # arguments
         arguments = [ob.tolist() for ob in [q,f,ff]] + \
-                    [sp.symbols('J')]
+                    [[sp.symbols('J')]]
         Dnum[i,j] = sp.lambdify(sum(arguments,[]),Dsym[i,j])
         Dnum[j,i] = Dnum[i,j]
 
