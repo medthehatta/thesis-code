@@ -13,13 +13,19 @@ import fung
 import pickle
 import sys
 
-def make_symbolic(symfile_path="fung_Dsym_ij.pkl"):
+def make_symbolic(symfile_path="fung_Dsym"):
     """
     Returns the tangent stiffness function, computed symbolically at runtime.
     """
     # Construct the quadratic form as a flat list of independent entries
     q = np.array([sp.symbols('q_{}{}'.format(i,j)) for 
                   (i,j) in lin.utri_indices(6)])
+
+    # We also need its matrix form
+    Q = np.empty((6,6),dtype=object)
+    for (i,j) in lin.utri_indices(6):
+        Q[i,j] = q[i,j]
+        Q[j,i] = Q[i,j]
 
     # Construct the Lagrangian strain (E) as a *vector* (e)
     f = np.array([sp.symbols('f_{i}'.format(i=i)) for i in range(9)])
@@ -34,7 +40,7 @@ def make_symbolic(symfile_path="fung_Dsym_ij.pkl"):
 
     # Attempt to load this from a pickle file
     try:
-        Dsym = pickle.load(open(symfile_path,'rb'))
+        Dsym = pickle.load(open(symfile_path+".pkl",'rb'))
 
     # Otherwise, just recompute it
     except Exception:
@@ -71,8 +77,8 @@ def make_symbolic(symfile_path="fung_Dsym_ij.pkl"):
             Dsym[j,i] = Dsym[i,j]
             # This computation is pretty costly, so let's save it
             # frequently
-            pickle.dump(Dsym, open(symfile_path.replace('ij','{}{}'.format(i,j)),'wb'))
-        pickle.dump(Dsym, open(symfile_path,'wb'))
+            pickle.dump(Dsym, open(symfile_path+"_{}{}.pkl".format(i,j),'wb'))
+        pickle.dump(Dsym, open(symfile_path+".pkl",'wb'))
 
     return Dsym
 
