@@ -13,7 +13,7 @@ import fung
 import pickle
 import sys
 
-def initialize(symfile_path="fung_Dsym.pkl"):
+def make_symbolic(symfile_path="fung_Dsym_ij.pkl"):
     """
     Returns the tangent stiffness function, computed symbolically at runtime.
     """
@@ -48,7 +48,6 @@ def initialize(symfile_path="fung_Dsym.pkl"):
 
         # Calculate second derivatives
         Dsym = np.empty((9,9),dtype=object)
-        symfile = open(symfile_path,'wb')
         for (i,j) in lin.utri_indices(9):
             print("Symbolic ddQ_{0}{1}".format(i,j))
             dQi = dQ[i]
@@ -72,8 +71,8 @@ def initialize(symfile_path="fung_Dsym.pkl"):
             Dsym[j,i] = Dsym[i,j]
             # This computation is pretty costly, so let's save it
             # frequently
-            pickle.dump(Dsym, symfile)
-        symfile.close()
+            pickle.dump(Dsym, open(symfile_path.replace('ij','{}{}'.format(i,j)),'wb'))
+        pickle.dump(Dsym, open(symfile_path,'wb'))
 
     return Dsym
 
