@@ -114,6 +114,30 @@ def make_numeric(Dsym):
 
     return Dnum
 
+def make_numeric_once(Dsym_single):
+    # Transform each symbolic expression into a python function
+    # We'll need the products of f components
+    # Construct the quadratic form
+    Q = np.empty((6,6),dtype=object)
+    for (i,j) in lin.utri_indices(6):
+        Q[i,j]=sp.symbols('q_{i}{j}'.format(i=i,j=j))
+        Q[j,i]=Q[i,j]
+
+    # Flat list of independent entries of Q
+    q = lin.utri_flat(Q)
+
+    # Components of F
+    f = np.array([sp.symbols('f_{i}'.format(i=i)) for i in range(9)])
+
+    # Products of F components
+    ff = np.array([sp.symbols('ff_{}{}'.format(i,j)) for (i,j) in lin.utri_indices(9)])
+
+    # This will take the quadratic form, f, products of f, and J as
+    # arguments
+    arguments = [ob.tolist() for ob in [q,f,ff]] + \
+                [[sp.symbols('J')]]
+    return sp.lambdify(sum(arguments,[]),Dsym_single)
+
 # Pass a deformation F and a set of parameters (c,b1...b9)
 def D(F,c,bs,Dnum):
     J = np.linalg.det(F)
@@ -124,4 +148,13 @@ def D(F,c,bs,Dnum):
     arglist = sum([ob.tolist() for ob in [q,f,ff]]+[[J]],[])
     return c*np.array([[dnum(*arglist) for dnum in DD] for DD in Dnum])
 
+# Pass a deformation F and a set of parameters (c,b1...b9)
+def D_once(F,c,bs,Dnum_single):
+    J = np.linalg.det(F)
+    f = F.ravel()
+    ff = lin.utri_flat(np.outer(f,f))
+    C = fung.make_quad_form(*bs)
+    q = lin.utri_flat(el.voigt(C)[:6,:6])
+    arglist = sum([ob.tolist() for ob in [q,f,ff]]+[[J]],[])
+    return c*Dnum_single(*arglist)
 
