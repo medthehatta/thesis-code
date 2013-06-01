@@ -103,7 +103,10 @@ def Sbar(E,c,M,L,EA=None,EdA=None,Q=None,A=None):
 
     # Compute quantities {E.Ai}
     if EdA is None:
-        EdA = lin.anticommutator(E,A)
+        # LAME: np.dot broadcasts differently than einsum, so we can't use it
+        # for this operation, even though it's way faster.  Crappy.
+        proper_dot = lambda x,y: np.einsum('...ab,...bc',x,y)
+        EdA = lin.anticommutator(E,A,op=proper_dot)
 
     # Compute {(Ai(x)Aj) : E}
     AAE = np.array([A[i]*EA[j] + A[j]*EA[i] for (i,j) in lin.utri_indices(3)])
