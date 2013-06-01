@@ -11,31 +11,42 @@ import numpy as np
 from itertools import count
 
 
-def Qbar(E,c,M,L,P=None):
+def Qbar(E,c,M,L,EA=None,EEA=None,A=None):
     """
     Computes the distortional ``Q`` in the invariant Fung model.
 
-    Required arguments:
-     - Modified Lagrangian strain ``E``
-     - Scalar parameter ``c``
-     - List of 3 parameters ``M``
-     - List of 6 "upper triangle" parameters ``L``
+    Parameters
+    ----------
+    E : (3, 3) array_like
+        Modified Lagrangian strain.
+    c : float
+        Scalar parameter.
+    M : array (3,)
+        List of 3 parameters.
+    L : array (6,)
+        List of 6 "upper triangle" parameters.
 
-    Optional arguments:
-     - Orthotropic structure tensor ``P``
+    Optional Parameters
+    -------------------
+    EA : array (3,)
+        Pre-computed invariants E:Ai
+    EEA : array (3,)
+        Pre-computed invariants E^2:Ai
+    A : array (3,3,3)
+        Pre-computed projectors onto the planes of orthotropy 
 
-    Returns:
-     - Distortional ``Q`` (a scalar)
+    Returns
+    -------
+    output : array (1,)
+        Distortional Q
     """
-    
+
     # Get orthotropic projection operators
-    P = P or el.standard_orthotropic_P()
-    A = el.orthotropic_projectors(P)
+    A = A or el.orthotropic_projectors(el.standard_orthotropic_P())
 
     # Compute scalar invariants
-    EE = np.dot(E,E)
-    EEA = np.tensordot(EE,A)
-    EA = np.tensordot(E,A)
+    EEA = EEA or np.tensordot(np.dot(E,E),A)
+    EA = EA or np.tensordot(E,A)
 
     # Express model with parameters
     # (2mi(Ai:E^2) + lij(Ai:E)(Aj:E))/c
@@ -46,30 +57,62 @@ def Qbar(E,c,M,L,P=None):
     return (M_part + L_part)/c
 
 
-def Sbar(E,c,m1,m2,m3,l11,l12,l13,l22,l23,l33,P=None):
-    P = P or el.standard_orthotropic_P()
+def Sbar(E,c,M,L,EA=None,EdA=None,Q=None,A=None):
+    """
+    Computes the distortional ``S`` in the invariant Fung model.
 
+    Parameters
+    ----------
+    E : (3, 3) array_like
+        Modified Lagrangian strain.
+    c : float
+        Scalar parameter.
+    M : array (3,)
+        List of 3 parameters.
+    L : array (6,)
+        List of 6 "upper triangle" parameters.
 
+    Optional Parameters
+    -------------------
+    EA : array (3,)
+        Pre-computed invariants E:Ai
+    EdA : array (3,3,3)
+        Pre-computed quantities {E.Ai}
+    Q : float
+        Pre-computed Q
+    A : array (3,3,3)
+        Pre-computed projectors onto the planes of orthotropy 
+
+    Returns
+    -------
+    output : (3, 3) array_like
+        Distortional S (PK2 stress)
+    """
     
+    # Get orthotropic projection operators
+    A = A or el.orthotropic_projectors(el.standard_orthotropic_P())
 
+    # Compute scalar invariants
+    EA = EA or np.tensordot(E,A)
 
+    # Compute quantities {E.Ai}
+    # FIXME: Need this explicit dot product; dunno why it's not equivalent to
+    # np.dot(x,y)
+    proper_dot = lambda x,y: np.einsum('...ab,...bc',x,y)
+    EdA = EdA or lin.anticommutator(E,A,op=proper_dot)
 
+    # Compute {(Ai(x)Aj) : E}
+    AAE = np.array([A[i]*EA[j] + A[j]*EA[i] for (i,j) in lin.utri_indices(3)])
 
+    # Compute Q
+    Q = Q or Qbar(E,c,M,L,EA,EEA=None,A=A)
 
+    # Insert parameters
+    M_part = sum(M*EdA)
+    L_part = 0.5*(AAE.T*L).T # 0.5 * Li * AAEi
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return np.exp(Q)*(M_part + L_part)
+    
 
 def Cbar(E,c,m1,m2,m3,l11,l12,l13,l22,l23,l33,P=None):
     P = P or el.standard_orthotropic_P()
@@ -78,4 +121,5 @@ def Cbar(E,c,m1,m2,m3,l11,l12,l13,l22,l23,l33,P=None):
 def C(E,c,m1,m2,m3,l11,l12,l13,l22,l23,l33,P=None):
     P = P or el.standard_orthotropic_P()
     pass
+
 
