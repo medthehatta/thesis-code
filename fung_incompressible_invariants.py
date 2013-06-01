@@ -114,7 +114,7 @@ def Sbar(E,c,M,L,EA=None,EdA=None,Q=None,A=None):
 
     # Insert parameters
     M_part = sum(M*EdA)
-    L_part = 0.5*(AAE.T*L).T # 0.5 * Li * AAEi
+    L_part = 0.5*sum((AAE.T*L).T) # 0.5 * Li * AAEi
 
     return np.exp(Q)*(M_part + L_part)
     
