@@ -89,7 +89,7 @@ def standard_orthotropic_P(e1=[1,0,0],e2=[0,1,0]):
     Returns the single irreducible structure tensor for orthotropy given the
     unit normals of two of the orthogonal reflection planes.
     """
-    P = np.outer(e1,e1) - np.outer(e2,e2)
+    return np.outer(e1,e1) - np.outer(e2,e2)
 
 def orthotropic_projectors(P):
     """
