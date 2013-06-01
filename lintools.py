@@ -111,9 +111,9 @@ def normed(v):
 
 def tensor(A,B):
   """
-  Return the tensor product of matrices A and B
+  Return the tensor product of tensors A and B
   """
-  return np.einsum('...ij,...kl->...ijkl',A,B)
+  return np.tensordot(A,B,0)
 
 
 def matrix_norm(A):
