@@ -84,4 +84,10 @@ def unvoigt(CC):
 VOIGT_ORDER = [0,4,8,5,6,1,7,2,3]
 VOIGT_ORDER_INVERSE = [0,5,7,8,1,3,4,6,2]
 
+def standard_orthotropic_P(e1=[1,0,0],e2=[0,1,0]):
+    """
+    Returns the single irreducible structure tensor for orthotropy given the
+    unit normals of two of the orthogonal reflection planes.
+    """
+    P = np.outer(e1,e1) - np.outer(e2,e2)
 
