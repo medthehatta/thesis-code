@@ -7,6 +7,7 @@ Hopefully it isn't too slow and annoying to call.
 
 import elastic as el
 import lintools as lin
+import numpy as np
 from itertools import count
 
 
@@ -40,6 +41,8 @@ def Qbar(E,c,M,L,P=None):
     # (2mi(Ai:E^2) + lij(Ai:E)(Aj:E))/c
     M_part = 2*np.dot(M,EEA)
     L_part = np.dot(L,lin.utri_flat(np.outer(EA,EA)))
+    # TODO: For some reason this returns a singleton list instead of an actual
+    # scalar
     return (M_part + L_part)/c
 
 
