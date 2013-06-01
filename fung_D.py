@@ -13,7 +13,7 @@ import fung
 import pickle
 import sys
 
-def make_symbolic(symfile_path="fung_Dsym"):
+def make_symbolic(symfile_path="fung_Dsym",resym=False):
     """
     Returns the tangent stiffness function, computed symbolically at runtime.
     """
@@ -61,23 +61,25 @@ def make_symbolic(symfile_path="fung_Dsym"):
             dQij = sp.diff(dQi,f[j])
             Dsym[i,j] = dQi*dQj + dQij
 
-            # Optimize the derivative by substituting for J, and for
-            # products of f components
+            # Optimize the derivative by substituting for J
             print("  Simplifying...")
             print("  J  ",end="")
             sys.stdout.flush()
             Dsym[i,j] = Dsym[i,j].subs(J,sp.symbols('J'))
-            for (k,l) in lin.utri_indices(9):
-                print("f{}f{}".format(k,l),end="  ")
-                sys.stdout.flush()
-                pair_symbol = sp.symbols('ff_{0}{1}'.format(k,l))
-                Dsym[i,j] = Dsym[i,j].subs(f[k]*f[l],pair_symbol)
+            # Further optimize by replacing products of f compoenents
+            if resym == True:
+                for (k,l) in lin.utri_indices(9):
+                    print("f{}f{}".format(k,l),end="  ")
+                    sys.stdout.flush()
+                    pair_symbol = sp.symbols('ff_{0}{1}'.format(k,l))
+                    Dsym[i,j] = Dsym[i,j].subs(f[k]*f[l],pair_symbol)
             # Since D will be symmetric, assign the symmetric components
             print("\n  Symmetrizing...")
             Dsym[j,i] = Dsym[i,j]
             # This computation is pretty costly, so let's save it
             # frequently
-            pickle.dump(Dsym, open(symfile_path+"_{}{}.pkl".format(i,j),'wb'))
+            if resym == True:
+                pickle.dump(Dsym, open(symfile_path+"_{}{}.pkl".format(i,j),'wb'))
         pickle.dump(Dsym, open(symfile_path+".pkl",'wb'))
 
     return Dsym
