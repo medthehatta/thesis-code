@@ -61,7 +61,7 @@ def Qbar(E,c,M,L,EA=None,EEA=None,A=None):
     return (M_part + L_part)/c
 
 
-def Sbar(E,c,M,L,EA=None,EdA=None,Q=None,A=None):
+def Sbar(E,c,M,L,EA=None,EEA=None,EdA=None,Q=None,A=None):
     """
     Computes the distortional ``S`` in the invariant Fung model.
 
@@ -80,6 +80,8 @@ def Sbar(E,c,M,L,EA=None,EdA=None,Q=None,A=None):
     -------------------
     EA : (3,) array_like
         Pre-computed invariants E:Ai
+    EEA : (3,) array_like
+        Pre-computed invariants E^2:Ai
     EdA : (3, 3, 3) array_like
         Pre-computed quantities {E.Ai}
     Q : float
@@ -98,6 +100,9 @@ def Sbar(E,c,M,L,EA=None,EdA=None,Q=None,A=None):
         A = el.orthotropic_projectors(el.standard_orthotropic_P())
 
     # Compute scalar invariants
+    if EEA is None:
+        EEA = np.tensordot(np.dot(E,E),A)
+
     if EA is None:
         EA = np.tensordot(E,A)
 
@@ -123,7 +128,7 @@ def Sbar(E,c,M,L,EA=None,EdA=None,Q=None,A=None):
     
 
 
-def Cbar(E,c,M,L,EA=None,EdA=None,Q=None,S=None,A=None):
+def Cbar(E,c,M,L,EA=None,EEA=None,EdA=None,Q=None,S=None,A=None):
     """
     Computes the distortional ``C`` in the invariant Fung model.
 
@@ -142,6 +147,8 @@ def Cbar(E,c,M,L,EA=None,EdA=None,Q=None,S=None,A=None):
     -------------------
     EA : (3,) array_like
         Pre-computed invariants E:Ai
+    EEA : (3,) array_like
+        Pre-computed invariants E^2:Ai
     EdA : (3, 3, 3) array_like
         Pre-computed quantities {E.Ai}
     Q : float
@@ -162,6 +169,9 @@ def Cbar(E,c,M,L,EA=None,EdA=None,Q=None,S=None,A=None):
         A = el.orthotropic_projectors(el.standard_orthotropic_P())
 
     # Compute scalar invariants
+    if EEA is None:
+        EEA = np.tensordot(np.dot(E,E),A)
+
     if EA is None:
         EA = np.tensordot(E,A)
 
@@ -177,7 +187,7 @@ def Cbar(E,c,M,L,EA=None,EdA=None,Q=None,S=None,A=None):
 
     # Compute Q
     if Q is None:
-        Q = Qbar(E,c,M,L,EA,EEA=None,A=A)
+        Q = Qbar(E,c,M,L,EA,EEA,A=A)
 
     # Compute S
     if S is None:
@@ -200,3 +210,96 @@ def Cbar(E,c,M,L,EA=None,EdA=None,Q=None,S=None,A=None):
 
     return S_part + np.exp(Q)*(M_part + L_part)
 
+
+
+def C(E,p,dpdt,c,M,L,EA=None,EEA=None,EdA=None,Q=None,S=None,A=None,\
+      CC=None,J=None,C=None,Ci=None):
+    """
+    Computes the tangent stiffness of the invariant Fung model.
+
+    Parameters
+    ----------
+    E : (3, 3) array_like
+        Modified Lagrangian strain.
+    p : float
+        Pressure
+    dpdJ : float
+        Pressure "modulus"
+    c : float
+        Scalar parameter.
+    M : (3,) array_like
+        List of 3 parameters.
+    L : (6,) array_like
+        List of 6 "upper triangle" parameters.
+
+    Optional Parameters
+    -------------------
+    EA : (3,) array_like
+        Pre-computed invariants E:Ai.
+    EEA : (3,) array_like
+        Pre-computed invariants E^2:Ai
+    EdA : (3, 3, 3) array_like
+        Pre-computed quantities {E.Ai}.
+    Q : float
+        Pre-computed Q
+    S : (3, 3) array_like
+        Pre-computed S.
+    A : (3, 3, 3) array_like
+        Pre-computed projectors onto the planes of orthotropy .
+    CC : (3, 3, 3, 3) array_like
+        Distortional tangent stiffness.
+    J : float
+        Determinant of deformation gradient.
+    C : (3, 3) array_like
+        Right Cauchy-Green tensor.
+    Ci : (3, 3) array_like
+        Inverse of right Cauchy-Green tensor.
+
+    Returns
+    -------
+    output : (3, 3, 3, 3) array_like
+        Tangent stiffness
+    """
+    
+    # Get orthotropic projection operators
+    if A is None:
+        A = el.orthotropic_projectors(el.standard_orthotropic_P())
+
+    # Compute scalar invariants
+    if EEA is None:
+        EEA = np.tensordot(np.dot(E,E),A)
+
+    if EA is None:
+        EA = np.tensordot(E,A)
+
+    # Compute quantities {E.Ai}
+    if EdA is None:
+        # LAME: np.dot broadcasts differently than einsum, so we can't use it
+        # for this operation, even though it's way faster.  Crappy.
+        proper_dot = lambda x,y: np.einsum('...ab,...bc',x,y)
+        EdA = lin.anticommutator(E,A,op=proper_dot)
+
+    # Compute Q
+    if Q is None:
+        Q = Qbar(E,c,M,L,EA,EEA,A=A)
+
+    # Compute S
+    if S is None:
+        S = Sbar(E,c,M,L,EA,EdA,Q,A)
+
+    # Compute S(x)S
+    SxS = lin.tensor(S,S)
+
+    # Compute {Ai(x)Aj}
+    AxA = np.array([lin.anticommutator(A[i],A[j],op=lin.tensor)
+                    for (i,j) in lin.utri_indices(3)])
+
+    # Compute {Ai(sym)I}
+    AsI = lin.anticommutator(A,np.eye(3),op=lin.symmetric_kronecker)
+
+    # Insert parameters
+    M_part = sum((AsI.T*M).T)
+    L_part = 0.5*sum((AxA.T*L).T)
+    S_part = 2*np.exp(-Q)*SxS/c
+
+    return S_part + np.exp(Q)*(M_part + L_part)
