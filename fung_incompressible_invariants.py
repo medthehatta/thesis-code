@@ -21,23 +21,23 @@ def Qbar(E,c,M,L,EA=None,EEA=None,A=None):
         Modified Lagrangian strain.
     c : float
         Scalar parameter.
-    M : array (3,)
+    M : (3,) array_like
         List of 3 parameters.
-    L : array (6,)
+    L : (6,) array_like
         List of 6 "upper triangle" parameters.
 
     Optional Parameters
     -------------------
-    EA : array (3,)
+    EA : (3,) array_like
         Pre-computed invariants E:Ai
-    EEA : array (3,)
+    EEA : (3,) array_like
         Pre-computed invariants E^2:Ai
-    A : array (3,3,3)
+    A : (3, 3, 3) array_like
         Pre-computed projectors onto the planes of orthotropy 
 
     Returns
     -------
-    output : array (1,)
+    output : (1,) array_like
         Distortional Q
     """
 
@@ -71,20 +71,20 @@ def Sbar(E,c,M,L,EA=None,EdA=None,Q=None,A=None):
         Modified Lagrangian strain.
     c : float
         Scalar parameter.
-    M : array (3,)
+    M : (3,) array_like
         List of 3 parameters.
-    L : array (6,)
+    L : (6,) array_like
         List of 6 "upper triangle" parameters.
 
     Optional Parameters
     -------------------
-    EA : array (3,)
+    EA : (3,) array_like
         Pre-computed invariants E:Ai
-    EdA : array (3,3,3)
+    EdA : (3, 3, 3) array_like
         Pre-computed quantities {E.Ai}
     Q : float
         Pre-computed Q
-    A : array (3,3,3)
+    A : (3, 3, 3) array_like
         Pre-computed projectors onto the planes of orthotropy 
 
     Returns
@@ -116,18 +116,87 @@ def Sbar(E,c,M,L,EA=None,EdA=None,Q=None,A=None):
         Q = Qbar(E,c,M,L,EA,EEA=None,A=A)
 
     # Insert parameters
-    M_part = sum(M*EdA)
+    M_part = sum((EdA.T*M).T)
     L_part = 0.5*sum((AAE.T*L).T) # 0.5 * Li * AAEi
 
     return np.exp(Q)*(M_part + L_part)
     
 
-def Cbar(E,c,m1,m2,m3,l11,l12,l13,l22,l23,l33,P=None):
-    P = P or el.standard_orthotropic_P()
-    pass
 
-def C(E,c,m1,m2,m3,l11,l12,l13,l22,l23,l33,P=None):
-    P = P or el.standard_orthotropic_P()
-    pass
+def Cbar(E,c,M,L,EA=None,EdA=None,Q=None,S=None,A=None):
+    """
+    Computes the distortional ``C`` in the invariant Fung model.
 
+    Parameters
+    ----------
+    E : (3, 3) array_like
+        Modified Lagrangian strain.
+    c : float
+        Scalar parameter.
+    M : (3,) array_like
+        List of 3 parameters.
+    L : (6,) array_like
+        List of 6 "upper triangle" parameters.
+
+    Optional Parameters
+    -------------------
+    EA : (3,) array_like
+        Pre-computed invariants E:Ai
+    EdA : (3, 3, 3) array_like
+        Pre-computed quantities {E.Ai}
+    Q : float
+        Pre-computed Q
+    S : (3,3) array_like
+        Pre-computed S
+    A : (3, 3, 3) array_like
+        Pre-computed projectors onto the planes of orthotropy 
+
+    Returns
+    -------
+    output : (3, 3, 3, 3) array_like
+        Distortional C (tangent stiffness)
+    """
+    
+    # Get orthotropic projection operators
+    if A is None:
+        A = el.orthotropic_projectors(el.standard_orthotropic_P())
+
+    # Compute scalar invariants
+    if EA is None:
+        EA = np.tensordot(E,A)
+
+    # Compute quantities {E.Ai}
+    if EdA is None:
+        # LAME: np.dot broadcasts differently than einsum, so we can't use it
+        # for this operation, even though it's way faster.  Crappy.
+        proper_dot = lambda x,y: np.einsum('...ab,...bc',x,y)
+        EdA = lin.anticommutator(E,A,op=proper_dot)
+
+    # Compute {(Ai(x)Aj) : E}
+    AAE = np.array([A[i]*EA[j] + A[j]*EA[i] for (i,j) in lin.utri_indices(3)])
+
+    # Compute Q
+    if Q is None:
+        Q = Qbar(E,c,M,L,EA,EEA=None,A=A)
+
+    # Compute S
+    if S is None:
+        S = Sbar(E,c,M,L,EA,EdA,Q,A)
+
+    # Compute S(x)S
+    SxS = lin.tensor(S,S)
+
+    # Compute {Ai(x)Aj}
+    AxA = np.array([lin.anticommutator(A[i],A[j],op=lin.tensor)
+                    for (i,j) in lin.utri_indices(3)])
+
+    # Compute {Ai(sym)I}
+    AsI = lin.anticommutator(A,np.eye(3),op=lin.symmetric_kronecker)
+
+    # Insert parameters
+    M_part = sum((AsI.T*M).T)
+    L_part = 0.5*sum((AxA.T*L).T)
+    S_part = 2*np.exp(-Q)*SxS/c
+
+    return S_part + np.exp(Q)*(M_part + L_part)
 
