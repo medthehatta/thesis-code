@@ -42,11 +42,15 @@ def Qbar(E,c,M,L,EA=None,EEA=None,A=None):
     """
 
     # Get orthotropic projection operators
-    A = A or el.orthotropic_projectors(el.standard_orthotropic_P())
+    if A is None:
+        A = el.orthotropic_projectors(el.standard_orthotropic_P())
 
     # Compute scalar invariants
-    EEA = EEA or np.tensordot(np.dot(E,E),A)
-    EA = EA or np.tensordot(E,A)
+    if EEA is None:
+        EEA = np.tensordot(np.dot(E,E),A)
+
+    if EA is None:
+        EA = np.tensordot(E,A)
 
     # Express model with parameters
     # (2mi(Ai:E^2) + lij(Ai:E)(Aj:E))/c
@@ -90,22 +94,23 @@ def Sbar(E,c,M,L,EA=None,EdA=None,Q=None,A=None):
     """
     
     # Get orthotropic projection operators
-    A = A or el.orthotropic_projectors(el.standard_orthotropic_P())
+    if A is None:
+        A = el.orthotropic_projectors(el.standard_orthotropic_P())
 
     # Compute scalar invariants
-    EA = EA or np.tensordot(E,A)
+    if EA is None:
+        EA = np.tensordot(E,A)
 
     # Compute quantities {E.Ai}
-    # FIXME: Need this explicit dot product; dunno why it's not equivalent to
-    # np.dot(x,y)
-    proper_dot = lambda x,y: np.einsum('...ab,...bc',x,y)
-    EdA = EdA or lin.anticommutator(E,A,op=proper_dot)
+    if EdA is None:
+        EdA = lin.anticommutator(E,A)
 
     # Compute {(Ai(x)Aj) : E}
     AAE = np.array([A[i]*EA[j] + A[j]*EA[i] for (i,j) in lin.utri_indices(3)])
 
     # Compute Q
-    Q = Q or Qbar(E,c,M,L,EA,EEA=None,A=A)
+    if Q is None:
+        Q = Qbar(E,c,M,L,EA,EEA=None,A=A)
 
     # Insert parameters
     M_part = sum(M*EdA)
