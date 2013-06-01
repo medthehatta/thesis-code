@@ -91,3 +91,17 @@ def standard_orthotropic_P(e1=[1,0,0],e2=[0,1,0]):
     """
     P = np.outer(e1,e1) - np.outer(e2,e2)
 
+def orthotropic_projectors(P):
+    """
+    Given the irreducible orthotropic structure tensor, returns projection
+    operators along normals to each of the planes of orthotropy.
+    """
+    I = np.eye(3)
+    PP = np.dot(P,P)
+
+    A1 = 0.5*(P + PP)
+    A2 = 0.5*(P - PP)
+    A3 = I - A1 - A2
+
+    return [A1,A2,A3]
+
