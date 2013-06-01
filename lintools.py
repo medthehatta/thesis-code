@@ -168,3 +168,24 @@ def utri_indices(size):
   shape ``size``x``size``.
   """
   return utri_flat(np.indices((size,size)).transpose(1,2,0))
+
+
+def commutator(A,B,op=np.dot):
+    return op(A,B) - op(B,A)
+
+def anticommutator(A,B,op=np.dot):
+    return op(A,B) + op(B,A)
+
+
+def kronecker(A,B):
+    return np.einsum('ab,cd->acbd',A,B)
+
+def cokronecker(A,B):
+    return np.einsum('ab,cd->adbc',A,B)
+
+def symmetric_kronecker(A,B):
+    return 0.5*(kronecker(A,B) + cokronecker(A,B))
+
+
+    
+
