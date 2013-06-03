@@ -345,11 +345,11 @@ def tangent_stiffness(E,p,dpdJ,c,M,L,J=1,EA=None,EEA=None,EdA=None,Q=None,A=None
     CxC = lin.tensor(C,C)
     CixCi = lin.tensor(Ci,Ci)
     SCi = lin.anticommutator(S,Ci,op=lin.tensor)
+    CS = np.tensordot(C,S)
 
     # Compute various products with the deviatoric tangent stiffness CC
     CCCC = np.tensordot(np.tensordot(CC,C),C)
     CCCCi = np.tensordot(CC,CCi)
-    CS = np.tensordot(C,S)
 
     # Assemble expression
     part_A = 2*J*p*FTFisFTFi
