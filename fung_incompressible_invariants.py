@@ -186,9 +186,6 @@ def Cbar(E,c,M,L,EA=None,EEA=None,EdA=None,Q=None,A=None,\
         proper_dot = lambda x,y: np.einsum('...ab,...bc',x,y)
         EdA = lin.anticommutator(E,A,op=proper_dot)
 
-    # Compute {(Ai(x)Aj) : E}
-    AAE = np.array([A[i]*EA[j] + A[j]*EA[i] for (i,j) in lin.utri_indices(3)])
-
     # Compute Q
     if Q is None:
         Q = Qbar(E,c,M,L,EA,EEA,A=A)
@@ -319,7 +316,7 @@ def tangent_stiffness(E,p,dpdJ,c,M,L,J=1,EA=None,EEA=None,EdA=None,Q=None,A=None
 
     # Compute CC (distortional C)
     if CC is None:
-        CC = Car(E,c,M,L,EA,EEA,EdA,Q,A,S,AxA,AsI)
+        CC = Cbar(E,c,M,L,EA,EEA,EdA,Q,A,S,AxA,AsI)
 
     # Compute C (distortional right cauchy-green)
     if C is None:
@@ -338,24 +335,15 @@ def tangent_stiffness(E,p,dpdJ,c,M,L,J=1,EA=None,EEA=None,EdA=None,Q=None,A=None
         FTFi = J**(2/3)*Ci #  TODO: check
 
     # Compute various products of the FTF's
-    if FTFisFTFi is None:
-        FTFisFTFi = lin.symmetric_kronecker(FTFi,FTFi)
-
-    if FTFixFTFi is None:
-        FTFixFTFi = lin.tensor(FTFi,FTFi)
+    FTFisFTFi = lin.symmetric_kronecker(FTFi,FTFi)
+    FTFixFTFi = lin.tensor(FTFi,FTFi)
 
     # Compute various products of the deviatoric C
-    if CCi is None:
-        CCi = lin.anticommutator(C,Ci,op=lin.tensor;
-    if CisCi is None:
-        CisCi = lin.symmetric_kronecker(Ci,Ci)
-    if CxC is None:
-        CxC = lin.tensor(C,C)
-    if CixCi is None:
-        CixCi = lin.tensor(Ci,Ci)
-    
-    if SCi is None:
-        SCi = lin.anticommutator(S,Ci,op=lin.tensor)
+    CCi = lin.anticommutator(C,Ci,op=lin.tensor)
+    CisCi = lin.symmetric_kronecker(Ci,Ci)
+    CxC = lin.tensor(C,C)
+    CixCi = lin.tensor(Ci,Ci)
+    SCi = lin.anticommutator(S,Ci,op=lin.tensor)
 
     # Compute various products with the deviatoric tangent stiffness CC
     CCCC = np.tensordot(np.tensordot(CC,C),C)
@@ -364,7 +352,7 @@ def tangent_stiffness(E,p,dpdJ,c,M,L,J=1,EA=None,EEA=None,EdA=None,Q=None,A=None
 
     # Assemble expression
     part_A = 2*J*p*FTFisFTFi
-    part_B = J*(p+J*dpdJ)*FTFixFTFi
+    part_B = J*(p + J*dpdJ)*FTFixFTFi
     part_C = CCCCi - (1/3.)*CCCC*CixCi
     part_D = CisCi + (1/3.)*CixCi
     part_E = CS*part_D - SCi
