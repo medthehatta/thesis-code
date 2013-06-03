@@ -103,5 +103,5 @@ def orthotropic_projectors(P):
     A2 = 0.5*(P - PP)
     A3 = I - A1 - A2
 
-    return [A1,A2,A3]
+    return np.array([A1,A2,A3])
 
