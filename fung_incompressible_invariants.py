@@ -47,17 +47,15 @@ def Qbar(E,c,M,L,EA=None,EEA=None,A=None):
 
     # Compute scalar invariants
     if EEA is None:
-        EEA = np.tensordot(np.dot(E,E),A)
+        EEA = np.tensordot(np.dot(E,E),A,axes=([0,1],[1,2]))
 
     if EA is None:
-        EA = np.tensordot(E,A)
+        EA = np.tensordot(E,A,axes=([0,1],[1,2]))
 
     # Express model with parameters
     # (2mi(Ai:E^2) + lij(Ai:E)(Aj:E))/c
     M_part = 2*np.dot(M,EEA)
     L_part = np.dot(L,lin.utri_flat(np.outer(EA,EA)))
-    # TODO: For some reason this returns a singleton list instead of an actual
-    # scalar
     return (M_part + L_part)/c
 
 
@@ -101,10 +99,10 @@ def Sbar(E,c,M,L,EA=None,EEA=None,EdA=None,Q=None,A=None):
 
     # Compute scalar invariants
     if EEA is None:
-        EEA = np.tensordot(np.dot(E,E),A)
+        EEA = np.tensordot(np.dot(E,E),A,axes=([0,1],[1,2]))
 
     if EA is None:
-        EA = np.tensordot(E,A)
+        EA = np.tensordot(E,A,axes=([0,1],[1,2]))
 
     # Compute quantities {E.Ai}
     if EdA is None:
@@ -176,10 +174,10 @@ def Cbar(E,c,M,L,EA=None,EEA=None,EdA=None,Q=None,A=None,\
 
     # Compute scalar invariants
     if EEA is None:
-        EEA = np.tensordot(np.dot(E,E),A)
+        EEA = np.tensordot(np.dot(E,E),A,axes=([0,1],[1,2]))
 
     if EA is None:
-        EA = np.tensordot(E,A)
+        EA = np.tensordot(E,A,axes=([0,1],[1,2]))
 
     # Compute quantities {E.Ai}
     if EdA is None:
@@ -284,10 +282,10 @@ def tangent_stiffness(E,p,dpdJ,c,M,L,J=1,EA=None,EEA=None,EdA=None,Q=None,A=None
 
     # Compute scalar invariants
     if EEA is None:
-        EEA = np.tensordot(np.dot(E,E),A)
+        EEA = np.tensordot(np.dot(E,E),A,axes=([0,1],[1,2]))
 
     if EA is None:
-        EA = np.tensordot(E,A)
+        EA = np.tensordot(E,A,axes=([0,1],[1,2]))
 
     # Compute quantities {E.Ai}
     if EdA is None:
