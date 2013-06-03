@@ -214,11 +214,163 @@ def Cbar(E,c,M,L,EA=None,EEA=None,EdA=None,Q=None,A=None,\
     # Insert parameters
     M_part = sum((AsI.T*M).T)
     L_part = 0.5*sum((AxA.T*L).T)
-    S_part = 2*np.exp(-Q)*SxS/c
 
-    return S_part + np.exp(Q)*(M_part + L_part)
-
+    return 2*np.exp(-Q)*SxS/c + np.exp(Q)*(M_part + L_part)
 
 
+
+
+def tangent_stiffness(E,p,dpdJ,c,M,L,J=1,EA=None,EEA=None,EdA=None,Q=None,A=None,\
+      S=None,AxA=None,AsI=None,CC=None,C=None,Ci=None,\
+      FTF=None,FTFi=None):
+    """
+    Computes the tangent stiffness for the invariant Fung model.
+
+    Parameters
+    ----------
+    E : (3, 3) array_like
+        Modified Lagrangian strain.
+    p : float
+        Pressure
+    dpdJ : float
+        Pressure "modulus" (dp/dJ)
+    c : float
+        Scalar parameter.
+    M : (3,) array_like
+        List of 3 parameters.
+    L : (6,) array_like
+        List of 6 "upper triangle" parameters.
+
+    Optional Parameters
+    -------------------
+    J : float
+        Determinant of the deformation gradient (default: 1)
+    EA : (3,) array_like
+        Pre-computed invariants E:Ai
+    EEA : (3,) array_like
+        Pre-computed invariants E^2:Ai
+    EdA : (3, 3, 3) array_like
+        Pre-computed quantities {E.Ai}
+    Q : float
+        Pre-computed Q
+    A : (3, 3, 3) array_like
+        Pre-computed projectors onto the planes of orthotropy 
+    S : (3, 3) array_like
+        Pre-computed S
+    AxA : (6, 3, 3, 3, 3) array_like
+        Pre-computed list of A (tensor) A
+    AsI : (6, 3, 3, 3, 3) array_like
+        Pre-computed list of A (sym) I
+    CC : (3, 3, 3, 3) array_like
+        Distortional tangent stiffness
+    C : (3, 3) array_like
+        Distortional Right Cauchy-Green tensor
+    Ci : (3, 3) array_like
+        Inverse of C
+    FTF : (3, 3) array_like
+        Actual Right Cauchy-Green tensor
+    FTFi : (3, 3) array_like
+        Inverse of FTF
+
+    Returns
+    -------
+    output : (3, 3, 3, 3) array_like
+        Tangent stiffness
+    """
+    
+    # Get orthotropic projection operators
+    if A is None:
+        A = el.orthotropic_projectors(el.standard_orthotropic_P())
+
+    # Compute scalar invariants
+    if EEA is None:
+        EEA = np.tensordot(np.dot(E,E),A)
+
+    if EA is None:
+        EA = np.tensordot(E,A)
+
+    # Compute quantities {E.Ai}
+    if EdA is None:
+        # LAME: np.dot broadcasts differently than einsum, so we can't use it
+        # for this operation, even though it's way faster.  Crappy.
+        proper_dot = lambda x,y: np.einsum('...ab,...bc',x,y)
+        EdA = lin.anticommutator(E,A,op=proper_dot)
+
+    # Compute {(Ai(x)Aj) : E}
+    AAE = np.array([A[i]*EA[j] + A[j]*EA[i] for (i,j) in lin.utri_indices(3)])
+
+    # Compute Q
+    if Q is None:
+        Q = Qbar(E,c,M,L,EA,EEA,A=A)
+
+    # Compute S
+    if S is None:
+        S = Sbar(E,c,M,L,EA,EdA,Q,A)
+
+    # Compute S(x)S
+    SxS = lin.tensor(S,S)
+
+    # Compute {Ai(x)Aj}
+    if AxA is None:
+        AxA = np.array([lin.anticommutator(A[i],A[j],op=lin.tensor)
+                        for (i,j) in lin.utri_indices(3)])
+
+    # Compute {Ai(sym)I}
+    if AsI is None:
+        AsI = lin.anticommutator(A,np.eye(3),op=lin.symmetric_kronecker)
+
+    # Compute CC (distortional C)
+    if CC is None:
+        CC = Car(E,c,M,L,EA,EEA,EdA,Q,A,S,AxA,AsI)
+
+    # Compute C (distortional right cauchy-green)
+    if C is None:
+        C = 2*E + np.eye(3)
+
+    # Compute C inverse
+    if Ci is None:
+        Ci = np.linalg.inv(C)
+
+    # Compute FTF
+    if FTF is None:
+        FTF = J**(2/3)*C
+
+    # Compute FTF inverse
+    if FTFi is None:
+        FTFi = J**(2/3)*Ci #  TODO: check
+
+    # Compute various products of the FTF's
+    if FTFisFTFi is None:
+        FTFisFTFi = lin.symmetric_kronecker(FTFi,FTFi)
+
+    if FTFixFTFi is None:
+        FTFixFTFi = lin.tensor(FTFi,FTFi)
+
+    # Compute various products of the deviatoric C
+    if CCi is None:
+        CCi = lin.anticommutator(C,Ci,op=lin.tensor;
+    if CisCi is None:
+        CisCi = lin.symmetric_kronecker(Ci,Ci)
+    if CxC is None:
+        CxC = lin.tensor(C,C)
+    if CixCi is None:
+        CixCi = lin.tensor(Ci,Ci)
+    
+    if SCi is None:
+        SCi = lin.anticommutator(S,Ci,op=lin.tensor)
+
+    # Compute various products with the deviatoric tangent stiffness CC
+    CCCC = np.tensordot(np.tensordot(CC,C),C)
+    CCCCi = np.tensordot(CC,CCi)
+    CS = np.tensordot(C,S)
+
+    # Assemble expression
+    part_A = 2*J*p*FTFisFTFi
+    part_B = J*(p+J*dpdJ)*FTFixFTFi
+    part_C = CCCCi - (1/3.)*CCCC*CixCi
+    part_D = CisCi + (1/3.)*CixCi
+    part_E = CS*part_D - SCi
+
+    return part_A - part_B + J**(-4/3.)*(CC - (1/3.)*part_C + (2/3.)*part_E)
 
 
