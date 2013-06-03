@@ -173,9 +173,9 @@ def holzapfel_D(F,c,k1,k2,a1=np.array([1,0,0]),a2=np.array([0,1,0])):
   dI2 = (S2*dG.T).T + (G*dS2.T).T
 
   # The 4th rank identity tensor
-  II = np.einsum('...ij,...kl->...ikjl',I,I)
+  II = np.einsum('...ik,...jl->...ijkl',I,I)
   dF  = II
-  dFiT = np.einsum('...ij,...kl->...lijk',Finv,Finv)
+  dFiT = np.einsum('...li,...jk->...ijkl',Finv,Finv)
 
   # second derivatives
   ddG = -2/3.*(G*dFiT.T).T - 4/9.*(G*lin.tensor(FiT,FiT).T).T
