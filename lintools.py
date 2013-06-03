@@ -178,10 +178,10 @@ def anticommutator(A,B,op=np.dot):
 
 
 def kronecker(A,B):
-    return np.einsum('...ab,...cd->...acbd',A,B)
+    return np.einsum('...ac,...bd->...abcd',A,B)
 
 def cokronecker(A,B):
-    return np.einsum('...ab,...cd->...adbc',A,B)
+    return np.einsum('...ad,...bc->...abcd',A,B)
 
 def symmetric_kronecker(A,B):
     return 0.5*(kronecker(A,B) + cokronecker(A,B))
