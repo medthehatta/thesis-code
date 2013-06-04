@@ -159,7 +159,7 @@ def minor_dets(matrix):
   """
   Returns all the minor determinants.
   """
-  return [np.linalg.det(matrix[:i,:i]) for i in range(1,len(matrix)+1)]
+  return np.array([np.linalg.det(matrix[:i,:i]) for i in range(1,len(matrix)+1)])
 
 
 def utri_indices(size):
