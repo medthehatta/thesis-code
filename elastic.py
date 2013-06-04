@@ -99,8 +99,8 @@ def orthotropic_projectors(P):
     I = np.eye(3)
     PP = np.dot(P,P)
 
-    A1 = 0.5*(P + PP)
-    A2 = 0.5*(P - PP)
+    A1 = 0.5*(PP + P)
+    A2 = 0.5*(PP - P)
     A3 = I - A1 - A2
 
     return np.array([A1,A2,A3])
