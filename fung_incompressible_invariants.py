@@ -327,10 +327,6 @@ def tangent_stiffness(E,p,dpdJ,c,M,L,J=1,EA=None,EEA=None,EdA=None,Q=None,A=None
     if Ci is None:
         Ci = np.linalg.inv(C)
 
-    # Compute FTF
-    if FTF is None:
-        FTF = J**(2/3.)*C
-
     # Compute FTF inverse
     if FTFi is None:
         FTFi = J**(2/3.)*Ci #  TODO: check
