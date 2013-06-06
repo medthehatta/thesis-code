@@ -55,12 +55,16 @@ def isotropic_stiffness(E,n):
   return orthotropic_stiffness(E,E,E,n,n,n,G,G,G)
 
 
-def voigt(A):
+def voigt(A,nine_component=False):
   """
   Returns the voigt-ified version of a 4th or 2nd rank tensor.
-  (Uses a 9-component, not 6-component form for the 2nd rank tensors.)
+
+  Assumes 2nd rank tensors are symmetric by default.
   """
-  return lin.reorder_matrix(lin.np_voigt(A),VOIGT_ORDER)
+  if nine_component:
+      return lin.reorder_matrix(lin.np_voigt(A),VOIGT_ORDER)
+  else:
+      return lin.reorder_matrix(lin.np_voigt(A),VOIGT_ORDER)[:6,:6]
 
 def voigt_vec(A):
   """
