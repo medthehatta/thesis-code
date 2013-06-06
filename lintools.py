@@ -163,6 +163,7 @@ def matrix_from_utri(flat,dim=3):
   m = np.empty((dim,dim))
   for (k,(i,j)) in zip(count(),utri_indices(dim)):
     m[i,j]=flat[k]
+    m[j,i]=m[i,j]
   return  m
   
 
