@@ -147,4 +147,7 @@ def fung_D_E(E,c,CC):
 # Model parameters from Holzapfel which give a model that is convex in E(bar)
 # The units of the first parameter is: kPa, and the last two 1's are arbitrary
 # guesses.
+# The parameters can be labeled in this less ambiguous way:
+# (c, [att, azz, arr, atz, arz, art, atz2, azr2, art2])
+# (Basically the Holzapfel convention assumes a theta,Z,R basis order.
 STABLE_IN_E = (26.95, [0.9925,0.4180,0.0089,0.0749,0.0295,0.0193,5.0,1.0,1.0])
