@@ -143,7 +143,7 @@ def reorder_matrix(matrix,permutation):
   else:
     P = p
 
-  return np.einsum('...ab,...bc,...dc',P,matrix,P)
+  return np.dot(P,np.dot(matrix,P.T))
 
 
 def utri_flat(matrix):
