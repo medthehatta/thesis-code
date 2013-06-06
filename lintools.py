@@ -4,6 +4,7 @@ lintools.py
 Some miscellaneous array / linear algebra tricks.
 """
 import numpy as np
+from itertools import count
 
 
 
@@ -153,6 +154,19 @@ def utri_flat(matrix):
   """
   nested = [matrix[i,i:].tolist() for i in range(len(matrix))]
   return np.array(sum(nested,[]))
+
+def matrix_from_utri(flat,dim=3):
+  """ 
+  Returns a symmetric matrix made from the upper triangle ordered as in
+  utri_flat
+  """
+  m = np.empty((dim,dim))
+  for (k,(i,j)) in zip(count(),utri_indices(dim)):
+    m[i,j]=flat[k]
+  return  m
+  
+
+
 
 
 def minor_dets(matrix):
