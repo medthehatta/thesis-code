@@ -169,6 +169,10 @@ def Cbar(E,c,M,L,EA=None,EEA=None,EdA=None,Q=None,A=None,\
         Distortional C (tangent stiffness)
     """
     
+    # This is vectorized, but we'll allow single values for convenience
+    if len(E.shape)==2:
+        E = np.array([E])
+
     # Get orthotropic projection operators
     if A is None:
         A = el.orthotropic_projectors(el.standard_orthotropic_P())
