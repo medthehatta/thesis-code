@@ -166,10 +166,6 @@ def matrix_from_utri(flat,dim=3):
     m[j,i]=m[i,j]
   return  m
   
-
-
-
-
 def minor_dets(matrix):
   """
   Returns all the minor determinants.
