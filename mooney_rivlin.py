@@ -76,7 +76,7 @@ def constitutive_model(B,*p):
     dIb2dB = I1*I - (2/3.)*I2*Bi - (0.5)*B
     dWdB = c1*dIb1dB + c2*dIb2dB
 
-    return 2*np.einsum('...ab,...bcde',B,dWdB)
+    return 2*np.einsum('...ab,...bc',B,dWdB)
 
 
 
