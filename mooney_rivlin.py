@@ -11,8 +11,6 @@ def tangent_stiffness(B,*p):
     """
     Tangent stiffness as a function of the left Cauchy-green tensor and the two
     parameters: p=c1,c2
-    TODO: This is wrong.  This *would* be the tangent stiffness if left C-G was
-    *material*.  But it's not.  It's spatial.
     """
     
     # Extract the model parameters
@@ -52,8 +50,9 @@ def tangent_stiffness(B,*p):
     part1 = I1*(BisBi + third*BixBi) - BivI
     part21 = BvBi - I1*BivI + I2*(BisBi + third*BixBi)
     part22 = IxI - 0.5*IsI
+    d2Wdb2 = c1*third*part1 + c2*2*third*part21 + c2*part22
 
-    return c1*third*part1 + c2*2*third*part21 + c2*part22
+    return 4*np.einsum('...ab,...bcde,...ef',B,d2Wdb2,B)
 
 def constitutive_model(B,*p):
     """
@@ -66,14 +65,18 @@ def constitutive_model(B,*p):
 
     # Compute the other required generating tensors for the expression
     I = np.eye(3)
-    BB = np.dot(B,B)
+    Bi = np.linalg.inv(B)
 
     # Alias the invariants of B
     I1 = np.trace(B)
     I2 = 0.5*(I1*I1 - np.trace(np.dot(B,B)))
 
     # Assemble the expression
-    return 2*c1*B - (2/3.)*I1*I - (4/3.)*c2*I2*I + 2*c2*I2*B - c2*BB
+    dIb1dB = I - (1/3.)*I1*Bi
+    dIb2dB = I1*I - (2/3.)*I2*Bi - (0.5)*B
+    dWdB = c1*dIb1dB + c2*dIb2dB
+
+    return 2*np.einsum('...ab,...bcde',B,dWdB)
 
 
 
