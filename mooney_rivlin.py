@@ -17,7 +17,7 @@ def tangent_stiffness(B,*p):
     (c1,c2) = p
 
     # Compute the other required generating tensors for the expression
-    Bi = np.linalg.inv(B)
+    BB = np.dot(B,B)
     I = np.eye(3)
 
     # Alias the scalar invariants of B
@@ -33,26 +33,24 @@ def tangent_stiffness(B,*p):
     IxI = np.einsum(tensor,I,I)
     IsI = 0.5*(np.einsum(kronecker,I,I) + np.einsum(cokronecker,I,I))
 
-    # Compute the relevant products of B and Bi
-    BixBi = np.einsum(tensor,Bi,Bi)
-    BixB = np.einsum(tensor,Bi,B)
-    BxBi = np.einsum(tensor,B,Bi)
-    BvBi = BxBi + BixB
-    BisBi = 0.5*(np.einsum(kronecker,Bi,Bi) + np.einsum(cokronecker,Bi,Bi))
+    # Compute the relevant products of B
+    BxB = np.einsum(tensor,B,B)
+    BsB = 0.5*(np.einsum(kronecker,B,B) + np.einsum(cokronecker,B,B))
 
-    # Compute the mixed products of B, I, and Bi
-    BixI = np.einsum(tensor,Bi,I)
-    IxBi = np.einsum(tensor,I,Bi)
-    BivI = BixI + IxBi
+    # Compute the mixed products of B, I, and BB
+    BxI = np.einsum(tensor,B,I)
+    IxB = np.einsum(tensor,I,B)
+    BvI = BxI + IxB
+    BBxI = np.einsum(tensor,BB,I)
+    IxBB = np.einsum(tensor,I,BB)
+    BBvI = BBxI + IxBB
 
     # Assemble the expression
-    third = (1/3.) #  this is probably unnecessary, but hey.
-    part1 = I1*(BisBi + third*BixBi) - BivI
-    part21 = BvBi - I1*BivI + I2*(BisBi + third*BixBi)
-    part22 = IxI - 0.5*IsI
-    d2Wdb2 = c1*third*part1 + c2*2*third*part21 + c2*part22
+    part1 = (1/3.)*(I1*(IsI + (1/3.)*IxI) - BvI)
+    part2 = (2/3.)*(BBvI - I1*BvI + I2*(IsI + (1/3.)*IxI))
+    part3 = (2/3.)*(BxB - (0.5)*BsB)
 
-    return 4*np.einsum('...ab,...bcde,...ef',B,d2Wdb2,B)
+    return c1*part1 + c2*(part2 + part3)
 
 def constitutive_model(B,*p):
     """
