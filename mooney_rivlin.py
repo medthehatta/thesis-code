@@ -74,7 +74,8 @@ def constitutive_model(B,*p):
     dIb2dB = I1*B - (2/3.)*I2*I - (0.5)*BB
     dWdB = c1*dIb1dB + c2*dIb2dB
 
-    return 2*dWdB
+    # I appear to be off by a sign.  I'll have to fix this properly later
+    return -2*dWdB
 
 
 
