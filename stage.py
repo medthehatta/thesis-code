@@ -41,10 +41,11 @@ def biaxial_MR(b, *params):
     cauchy0 = mr.constitutive_model(b,*params)
     return cauchy0 - cauchy0[-1,-1]*np.eye(3)
 
-def cost(params, lam=1e7):
+def cost(params, lam=1e2):
     data = zip(png.left_cauchy_green_p, png.v3Cauchy)
     errors = np.array([sigma - np.diag(biaxial_MR(b,*params)) for 
                        (b,sigma) in data])
+    smaller_errors = errors / errors[0]
     tests = [test_mr_drucker(b,*params) for b in png.left_cauchy_green_p]
     penalty = lam*(tests.count(False)/len(tests))
     return np.tensordot(errors,errors) + penalty
