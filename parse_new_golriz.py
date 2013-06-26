@@ -139,7 +139,7 @@ areas = (thk*np.array([Llc,Lll,1]))/1e3
 PK1 = np.array([np.diagflat(f.tolist()+[0]) for f in force_data])/areas
 
 # How about Cauchy stress too
-cauchy = np.array([np.dot(P,F.T) for (F,P) in zip(avg_deformations,PK1)])
+cauchy = np.array([np.dot(P,F.T) for (F,P) in zip(avg_deformations_p,PK1)])
 
 # 3-vector representations
 v3F = np.diagonal(avg_deformations_p,axis1=1,axis2=2)
