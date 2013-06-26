@@ -42,12 +42,18 @@ def biaxial_MR(b, *params):
     return cauchy0 - cauchy0[-1,-1]*np.eye(3)
 
 def cost(params, lam=1e2):
+    # Collate the data
     data = zip(png.left_cauchy_green_p, png.v3Cauchy)
+
+    # Least square error
     errors = np.array([sigma - np.diag(biaxial_MR(b,*params)) for 
                        (b,sigma) in data])
-    smaller_errors = errors / errors[0]
+    total_error = np.tensordot(errors,errors) / np.dot(errors[0],errors[0])
+
+    # Penalty error
     tests = [test_mr_drucker(b,*params) for b in png.left_cauchy_green_p]
-    penalty = lam*(tests.count(False)/len(tests))
-    return np.tensordot(errors,errors) + penalty
+    penalty = tests.count(False)/len(tests)
+
+    return total_error + lam*penalty
 
 
