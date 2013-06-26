@@ -63,18 +63,18 @@ def constitutive_model(B,*p):
 
     # Compute the other required generating tensors for the expression
     I = np.eye(3)
-    Bi = np.linalg.inv(B)
+    BB = np.dot(B,B)
 
     # Alias the invariants of B
     I1 = np.trace(B)
     I2 = 0.5*(I1*I1 - np.trace(np.dot(B,B)))
 
     # Assemble the expression
-    dIb1dB = I - (1/3.)*I1*Bi
-    dIb2dB = I1*I - (2/3.)*I2*Bi - (0.5)*B
+    dIb1dB = B - (1/3.)*I1*I
+    dIb2dB = I1*B - (2/3.)*I2*I - (0.5)*BB
     dWdB = c1*dIb1dB + c2*dIb2dB
 
-    return 2*np.einsum('...ab,...bc',B,dWdB)
+    return 2*dWdB
 
 
 
