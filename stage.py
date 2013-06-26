@@ -7,7 +7,7 @@ def random_F(scale=1.0):
     F0 = np.eye(2) + scale*np.random.random((2,2))
     return det1_3d(F0)
 
-def symmetric_2_1(a11,a22,a12):
+def symmetric_2x2(a11,a22,a12):
     return np.array([[a11,a12],[a12,a22]])
 
 def det1_3d(mat2d):
@@ -24,7 +24,7 @@ def points_in_box(lower=np.zeros(2),upper=np.ones(2),num=10):
 
 def stable_region(lower,upper,*p,num=10):
     pts = points_in_box(lower,upper,num)
-    Bs = [det1_3d(np.eye(2) + symmetric_2_1(a,b,c)) for (a,b,c) in pts]
+    Bs = [det1_3d(np.eye(2) + symmetric_2x2(*pt)) for pt in pts]
     tests = [test_mr_drucker(b,*p) for b in Bs]
     return (tests.count(True)/len(tests))
 
