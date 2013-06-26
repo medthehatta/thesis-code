@@ -112,12 +112,16 @@ avg_deformations = np.average(deformations,axis=1)
 # Compute the Lagrangian strain for each deformation
 right_cauchy_green = np.einsum('...ab,...ac',avg_deformations
                                             ,avg_deformations)
+left_cauchy_green = np.einsum('...ab,...cb',avg_deformations
+                                            ,avg_deformations)
 lagrangian_strain = 0.5*(right_cauchy_green - np.eye(3))
 
 # Disregarding shear and radial deformation, compute the principal strains
 avg_deformations_p = np.array([np.diagflat(np.diag(F)) 
                                for F in avg_deformations])
 right_cauchy_green_p = np.einsum('...ab,...ac',avg_deformations_p
+                                              ,avg_deformations_p)
+left_cauchy_green_p = np.einsum('...ab,...cb',avg_deformations_p
                                               ,avg_deformations_p)
 lagrangian_strain_p = 0.5*(right_cauchy_green_p - np.eye(3))
 
@@ -134,17 +138,18 @@ areas = (thk*np.array([Llc,Lll,1]))/1e3
 # We assume that the stress is perfectly biaxial
 PK1 = np.array([np.diagflat(f.tolist()+[0]) for f in force_data])/areas
 
-# Let's also make a PK2 version so we can compare it with Fung more easily
-PK2 = np.array([np.dot(F,P) for (F,P) in zip(avg_deformations,PK1)])
+# How about Cauchy stress too
+cauchy = np.array([np.dot(P,F.T) for (F,P) in zip(avg_deformations,PK1)])
 
 # 3-vector representations
 v3F = np.diagonal(avg_deformations_p,axis1=1,axis2=2)
 v3E = np.diagonal(lagrangian_strain_p,axis1=1,axis2=2)
 v3PK1 = np.diagonal(PK1,axis1=1,axis2=2)
-v3PK2 = np.diagonal(PK2,axis1=1,axis2=2)
+v3Cauchy = np.diagonal(cauchy,axis1=1,axis2=2)
 
 ######################################################
 # Prepare a 2x2 projection of stress and deformation #
+# NOTE: This is probably crap.  Better to use 3x3    #
 ######################################################
 
 # Deformation
@@ -153,11 +158,9 @@ lagrangian_strain_p_2 = np.array([E[:2,:2] for E in lagrangian_strain_p])
 
 # Stress
 PK1_2 = np.array([P[:2,:2] for P in PK1])
-PK2_2 = np.array([np.dot(F,P) for (F,P) in zip(avg_deformations_p_2,PK1_2)])
 
 # 2-vector representations
 v2F = np.diagonal(avg_deformations_p_2,axis1=1,axis2=2)
 v2E = np.diagonal(lagrangian_strain_p_2,axis1=1,axis2=2)
 v2PK1 = np.diagonal(PK1_2,axis1=1,axis2=2)
-v2PK2 = np.diagonal(PK2_2,axis1=1,axis2=2)
 
