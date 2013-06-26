@@ -28,3 +28,25 @@ def stable_region(lower,upper,*p,num=10):
     tests = [test_mr_drucker(b,*p) for b in Bs]
     return (tests.count(True)/len(tests))
 
+# For constrained fitting
+
+import parse_new_golriz as png
+import mooney_rivlin as mr
+
+def biaxial_MR(b, *params):
+    """
+    Incompressibility gives pressure from boundary condition that radial
+    boundaries are stress-free
+    """
+    cauchy0 = mr.constitutive_model(b,*params)
+    return cauchy0 - cauchy0[-1,-1]*np.eye(3)
+
+def cost(params):
+    data = zip(png.left_cauchy_green_p, png.v3Cauchy)
+    errors = np.array([sigma - np.diag(biaxial_MR(b,*params)) for 
+                       (b,sigma) in data])
+    tests = [test_mr_drucker(b,*params) for b in png.left_cauchy_green_p]
+    penalty = 5e6*(tests.count(True)/len(tests))
+    return np.tensordot(errors,errors) + penalty
+
+
