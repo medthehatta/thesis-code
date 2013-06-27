@@ -66,3 +66,9 @@ def automatic_fits(setups):
                         callback=print, method='Powell')
     return results
 
+attempts = [\
+            (200,-50,100),  # nice
+            (200,-50,0),    # also nice and by accident *stable*
+            (200,100,0),    # terrible
+            (10,10,0),      # even worse
+            (1,1,0)]
