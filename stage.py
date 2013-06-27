@@ -14,8 +14,9 @@ def det1_3d(mat2d):
     J0 = np.linalg.det(mat2d)
     return lin.direct_sum(mat2d,np.diagflat([1/J0]))
 
-def test_mr_drucker(B,*params):
-    return lin.is_positive_definite(el.voigt(mr.tangent_stiffness(B,*params)))
+def test_mr_drucker(C,*params):
+    tstiff = el.voigt(mr.material_tangent_stiffness(C,*params))
+    return lin.is_positive_definite(tstiff)
 
 def points_in_box(lower=np.zeros(2),upper=np.ones(2),num=10):
     result_shape = [num]+list(lower.shape)
@@ -51,7 +52,7 @@ def cost(params, lam=1e2):
     total_error = np.tensordot(errors,errors) / np.dot(errors[0],errors[0])
 
     # Penalty error
-    tests = [test_mr_drucker(b,*params) for b in png.left_cauchy_green_p]
+    tests = [test_mr_drucker(c,*params) for c in png.right_cauchy_green_p]
     penalty = tests.count(False)/len(tests)
 
     return total_error + lam*penalty
