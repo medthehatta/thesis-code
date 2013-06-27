@@ -56,4 +56,4 @@ def cost(params, lam=1e2):
 
     return total_error + lam*penalty
 
-
+# so.minimize(cost, [200,-50], args=(100,), callback=print, method='Powell')
