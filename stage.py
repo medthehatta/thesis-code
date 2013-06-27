@@ -33,6 +33,7 @@ def stable_region(lower,upper,*p,num=10):
 
 import parse_new_golriz as png
 import mooney_rivlin as mr
+import scipy.optimize as so
 
 def biaxial_MR(b, *params):
     """
@@ -57,4 +58,11 @@ def cost(params, lam=1e2):
 
     return total_error + lam*penalty
 
-# so.minimize(cost, [200,-50], args=(100,), callback=print, method='Powell')
+def automatic_fits(setups):
+    results = {}
+    for (initial1,initial2,lam) in setups:
+        results[(initial1,initial2,lam)] = \
+            so.minimize(cost, [200,-50], args=(100,), \
+                        callback=print, method='Powell')
+    return results
+
