@@ -87,7 +87,7 @@ def cost_kaveh(params, lam=1e2):
 
     return total_error + lam*penalty
 
-def automatic_fits(setups):
+def automatic_fits(setups,cost):
     results = {}
     for (initial1,initial2,lam) in setups:
         results[(initial1,initial2,lam)] = \
