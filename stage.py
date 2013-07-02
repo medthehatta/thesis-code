@@ -32,6 +32,7 @@ def stable_region(lower,upper,*p,num=10):
 # For constrained fitting
 
 import parse_new_golriz as png
+import parse_kaveh_compression as pkc
 import mooney_rivlin as mr
 import scipy.optimize as so
 
@@ -43,9 +44,22 @@ def biaxial_MR(b, *params):
     cauchy0 = mr.constitutive_model(b,*params)
     return cauchy0 - cauchy0[-1,-1]*np.eye(3)
 
-def cost(params, lam=1e2):
+def uniaxial_MR(b, *params):
+    """
+    Incompressibility gives pressure from boundary condition that non-axial
+    boundaries are stress-free.
+    I hope this isn't overdetermined.
+    """
+    cauchy0 = mr.constitutive_model(b,*params)
+    other1 = cauchy0[-1,-1]
+    other2 = cauchy0[-2,-2]
+    if other1 != other2:
+        raise ValueError("Loading yields ambiguous stress response.")
+    return cauchy0 - other1*np.eye(3)
+
+def cost_golriz(params, lam=1e2):
     # Collate the data
-    data = zip(png.left_cauchy_green_p, png.v3Cauchy)
+    data = zip(pkc.left_cauchy_green_p, pkc.v3Cauchy)
 
     # Least square error
     errors = np.array([sigma - np.diag(biaxial_MR(b,*params)) for 
@@ -54,6 +68,21 @@ def cost(params, lam=1e2):
 
     # Penalty error
     tests = [test_mr_drucker(c,*params) for c in png.right_cauchy_green_p]
+    penalty = tests.count(False)/len(tests)
+
+    return total_error + lam*penalty
+
+def cost_kaveh(params, lam=1e2):
+    # Collate the data
+    data = zip(pkc.left_cauchy_green, pkc.v3Cauchy)
+
+    # Least square error
+    errors = np.array([sigma - np.diag(uniaxial_MR(b,*params)) for 
+                       (b,sigma) in data])
+    total_error = np.tensordot(errors,errors) / np.dot(errors[0],errors[0])
+
+    # Penalty error
+    tests = [test_mr_drucker(c,*params) for c in pkc.right_cauchy_green]
     penalty = tests.count(False)/len(tests)
 
     return total_error + lam*penalty
@@ -72,3 +101,4 @@ attempts = [\
             (200,100,0),    # terrible
             (10,10,0),      # even worse
             (1,1,0)]
+
