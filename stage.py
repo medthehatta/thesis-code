@@ -75,7 +75,7 @@ def cost_golriz(params, lam=1e2):
 
     return total_error + lam*penalty + lam2*regularize
 
-def cost_kaveh(params, lam=1e2, lam2=1e2):
+def cost_kaveh(params, lam=1e2, lam2=1.):
     # Collate the data
     data = zip(pkc.left_cauchy_green, pkc.v3Cauchy)
 
