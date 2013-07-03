@@ -82,8 +82,11 @@ def cost_kaveh(params, lam=1e2):
     total_error = np.tensordot(errors,errors) / np.dot(errors[0],errors[0])
 
     # Penalty error
-    tests = [test_mr_drucker(c,*params) for c in pkc.right_cauchy_green]
-    penalty = tests.count(False)/len(tests)
+    if lam>0:
+        tests = [test_mr_drucker(c,*params) for c in pkc.right_cauchy_green]
+        penalty = tests.count(False)/len(tests)
+    else:
+        penalty = 0
 
     return total_error + lam*penalty
 
