@@ -119,7 +119,7 @@ def constitutive_model(b,*p):
 
     # Assemble the expression
     dIb1db = b - (1/3.)*I1*I
-    dIb2db = I1*b - (2/3.)*I2*I - (0.5)*bb
+    dIb2db = I1*b - (2/3.)*I2*I - bb
     dWdb = c1*dIb1db + c2*dIb2db
 
     return 2*dWdb
