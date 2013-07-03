@@ -94,14 +94,17 @@ def automatic_fits(setups,cost):
     results = {}
     for (initial1,initial2,lam) in setups:
         results[(initial1,initial2,lam)] = \
-            so.minimize(cost, [intial1,initial2], args=(lam,), \
+            so.minimize(cost, [initial1,initial2], args=(lam,), \
                         callback=print, method='Powell')
     return results
 
 attempts = [\
-            (200,-50,100),  # nice
-            (200,-50,0),    # also nice and by accident *stable*
-            (200,100,0),    # terrible
-            (10,10,0),      # even worse
-            (1,1,0)]
+            (200,-50,100),
+            (200,-50,0), 
+            (200,100,0),
+            (10,10,0), 
+            (1,1,0),
+            (1,1,100),
+            (10,10,10),
+            (10,10,0)]
 
