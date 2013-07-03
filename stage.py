@@ -94,7 +94,7 @@ def automatic_fits(setups,cost):
     results = {}
     for (initial1,initial2,lam) in setups:
         results[(initial1,initial2,lam)] = \
-            so.minimize(cost, [200,-50], args=(100,), \
+            so.minimize(cost, [intial1,initial2], args=(lam,), \
                         callback=print, method='Powell')
     return results
 
