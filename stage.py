@@ -70,9 +70,12 @@ def cost_golriz(params, lam=1e2):
     tests = [test_mr_drucker(c,*params) for c in png.right_cauchy_green_p]
     penalty = tests.count(False)/len(tests)
 
-    return total_error + lam*penalty
+    # Regularization
+    regularize = sum([p*p for p in params])
 
-def cost_kaveh(params, lam=1e2):
+    return total_error + lam*penalty + lam2*regularize
+
+def cost_kaveh(params, lam=1e2, lam2=1e2):
     # Collate the data
     data = zip(pkc.left_cauchy_green, pkc.v3Cauchy)
 
@@ -88,7 +91,10 @@ def cost_kaveh(params, lam=1e2):
     else:
         penalty = 0
 
-    return total_error + lam*penalty
+    # Regularization
+    regularize = sum([p*p for p in params])
+
+    return total_error + lam*penalty + lam2*regularize
 
 def automatic_fits(setups,cost):
     results = {}
