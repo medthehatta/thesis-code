@@ -92,12 +92,11 @@ def material_tangent_stiffness(C,*p):
     CivI = CixI + IxCi
 
     # Assemble the expression
-    third = (1/3.) #  this is probably unnecessary, but hey.
-    part1 = I1*(CisCi + third*CixCi) - CivI
-    part21 = CvCi - I1*CivI + I2*(CisCi + third*CixCi)
+    part1 = I1*(CisCi + (1/3.)*CixCi) - CivI
+    part21 = CvCi - I1*CivI + I2*(CisCi + (1/3.)*CixCi)
     part22 = IxI - 0.5*IsI
 
-    return c1*third*part1 + c2*2*third*part21 + c2*part22
+    return c1*(1/3.)*part1 + c2*(2/3.)*part21 + c2*part22
 
 
 def constitutive_model(b,*p):
