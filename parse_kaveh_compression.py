@@ -24,7 +24,7 @@ df = read_csv(PREFIX+"kaveh-brain-compression.tab", sep='\t',
 (l0,e,P) = df.as_matrix().T
 
 # Calculate the total stretch 
-l = [(1-ee) for (ll0,ee) in zip(l0,e)]
+l = [(1-ee)*ll0 for (ll0,ee) in zip(l0,e)]
 
 # Calculate the deformation gradient assuming the other directions are
 # unconstrained and that the sample is incompressible
