@@ -57,6 +57,15 @@ def uniaxial_MR(b, *params):
         raise ValueError("Loading yields ambiguous stress response.")
     return cauchy0 - other1*np.eye(3)
 
+def uniaxial_pressure(C,*params2):
+    """
+    Uniaxial pressure
+    Assume c is in principal coordinates
+    """
+    (c10,c01) = params2
+    l = np.sqrt(C[0,0])
+    return (1/3.)*(c10*((1/l) - l*l) + c01*(1/(l*l) - l))
+
 def cost_golriz(params, lam=1e2):
     # Collate the data
     data = zip(pkc.left_cauchy_green_p, pkc.v3Cauchy)
@@ -86,12 +95,6 @@ def cost_kaveh(params, lam=1e2, lam2=1.):
 
     # Penalty error
     if lam>0:
-        # Uniaxial pressure
-        # Assume c is in principal coordinates
-        def uniaxial_pressure(C,*params2):
-            (c10,c01) = params2
-            l = np.sqrt(C[0,0])
-            return (1/3.)*(c10*((1/l) - l*l) + c01*(1/(l*l) - l))
         tests = [test_mr_drucker(c,uniaxial_pressure(c,*params),*params) for c in pkc.right_cauchy_green]
         penalty = tests.count(False)/len(tests)
     else:
@@ -110,13 +113,17 @@ def automatic_fits(setups,cost):
                         callback=print, method='Powell')
     return results
 
-attempts = [\
-            (200,-50,100),
-            (200,-50,0), 
-            (200,100,0),
-            (10,10,0), 
-            (1,1,0),
-            (1,1,100),
-            (10,10,10),
-            (10,10,0)]
+def sweep_auto_fits(initials,cost):
+    penalty_parameters = [0,1,10,100,1000]
+    setups = [[(a,b,n) for n in penalty_parameters] for (a,b) in initials]
+    fits = automatic_fits(sum(setups,[]),cost_kaveh)
+    return [(k,fits[k]['x'],fits[k]['fun']) for k in fits.keys()]
+
+some_initials = [\
+                 (-1.01,1.49), # kaveh
+                 (200,-50),
+                 (200,100),
+                 (10,10),
+                 (1,1),
+                 (-100,100)]
 
