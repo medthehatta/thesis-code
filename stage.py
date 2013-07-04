@@ -127,3 +127,45 @@ some_initials = [\
                  (1,1),
                  (-100,100)]
 
+
+def test_drucker(params,tangent_stiffness,points):
+    res = [lin.is_positive_definite(el.voigt(tangent_stiffness(pt,*params)))
+           for pt in points]
+    labeled = list(zip(points,res))
+    trues = [p for (p,r) in labeled if r==True]
+    falses = [p for (p,r) in labeled if r==False]
+    return (trues,falses)
+    
+def analyze_params_uniaxial_mr(params):
+    def tstiff(C,*p):
+      return mr.material_tangent_stiffness(C,uniaxial_pressure(C,*p),*p)
+
+    identity = np.eye(3)
+    regional = points_in_box(0.1*np.zeros(2),1.3*np.ones(2),500)
+    regional_mats = [det1_3d(np.diagflat(r)) for r in regional]+[identity]
+
+    identity_result = test_drucker(params,tstiff,[identity])
+    id_true = bool(len(identity_result[0]))
+
+    region_result = test_drucker(params,tstiff,regional_mats)
+    r_num_true = len(region_result[0])
+    r_num_false = len(region_result[1])
+    r_pct_true = 100*r_num_true/(r_num_true + r_num_false)
+    r_pct_false = 100*r_num_false/(r_num_true + r_num_false)
+
+    more_info = identity_result[0]+identity_result[1]+region_result[0]+region_result[1]
+
+    id_text = "Stable at identity: " + str(id_true).upper()
+
+    r1_t = "Stable at {} and unstable at {} of {} points sampled from region ({}%)"
+    r1_text = r1_t.format(r_num_true,r_num_false,r_num_true+r_num_false,r_pct_true)
+    
+    if r_pct_false==0:
+        r_text = "Stable over all samples from region: TRUE"
+    else:
+        r_text = "Stable over all samples from region: FALSE"
+
+    return "\n".join([str(params),id_text,r1_text,r_text]) 
+        
+        
+    
