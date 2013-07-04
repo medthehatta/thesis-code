@@ -134,15 +134,15 @@ def test_drucker(params,tangent_stiffness,points):
     labeled = list(zip(points,res))
     trues = [p for (p,r) in labeled if r==True]
     falses = [p for (p,r) in labeled if r==False]
-    return (trues,falses)
+    return (trues,falses,labeled)
     
 def analyze_params_uniaxial_mr(params):
     def tstiff(C,*p):
       return mr.material_tangent_stiffness(C,uniaxial_pressure(C,*p),*p)
 
     identity = np.eye(3)
-    regional = points_in_box(0.1*np.zeros(2),1.3*np.ones(2),500)
-    regional_mats = [det1_3d(np.diagflat(r)) for r in regional]+[identity]
+    regional = 0.01 + 2.0*np.random.random(100)
+    regional_mats = [np.diagflat([r,1/np.sqrt(r),1/np.sqrt(r)]) for r in regional]
 
     identity_result = test_drucker(params,tstiff,[identity])
     id_true = bool(len(identity_result[0]))
@@ -152,8 +152,6 @@ def analyze_params_uniaxial_mr(params):
     r_num_false = len(region_result[1])
     r_pct_true = 100*r_num_true/(r_num_true + r_num_false)
     r_pct_false = 100*r_num_false/(r_num_true + r_num_false)
-
-    more_info = identity_result[0]+identity_result[1]+region_result[0]+region_result[1]
 
     id_text = "Stable at identity: " + str(id_true).upper()
 
@@ -165,7 +163,7 @@ def analyze_params_uniaxial_mr(params):
     else:
         r_text = "Stable over all samples from region: FALSE"
 
-    return "\n".join([str(params),id_text,r1_text,r_text]) 
-        
-        
-    
+    print("\n".join([str(params),id_text,r1_text,r_text]))
+
+    return sorted([(np.trace(c), np.trace(np.dot(c,c)), r) for (c,r) in region_result[2]],key=lambda x:x[-1])
+
