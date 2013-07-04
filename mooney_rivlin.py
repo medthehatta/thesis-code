@@ -7,7 +7,7 @@
 
 import numpy as np
 
-def spatial_tangent_stiffness(b,*p):
+def spatial_tangent_stiffness(b,pressure=0,*p):
     """
     Spatial Tangent stiffness as a function of the left Cauchy-green tensor and
     the two parameters: p=c1,c2
@@ -50,10 +50,10 @@ def spatial_tangent_stiffness(b,*p):
     part2 = (2/3.)*(bbvI - I1*bvI + I2*(IsI + (1/3.)*IxI))
     part3 = (2/3.)*(bxb - (0.5)*bsb)
 
-    return c1*part1 + c2*(part2 + part3)
+    return -pressure*np.eye(3) + c1*part1 + c2*(part2 + part3)
 
 
-def material_tangent_stiffness(C,*p):
+def material_tangent_stiffness(C,pressure,*p):
     """
     Material Tangent stiffness as a function of the right Cauchy-green tensor
     and the two parameters: p=c1,c2
@@ -92,17 +92,19 @@ def material_tangent_stiffness(C,*p):
     CivI = CixI + IxCi
 
     # Assemble the expression
+    part0 = CixCi - 2*CisCi
     part1 = I1*(CisCi + (1/3.)*CixCi) - CivI
     part21 = CvCi - I1*CivI + I2*(CisCi + (1/3.)*CixCi)
     part22 = IxI - 0.5*IsI
 
-    return c1*(1/3.)*part1 + c2*(2/3.)*part21 + c2*part22
+    # FIXME: It's *plus* pressure, right?  Check.
+    return pressure*part0 + c1*(1/3.)*part1 + c2*(2/3.)*part21 + c2*part22
 
 
 def constitutive_model(b,*p):
     """
-    Kirchhoff stress as a function of the left Cauchy-green tensor and the two
-    parameters: p=c1,c2
+    Distortional Kirchhoff stress as a function of the left Cauchy-green tensor
+    and the two parameters: p=c1,c2
     """
    
     # Extract the model parameters

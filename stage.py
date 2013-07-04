@@ -14,8 +14,8 @@ def det1_3d(mat2d):
     J0 = np.linalg.det(mat2d)
     return lin.direct_sum(mat2d,np.diagflat([1/J0]))
 
-def test_mr_drucker(C,*params):
-    tstiff = el.voigt(mr.material_tangent_stiffness(C,*params))
+def test_mr_drucker(C,pressure,*params):
+    tstiff = el.voigt(mr.material_tangent_stiffness(C,pressure,*params))
     return lin.is_positive_definite(tstiff)
 
 def points_in_box(lower=np.zeros(2),upper=np.ones(2),num=10):
@@ -41,7 +41,7 @@ def biaxial_MR(b, *params):
     Incompressibility gives pressure from boundary condition that radial
     boundaries are stress-free
     """
-    cauchy0 = mr.constitutive_model(b,*params)
+    cauchy0 = mr.constitutive_model(b,pressure=0,*params)
     return cauchy0 - cauchy0[-1,-1]*np.eye(3)
 
 def uniaxial_MR(b, *params):
@@ -86,7 +86,13 @@ def cost_kaveh(params, lam=1e2, lam2=1.):
 
     # Penalty error
     if lam>0:
-        tests = [test_mr_drucker(c,*params) for c in pkc.right_cauchy_green]
+        # Uniaxial pressure
+        # Assume c is in principal coordinates
+        def uniaxial_pressure(C,*params2):
+            (c10,c01) = params2
+            l = np.sqrt(C[0,0])
+            return (1/3.)*(c10*((1/l) - l*l) + c01*(1/(l*l) - l))
+        tests = [test_mr_drucker(c,uniaxial_pressure(c,*params),*params) for c in pkc.right_cauchy_green]
         penalty = tests.count(False)/len(tests)
     else:
         penalty = 0
