@@ -94,11 +94,11 @@ def material_tangent_stiffness(C,pressure,*p):
     # Assemble the expression
     part0 = CixCi - 2*CisCi
     part1 = I1*(CisCi + (1/3.)*CixCi) - CivI
-    part21 = CvCi - I1*CivI + I2*(CisCi + (1/3.)*CixCi)
-    part22 = IxI - 0.5*IsI
+    part21 = CvCi - I1*CivI + I2*(CisCi + (2/3.)*CixCi)
+    part22 = IxI - IsI
 
     # FIXME: It's *plus* pressure, right?  Check.
-    return pressure*part0 + c1*(1/3.)*part1 + c2*(2/3.)*part21 + c2*part22
+    return pressure*part0 + 4*(c1*(1/3.)*part1 + c2*(2/3.)*part21 + c2*part22)
 
 
 def constitutive_model(b,*p):
