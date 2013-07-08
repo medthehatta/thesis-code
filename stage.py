@@ -109,25 +109,25 @@ def cost_kaveh(params, lam=1e2, lam2=1.):
 
 def automatic_fits(setups,cost):
     results = {}
-    for (initial1,initial2,lam) in setups:
-        results[(initial1,initial2,lam)] = \
-            so.minimize(cost, [initial1,initial2], args=(lam,), \
+    for (initial1,initial2,initial3,lam) in setups:
+        results[(initial1,initial2,initial3,lam)] = \
+            so.minimize(cost, [initial1,initial2,initial3], args=(lam,), \
                         callback=print, method='Powell')
     return results
 
 def sweep_auto_fits(initials,cost):
     penalty_parameters = [0,1,10,100,1000]
-    setups = [[(a,b,n) for n in penalty_parameters] for (a,b) in initials]
+    setups = [[(a,b,c,n) for n in penalty_parameters] for (a,b,c) in initials]
     fits = automatic_fits(sum(setups,[]),cost_kaveh)
     return [(k,fits[k]['x'],fits[k]['fun']) for k in fits.keys()]
 
 some_initials = [\
-                 (-1.01,1.49), # kaveh
-                 (200,-50),
-                 (200,100),
-                 (10,10),
-                 (1,1),
-                 (-100,100)]
+                 (-1.01,1.49,0.19), # kaveh
+                 (200,-50,0),
+                 (200,100,0),
+                 (10,10,0),
+                 (1,1,0),
+                 (-100,100,0)]
 
 
 def test_drucker(params,tangent_stiffness,points):
