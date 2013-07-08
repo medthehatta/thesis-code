@@ -45,17 +45,7 @@ def biaxial_MR(b, *params):
     return cauchy0 - cauchy0[-1,-1]*np.eye(3)
 
 def uniaxial_MR(b, *params):
-    """
-    Incompressibility gives pressure from boundary condition that non-axial
-    boundaries are stress-free.
-    I hope this isn't overdetermined.
-    """
-    cauchy0 = mr.constitutive_model(b,*params)
-    other1 = cauchy0[-1,-1]
-    other2 = cauchy0[-2,-2]
-    if other1 != other2:
-        raise ValueError("Loading yields ambiguous stress response.")
-    return cauchy0 - other1*np.eye(3)
+    return mr.constitutive_model(b,uniaxial_pressure(b,*params),*params)
 
 def uniaxial_pressure(C,*params2):
     """
@@ -106,7 +96,8 @@ def cost_kaveh(params, lam=1e2, lam2=1.):
 
     # Penalty error
     if lam>0:
-        tests = [test_mr_drucker(c,uniaxial_pressure(c,*params),*params) for c in pkc.right_cauchy_green]
+        tests = [test_mr_drucker(c,uniaxial_pressure(c,*params),*params) j
+                 for c in pkc.right_cauchy_green]
         penalty = tests.count(False)/len(tests)
     else:
         penalty = 0
