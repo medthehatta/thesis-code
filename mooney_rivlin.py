@@ -97,7 +97,6 @@ def material_tangent_stiffness(C,pressure,*p):
     part21 = CvCi - I1*CivI + I2*(CisCi + (2/3.)*CixCi)
     part22 = IxI - IsI
 
-    # FIXME: It's *plus* pressure, right?  Check.
     return pressure*part0 + 4*(c1*(1/3.)*part1 + c2*(2/3.)*part21 + c2*part22)
 
 
