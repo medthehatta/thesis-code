@@ -96,7 +96,7 @@ def cost_kaveh(params, lam=1e2, lam2=1.):
 
     # Penalty error
     if lam>0:
-        tests = [test_mr_drucker(c,uniaxial_pressure(c,*params),*params) j
+        tests = [test_mr_drucker(c,uniaxial_pressure(c,*params),*params) 
                  for c in pkc.right_cauchy_green]
         penalty = tests.count(False)/len(tests)
     else:
