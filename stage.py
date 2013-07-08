@@ -62,9 +62,20 @@ def uniaxial_pressure(C,*params2):
     Uniaxial pressure
     Assume c is in principal coordinates
     """
-    (c10,c01) = params2
-    l = np.sqrt(C[0,0])
-    return (1/3.)*(c10*((1/l) - l*l) + c01*(1/(l*l) - l))
+    (c10,c01,c11) = params2
+    ll = C[0,0]
+    l = np.sqrt(ll)
+
+    # Construct invariants from stretch
+    I1 = ll + 2/l
+    I2 = 1/ll + 2*l
+
+    # Assemble the awful pressure expression
+    p1 = 1/l 
+    p2 = I1/l - 1/ll
+    p3 = (I2/l + I1*I1/l - I1/ll)/3 + 1/ll - 1/l - I1/l
+
+    return 2*c10*p1 + 2*c01*p2 + 6*c11*p3
 
 def cost_golriz(params, lam=1e2):
     # Collate the data
