@@ -106,7 +106,7 @@ def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
     regularize = sum([p*p for p in params])
 
     if debug==True:
-        return (total_error, penalty, regularize)
+        return (total_error, penalty, lam*penalty, regularize, lam2*regularize)
     else:
         return total_error + lam*penalty + lam2*regularize
 
