@@ -79,7 +79,7 @@ def constitutive_model(F,pressure,*p):
     part32 = (3 - I1)*F
     part3 = c11*(part31 + part32)
 
-    return 2*(volumetric + part1 + part2 + part3)
+    return volumetric + 2*(part1 + part2 + part3)
 
 
 
