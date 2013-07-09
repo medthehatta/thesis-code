@@ -44,9 +44,6 @@ def biaxial_MR(b, *params):
     cauchy0 = mr.constitutive_model(b,pressure=0,*params)
     return cauchy0 - cauchy0[-1,-1]*np.eye(3)
 
-def uniaxial_MR(b, *params):
-    return mr.constitutive_model(b,uniaxial_pressure(b,*params),*params)
-
 def uniaxial_pressure(F,*params2):
     """
     Uniaxial pressure
@@ -87,11 +84,13 @@ def cost_golriz(params, lam=1e2):
 
 def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
     # Collate the data
-    data = zip(pkc.left_cauchy_green, pkc.v3Cauchy)
+    data = zip(pkc.deformations, pkc.v3Cauchy)
 
     # Least square error
-    errors = np.array([sigma - np.diag(uniaxial_MR(b,*params)) for 
-                       (b,sigma) in data])
+    def uniaxial_MR(f,*params):
+        return mr.constitutive_model(f,uniaxial_pressure(f,*params),*params)
+    errors = np.array([P - np.diag(uniaxial_MR(f,*params)) for 
+                       (f,P) in data])
     total_error = np.tensordot(errors,errors)
 
     # Penalty error
