@@ -107,18 +107,18 @@ def cost_kaveh(params, lam=1e2, lam2=1.):
 
     return total_error + lam*penalty + lam2*regularize
 
-def automatic_fits(setups,cost):
+def automatic_fits(setups,cost,min_method='Powell',reg=1.0):
     results = {}
     for (initial1,initial2,initial3,lam) in setups:
         results[(initial1,initial2,initial3,lam)] = \
-            so.minimize(cost, [initial1,initial2,initial3], args=(lam,), \
-                        callback=print, method='Powell')
+            so.minimize(cost, [initial1,initial2,initial3], args=(lam,reg), \
+                        callback=print, method=min_method)
     return results
 
-def sweep_auto_fits(initials,cost):
+def sweep_auto_fits(initials,cost,min_method='Powell',reg=1.0):
     penalty_parameters = [0,1,10,100,1000]
     setups = [[(a,b,c,n) for n in penalty_parameters] for (a,b,c) in initials]
-    fits = automatic_fits(sum(setups,[]),cost_kaveh)
+    fits = automatic_fits(sum(setups,[]),cost_kaveh,min_method,reg)
     return [(k,fits[k]['x'],fits[k]['fun']) for k in fits.keys()]
 
 some_initials = [\
