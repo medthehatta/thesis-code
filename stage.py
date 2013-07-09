@@ -84,14 +84,14 @@ def cost_golriz(params, lam=1e2):
 
 def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
     # Collate the data
-    data = zip(pkc.deformations, pkc.v3Cauchy)
+    data = zip(pkc.deformations, pkc.PK1)
 
     # Least square error
     def uniaxial_MR(f,*params):
         return mr.constitutive_model(f,uniaxial_pressure(f,*params),*params)
-    errors = np.array([P - np.diag(uniaxial_MR(f,*params)) for 
+    errors = np.array([P[0,0] - uniaxial_MR(f,*params)[0,0] for 
                        (f,P) in data])
-    total_error = np.tensordot(errors,errors)
+    total_error = np.dot(errors,errors)
 
     # Penalty error
     if lam>0:
@@ -157,17 +157,26 @@ def analyze_params_uniaxial_mr(params):
     r_pct_true = 100*r_num_true/(r_num_true + r_num_false)
     r_pct_false = 100*r_num_false/(r_num_true + r_num_false)
 
+    data_result = test_drucker(params,tstiff,pkc.right_cauchy_green)
+    d_num_true = len(data_result[0])
+    d_num_false = len(data_result[1])
+    d_pct_true = 100*d_num_true/(d_num_true + d_num_false)
+    d_pct_false = 100*d_num_false/(d_num_true + d_num_false)
+
     id_text = "Stable at identity: " + str(id_true).upper()
 
     r1_t = "Stable at {} and unstable at {} of {} points sampled from region ({}%)"
     r1_text = r1_t.format(r_num_true,r_num_false,r_num_true+r_num_false,r_pct_true)
-    
-    if r_pct_false==0:
-        r_text = "Stable over all samples from region: TRUE"
-    else:
-        r_text = "Stable over all samples from region: FALSE"
 
-    print("\n".join([str(params),id_text,r1_text,r_text]))
+    d1_t = "Stable at {} and unstable at {} of {} data points ({}%)"
+    d1_text = d1_t.format(d_num_true,d_num_false,d_num_true+d_num_false,d_pct_true)
+
+    print("\n".join([str(params),id_text,r1_text,d1_text]))
+
+    if d_pct_true == 100:
+        print("== STABLE OVER DATA ==")
+    else:
+        print("(Unstable over data)")
 
     return sorted([(np.trace(c), np.trace(np.dot(c,c)), r) for (c,r) in region_result[2]],key=lambda x:x[-1])
 
