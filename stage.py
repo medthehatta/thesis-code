@@ -3,46 +3,9 @@ import lintools as lin
 import mooney_rivlin as mr
 import elastic as el
 
-def random_F(scale=1.0):
-    F0 = np.eye(2) + scale*np.random.random((2,2))
-    return det1_3d(F0)
-
-def symmetric_2x2(a11,a22,a12):
-    return np.array([[a11,a12],[a12,a22]])
-
-def det1_3d(mat2d):
-    J0 = np.linalg.det(mat2d)
-    return lin.direct_sum(mat2d,np.diagflat([1/J0]))
-
-def test_mr_drucker(C,pressure,*params):
-    tstiff = el.voigt(mr.material_tangent_stiffness(C,pressure,*params))
-    return lin.is_positive_definite(tstiff)
-
-def points_in_box(lower=np.zeros(2),upper=np.ones(2),num=10):
-    result_shape = [num]+list(lower.shape)
-    signs = np.random.choice([-1,1],size=result_shape)
-    return lower + (upper-lower)*signs*np.random.random(result_shape)
-
-def stable_region(lower,upper,*p,num=10):
-    pts = points_in_box(lower,upper,num)
-    Bs = [det1_3d(np.eye(2) + symmetric_2x2(*pt)) for pt in pts]
-    tests = [test_mr_drucker(b,*p) for b in Bs]
-    return (tests.count(True)/len(tests))
-
-# For constrained fitting
-
-import parse_new_golriz as png
 import parse_kaveh_compression as pkc
 import mooney_rivlin as mr
 import scipy.optimize as so
-
-def biaxial_MR(b, *params):
-    """
-    Incompressibility gives pressure from boundary condition that radial
-    boundaries are stress-free
-    """
-    cauchy0 = mr.constitutive_model(b,pressure=0,*params)
-    return cauchy0 - cauchy0[-1,-1]*np.eye(3)
 
 def uniaxial_pressure(F,*params2):
     """
@@ -63,24 +26,6 @@ def uniaxial_pressure(F,*params2):
     p3 = (I2 - 3 + I1*I1 - 3*I1)/l + (3 - I1)/ll
 
     return 2*c10*p1 + 2*c01*p2 + 2*c11*p3
-
-def cost_golriz(params, lam=1e2):
-    # Collate the data
-    data = zip(pkc.left_cauchy_green_p, pkc.v3Cauchy)
-
-    # Least square error
-    errors = np.array([sigma - np.diag(biaxial_MR(b,*params)) for 
-                       (b,sigma) in data])
-    total_error = np.tensordot(errors,errors) / np.dot(errors[0],errors[0])
-
-    # Penalty error
-    tests = [test_mr_drucker(c,*params) for c in png.right_cauchy_green_p]
-    penalty = tests.count(False)/len(tests)
-
-    # Regularization
-    regularize = sum([p*p for p in params])
-
-    return total_error + lam*penalty + lam2*regularize
 
 def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
     # Collate the data
@@ -122,15 +67,6 @@ def sweep_auto_fits(initials,cost,min_method='Powell',reg=1.0):
     setups = [[(a,b,c,n) for n in penalty_parameters] for (a,b,c) in initials]
     fits = automatic_fits(sum(setups,[]),cost_kaveh,min_method,reg)
     return [(k,fits[k]['x'],fits[k]['fun']) for k in fits.keys()]
-
-some_initials = [\
-                 (-1.01,1.49,0.19), # kaveh
-                 (200,-50,0),
-                 (200,100,0),
-                 (10,10,0),
-                 (1,1,0),
-                 (-100,100,0)]
-
 
 def test_drucker(params,tangent_stiffness,points):
     res = [lin.is_positive_definite(el.voigt(tangent_stiffness(pt,*params)))
