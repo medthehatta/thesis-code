@@ -74,7 +74,11 @@ def constitutive_model(F,pressure,*p):
     """
    
     # Extract the model parameters
-    (c10,c01,c11) = p
+    if len(p)==2:
+        (c10,c01) = p
+        c11 = 0
+    else:
+        (c10,c01,c11) = p
 
     # Compute the other required generating tensors for the expression
     C = np.dot(F.T,F)
