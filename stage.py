@@ -92,7 +92,7 @@ def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
     # Least square error
     errors = np.array([sigma - np.diag(uniaxial_MR(b,*params)) for 
                        (b,sigma) in data])
-    total_error = np.tensordot(errors,errors) / np.dot(errors[0],errors[0])
+    total_error = np.tensordot(errors,errors)
 
     # Penalty error
     if lam>0:
