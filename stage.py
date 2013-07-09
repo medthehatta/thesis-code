@@ -68,6 +68,13 @@ def sweep_auto_fits(initials,cost,min_method='Powell',reg=1.0):
     fits = automatic_fits(sum(setups,[]),cost_kaveh,min_method,reg)
     return [(k,fits[k]['x'],fits[k]['fun']) for k in fits.keys()]
 
+def test_mr_drucker(C,pressure,*params):
+    def tstiff(C,*p):
+      return mr.material_tangent_stiffness(C,uniaxial_pressure(C,*p),*p)
+
+    trues = test_drucker(params,tstiff,[C])[0]
+    return len(trues)>0
+
 def test_drucker(params,tangent_stiffness,points):
     res = [lin.is_positive_definite(el.voigt(tangent_stiffness(pt,*params)))
            for pt in points]
