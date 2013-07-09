@@ -54,32 +54,32 @@ def material_tangent_stiffness(C,pressure,*p):
     return pressure*part0 + 4*(c1*(1/3.)*part1 + c2*(2/3.)*part21 + c2*part22)
 
 
-def constitutive_model(b,pressure,*p):
+def constitutive_model(F,pressure,*p):
     """
-    Kirchhoff stress as a function of the left Cauchy-green tensor and the
-    parameters: params=c1,c2,c3
+    PK1 stress as a function of the deformation gradient and model parameters.
     """
    
     # Extract the model parameters
-    (c1,c2,c3) = p
+    (c10,c01,c11) = p
 
     # Compute the other required generating tensors for the expression
-    I = np.eye(3)
-    bb = np.dot(b,b)
+    C = np.dot(F.T,F)
+    Fit = np.linalg.inv(F.T)
+    FC = np.dot(F,C)
 
-    # Alias the invariants of b
-    I1 = np.trace(b)
-    I2 = 0.5*(I1*I1 - np.trace(np.dot(b,b)))
+    # Alias the invariants of C
+    I1 = np.trace(C)
+    I2 = 0.5*(I1*I1 - np.trace(np.dot(C,C)))
 
     # Assemble the expression
-    volumetric = -pressure*I
-    part1 = 2*c1*b
-    part2 = 2*c2*(I1*b - bb)
-    part31 = I2*b + I1*I1*b - I1*bb
-    part32 = bb - I1*b - b
-    part3 = 6*c3*(part31/3. + part32)
+    volumetric = -pressure*Fit
+    part1 = c10*F
+    part2 = c01*(I1*F - FC)
+    part31 = (I2 - 3 + I1*I1 - 3*I1)*F
+    part32 = (3 - I1)*F
+    part3 = c11*(part31 + part32)
 
-    return part1 + part2 + part3
+    return 2*(volumetric + part1 + part2 + part3)
 
 
 

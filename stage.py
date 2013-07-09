@@ -47,14 +47,14 @@ def biaxial_MR(b, *params):
 def uniaxial_MR(b, *params):
     return mr.constitutive_model(b,uniaxial_pressure(b,*params),*params)
 
-def uniaxial_pressure(C,*params2):
+def uniaxial_pressure(F,*params2):
     """
     Uniaxial pressure
-    Assume c is in principal coordinates
+    Assume F is diagonal.
     """
     (c10,c01,c11) = params2
-    ll = C[0,0]
-    l = np.sqrt(ll)
+    l = F[0,0]
+    ll = l*l
 
     # Construct invariants from stretch
     I1 = ll + 2/l
