@@ -63,9 +63,9 @@ def uniaxial_pressure(C,*params2):
     # Assemble the awful pressure expression
     p1 = 1/l 
     p2 = I1/l - 1/ll
-    p3 = (I2/l + I1*I1/l - I1/ll)/3 + 1/ll - 1/l - I1/l
+    p3 = (I2 - 3 + I1*I1 - 3*I1)/l + (3 - I1)/ll
 
-    return 2*c10*p1 + 2*c01*p2 + 6*c11*p3
+    return 2*c10*p1 + 2*c01*p2 + 2*c11*p3
 
 def cost_golriz(params, lam=1e2):
     # Collate the data
