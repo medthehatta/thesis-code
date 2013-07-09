@@ -85,7 +85,7 @@ def cost_golriz(params, lam=1e2):
 
     return total_error + lam*penalty + lam2*regularize
 
-def cost_kaveh(params, lam=1e2, lam2=1.):
+def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
     # Collate the data
     data = zip(pkc.left_cauchy_green, pkc.v3Cauchy)
 
@@ -105,7 +105,10 @@ def cost_kaveh(params, lam=1e2, lam2=1.):
     # Regularization
     regularize = sum([p*p for p in params])
 
-    return total_error + lam*penalty + lam2*regularize
+    if debug==True:
+        return (total_error, penalty, regularize)
+    else:
+        return total_error + lam*penalty + lam2*regularize
 
 def automatic_fits(setups,cost,min_method='Powell',reg=1.0):
     results = {}
