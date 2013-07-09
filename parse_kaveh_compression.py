@@ -35,7 +35,7 @@ left_cauchy_green = [np.dot(f,f.T) for f in deformations]
 right_cauchy_green = [np.dot(f.T,f) for f in deformations]
 
 # Calculate the full PK1 stress assuming the other directions are stress-free
-PK1 = [np.diagflat([-p]+[0,0]) for p in P]
+PK1 = [np.diagflat([p]+[0,0]) for p in P]
 
 # Calculate the cauchy stresses from the PK1 stresses
 cauchy = [np.dot(p,f.T) for (p,f) in zip(PK1,deformations)]
