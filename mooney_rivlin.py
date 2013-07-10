@@ -67,8 +67,8 @@ def material_tangent_stiffness(C,pressure,*p):
             ((1/3.)*I1 + (2/9.)*I1*I2)*CivCi
 
     return pressure*part0 + \
-           4*(c1+c3*(I1-3))*(1/3.)*(part1) + \
-           4*(c2+c3*(I2-3))*(part2) + \
+           4*(c1+c3*(I2-3))*(1/3.)*(part1) + \
+           4*(c2+c3*(I1-3))*(part2) + \
            4*c3*(part3)
 
 
