@@ -62,14 +62,7 @@ def material_tangent_stiffness(C,pressure,*p):
     part22 = IxI - IsI
     part2 = (2/3.)*part21 + part22
 
-    part3 = I1*IvI - CvI - \
-            ((2/3.)*I2 + (1/3.)*I1*I1)*CivI + \
-            ((1/3.)*I1 + (2/9.)*I1*I2)*CivCi
-
-    return pressure*part0 + \
-           4*(c1+c3*(I2-3))*(1/3.)*(part1) + \
-           4*(c2+c3*(I1-3))*(part2) + \
-           4*c3*(part3)
+    return pressure*part0 + 4*(c1*(1/3.)*part1 + c2*part2)
 
 
 def constitutive_model(F,pressure,*p):
@@ -78,11 +71,7 @@ def constitutive_model(F,pressure,*p):
     """
    
     # Extract the model parameters
-    if len(p)==2:
-        (c10,c01) = p
-        c11 = 0
-    else:
-        (c10,c01,c11) = p
+    (c10,c01) = p
 
     # Compute the other required generating tensors for the expression
     C = np.dot(F.T,F)
@@ -97,11 +86,8 @@ def constitutive_model(F,pressure,*p):
     volumetric = -pressure*Fit
     part1 = c10*F
     part2 = c01*(I1*F - FC)
-    part31 = (I2 - 3 + I1*I1 - 3*I1)*F
-    part32 = (3 - I1)*FC
-    part3 = c11*(part31 + part32)
 
-    return volumetric + 2*(part1 + part2 + part3)
+    return volumetric + 2*(part1 + part2)
 
 
 

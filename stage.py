@@ -12,11 +12,7 @@ def uniaxial_pressure(F,*params2):
     Uniaxial pressure
     Assume F is diagonal.
     """
-    if len(params2)==2:
-        (c10,c01) = params2
-        c11 = 0
-    else:
-        (c10,c01,c11) = params2
+    (c10,c01) = params2
 
     l = F[0,0]
     ll = l*l
@@ -28,9 +24,8 @@ def uniaxial_pressure(F,*params2):
     # Assemble the awful pressure expression
     p1 = 1/l 
     p2 = I1/l - 1/ll
-    p3 = (I2 - 3 + I1*I1 - 3*I1)/l + (3 - I1)/ll
 
-    return 2*c10*p1 + 2*c01*p2 + 2*c11*p3
+    return 2*(c10*p1 + c01*p2)
 
 def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
     # Collate the data
