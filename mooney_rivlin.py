@@ -14,7 +14,11 @@ def material_tangent_stiffness(C,pressure,*p):
     """
     
     # Extract the model parameters
-    (c1,c2,c3) = p
+    if len(p)==2:
+        (c1,c2) = p
+        c3 = 0
+    else:
+        (c1,c2,c3) = p
 
     # Compute the other required generating tensors for the expression
     Ci = np.linalg.inv(C)

@@ -12,7 +12,12 @@ def uniaxial_pressure(F,*params2):
     Uniaxial pressure
     Assume F is diagonal.
     """
-    (c10,c01,c11) = params2
+    if len(params2)==2:
+        (c10,c01) = params2
+        c11 = 0
+    else:
+        (c10,c01,c11) = params2
+
     l = F[0,0]
     ll = l*l
 
@@ -56,15 +61,15 @@ def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
 
 def automatic_fits(setups,cost,min_method='Powell',reg=1.0):
     results = {}
-    for (initial1,initial2,initial3,lam) in setups:
-        results[(initial1,initial2,initial3,lam)] = \
-            so.minimize(cost, [initial1,initial2,initial3], args=(lam,reg), \
+    for setup in setups:
+        results[tuple(setup)] = \
+            so.minimize(cost, setup[:-1], args=(setup[-1],reg), \
                         callback=print, method=min_method)
     return results
 
 def sweep_auto_fits(initials,cost,min_method='Powell',reg=1.0):
     penalty_parameters = [0,1,10,100,1000]
-    setups = [[(a,b,c,n) for n in penalty_parameters] for (a,b,c) in initials]
+    setups = [[ini+[n] for n in penalty_parameters] for ini in initials]
     fits = automatic_fits(sum(setups,[]),cost_kaveh,min_method,reg)
     return [(k,fits[k]['x'],fits[k]['fun']) for k in fits.keys()]
 
