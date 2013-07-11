@@ -7,10 +7,10 @@
 
 import numpy as np
 
-def material_tangent_stiffness(C,pressure,*p):
+def material_tangent_stiffness(F,pressure,*p):
     """
-    Material Tangent stiffness as a function of the right Cauchy-green tensor
-    and the two parameters: p=c1,c2
+    Material Tangent stiffness as a function of the deformation gradient and
+    the two parameters: p=c1,c2
     """
     
     # Extract the model parameters
@@ -21,6 +21,7 @@ def material_tangent_stiffness(C,pressure,*p):
         (c1,c2,c3) = p
 
     # Compute the other required generating tensors for the expression
+    C = np.dot(F.T,F)
     Ci = np.linalg.inv(C)
     I = np.eye(3)
 

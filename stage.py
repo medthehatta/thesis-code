@@ -42,16 +42,18 @@ def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
     data = zip(pkc.deformations, pkc.PK1)
 
     # Least square error
-    def uniaxial_MR(f,*params):
-        return mr.constitutive_model(f,uniaxial_pressure(f,*params),*params)
-    errors = np.array([P[0,0] - uniaxial_MR(f,*params)[0,0] for 
-                       (f,P) in data])
+    def MR(f,*params):
+        pressure = general_pressure_PK1(f,mr.constitutive_model,*params)
+        return mr.constitutive_model(f,pressure,*params)
+    errors = np.array([P[0,0] - MR(f,*params)[0,0] for (f,P) in data])
     total_error = np.dot(errors,errors)
 
     # Penalty error
     if lam>0:
-        tests = [test_mr_drucker(c,uniaxial_pressure(c,*params),*params) 
-                 for c in pkc.right_cauchy_green]
+        def pressure(f,*params): 
+            return general_pressure_PK1(f,mr.constitutive_model,*params)
+        tests = [test_mr_drucker(f,pressure(f,*params),*params) 
+                 for f in pkc.deformations]
         penalty = tests.count(False)/len(tests)
     else:
         penalty = 0
@@ -78,13 +80,6 @@ def sweep_auto_fits(initials,cost,min_method='Powell',reg=1.0):
     fits = automatic_fits(sum(setups,[]),cost_kaveh,min_method,reg)
     return [(k,fits[k]['x'],fits[k]['fun']) for k in fits.keys()]
 
-def test_mr_drucker(C,pressure,*params):
-    def tstiff(C,*p):
-      return mr.material_tangent_stiffness(C,uniaxial_pressure(C,*p),*p)
-
-    trues = test_drucker(params,tstiff,[C])[0]
-    return len(trues)>0
-
 def test_drucker(params,tangent_stiffness,points):
     res = [lin.is_positive_definite(el.voigt(tangent_stiffness(pt,*params)))
            for pt in points]
@@ -93,9 +88,18 @@ def test_drucker(params,tangent_stiffness,points):
     falses = [p for (p,r) in labeled if r==False]
     return (trues,falses,labeled)
     
+def test_mr_drucker(F,pressure,*params):
+    def tstiff(F,*p):
+        pressure = general_pressure_PK1(F,mr.constitutive_model,*p)
+        return mr.material_tangent_stiffness(F,pressure,*p)
+
+    trues = test_drucker(params,tstiff,[F])[0]
+    return len(trues)>0
+
 def analyze_params_uniaxial_mr(params):
-    def tstiff(C,*p):
-      return mr.material_tangent_stiffness(C,uniaxial_pressure(C,*p),*p)
+    def tstiff(F,*p):
+        pressure = general_pressure_PK1(F,mr.constitutive_model,*p)
+        return mr.material_tangent_stiffness(F,pressure,*p)
 
     identity = np.eye(3)
     regional = 0.01 + 2.0*np.random.random(100)
