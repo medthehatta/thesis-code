@@ -7,6 +7,14 @@ import parse_kaveh_compression as pkc
 import mooney_rivlin as mr
 import scipy.optimize as so
 
+def det1_3d(F0):
+    J0 = np.linalg.det(mat2d)
+    return lin.direct_sum(mat2d,np.diagflat([1/J0]))
+
+def random_F(scale=1.0):
+    F0 = np.eye(2) + scale*np.random.random((2,2))
+    return det1_3d(F0)
+
 def general_pressure_PK1(F,constitutive_model,*params):
     """
     Get the pressure from the constitutive model.
