@@ -19,7 +19,6 @@ def uniaxial_pressure(F,*params2):
 
     # Construct invariants from stretch
     I1 = ll + 2/l
-    I2 = 1/ll + 2*l
 
     # Assemble the awful pressure expression
     p1 = 1/l 
