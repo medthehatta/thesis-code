@@ -36,12 +36,10 @@ def material_tangent_stiffness(F,pressure,*p):
 
     # Compute the relevant products of I
     IxI = np.einsum(tensor,I,I)
-    IvI = 2*IxI
     IsI = 0.5*(np.einsum(kronecker,I,I) + np.einsum(cokronecker,I,I))
 
     # Compute the relevant products of C and Ci
     CixCi = np.einsum(tensor,Ci,Ci)
-    CivCi = 2*CixCi
     CixC = np.einsum(tensor,Ci,C)
     CxCi = np.einsum(tensor,C,Ci)
     CvCi = CxCi + CixC
