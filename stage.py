@@ -9,7 +9,7 @@ import scipy.optimize as so
 
 
 
-def det1_3d(F0):
+def det1_3d(mat2d):
     J0 = np.linalg.det(mat2d)
     return lin.direct_sum(mat2d,np.diagflat([1/J0]))
 
