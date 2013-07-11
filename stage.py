@@ -7,6 +7,17 @@ import parse_kaveh_compression as pkc
 import mooney_rivlin as mr
 import scipy.optimize as so
 
+def general_pressure_PK1(F,constitutive_model,*params):
+    """
+    Get the pressure from the constitutive model.
+    constitutive_model(F,pressure,*params)
+    I hope this works.
+    """
+    P_nop = constitutive_model(F,0,*params)
+    pI = np.dot(P_nop,F.T)
+    return pI[0,0]
+
+
 def uniaxial_pressure(F,*params2):
     """
     Uniaxial pressure
