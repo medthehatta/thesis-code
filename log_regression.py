@@ -69,9 +69,9 @@ def calibrate_logistic(X, y, lam=0.0):
 
 # Pre-made powers for monomializing 2d vectors
 # The [0,0] guarantees a bias term for calibration of the logistic classifier
-dim2_deg2 = [[0,0],[1,0],[0,1],[2,0],[0,2],[1,1]]
-dim2_deg3 = [[0,0],[1,0],[0,1],[2,0],[0,2],[1,1],[3,0],[0,3],[2,1],[1,2]]
-dim2_deg4 = [[0,0],[1,0],[0,1],[2,0],[0,2],[1,1],[3,0],[0,3],[2,1],[1,2],[4,0],[0,4],[3,1],[1,3],[2,2]]
+dim2_deg2 = np.array([[0,0],[1,0],[0,1],[2,0],[0,2],[1,1]])
+dim2_deg3 = np.array([[0,0],[1,0],[0,1],[2,0],[0,2],[1,1],[3,0],[0,3],[2,1],[1,2]])
+dim2_deg4 = np.array([[0,0],[1,0],[0,1],[2,0],[0,2],[1,1],[3,0],[0,3],[2,1],[1,2],[4,0],[0,4],[3,1],[1,3],[2,2]])
 
 def monomialize_vector(vec,powers):
     """
@@ -79,5 +79,8 @@ def monomialize_vector(vec,powers):
     into monomials and returning a vector of them.
     I.E., [x1, x2] -> [x1, x2, x1^2 x2, x1 x2^2, ...]
     """
-    return np.product(vec**powers,axis=1)
+    return np.product(vec**powers,axis=-1).T
+
+def evaluate_poly(poly_coeffs,powers,vector):
+    return np.dot(monomialize_vector(vector, powers), poly_coeffs)
 
