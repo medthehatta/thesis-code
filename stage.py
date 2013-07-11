@@ -120,5 +120,5 @@ def analyze_params_uniaxial_mr(params):
     else:
         print("(Unstable over data)")
 
-    return sorted([(np.trace(c), np.trace(np.dot(c,c)), r) for (c,r) in region_result[2]],key=lambda x:x[-1])
+    return sorted([(np.trace(c), 0.5*(np.trace(c)**2 - np.trace(np.dot(c,c))), r) for (c,r) in region_result[2]],key=lambda x:x[-1])
 
