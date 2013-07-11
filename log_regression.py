@@ -5,6 +5,7 @@ Logistic regression binary classifier.
 """
 import numpy as np
 import scipy.optimize as so
+from itertools import permutations
 
 def sigmoid(X):
     """Compute the sigmoid function"""
@@ -63,5 +64,20 @@ def calibrate_logistic(X, y, lam=0.0):
     """
     cost = lambda t: compute_cost(t,X,y,lam)
     dcost = lambda t: compute_grad(t,X,y,lam)
-    return so.fmin_bfgs(cost,np.ones(X.shape[-1]),dcost)
+    return so.minimize(cost,np.ones(X.shape[-1]),jac=dcost,method="CG")
+
+
+# Pre-made powers for monomializing 2d vectors
+# The [0,0] guarantees a bias term for calibration of the logistic classifier
+dim2_deg2 = [[0,0],[1,0],[0,1],[2,0],[0,2],[1,1]]
+dim2_deg3 = [[0,0],[1,0],[0,1],[2,0],[0,2],[1,1],[3,0],[0,3],[2,1],[1,2]]
+dim2_deg4 = [[0,0],[1,0],[0,1],[2,0],[0,2],[1,1],[3,0],[0,3],[2,1],[1,2],[4,0],[0,4],[3,1],[1,3],[2,2]]
+
+def monomialize_vector(vec,powers):
+    """
+    Takes a vector and raises its elements to various powers, combining them
+    into monomials and returning a vector of them.
+    I.E., [x1, x2] -> [x1, x2, x1^2 x2, x1 x2^2, ...]
+    """
+    return np.product(vec**powers,axis=1)
 
