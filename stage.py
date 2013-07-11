@@ -46,9 +46,7 @@ def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
 
     # Penalty error
     if lam>0:
-        def pressure(f,*params): 
-            return general_pressure_PK1(f,mr.constitutive_model,*params)
-        tests = [test_mr_drucker(f,pressure(f,*params),*params) 
+        tests = [test_mr_drucker(f,*params),*params) 
                  for f in pkc.deformations]
         penalty = tests.count(False)/len(tests)
     else:
@@ -92,7 +90,7 @@ def test_drucker(params,tangent_stiffness,points):
     
 
 
-def test_mr_drucker(F,pressure,*params):
+def test_mr_drucker(F,*params):
     def tstiff(F,*p):
         pressure = general_pressure_PK1(F,mr.constitutive_model,*p)
         return mr.material_tangent_stiffness(F,pressure,*p)
