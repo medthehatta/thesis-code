@@ -79,7 +79,8 @@ def monomialize_vector(vec,powers):
     into monomials and returning a vector of them.
     I.E., [x1, x2] -> [x1, x2, x1^2 x2, x1 x2^2, ...]
     """
-    return np.product(vec**powers,axis=-1).T
+    transposed = np.product(vec**powers,axis=-1)
+    return np.rollaxis(transposed,0,len(transposed.shape))
 
 def evaluate_poly(poly_coeffs,powers,vector):
     return np.dot(monomialize_vector(vector, powers), poly_coeffs)
