@@ -7,13 +7,19 @@ import parse_kaveh_compression as pkc
 import mooney_rivlin as mr
 import scipy.optimize as so
 
+
+
 def det1_3d(F0):
     J0 = np.linalg.det(mat2d)
     return lin.direct_sum(mat2d,np.diagflat([1/J0]))
 
+
+
 def random_F(scale=1.0):
     F0 = np.eye(2) + scale*np.random.random((2,2))
     return det1_3d(F0)
+
+
 
 def general_pressure_PK1(F,constitutive_model,*params):
     """
@@ -26,24 +32,6 @@ def general_pressure_PK1(F,constitutive_model,*params):
     return pI[0,0]
 
 
-def uniaxial_pressure(F,*params2):
-    """
-    Uniaxial pressure
-    Assume F is diagonal.
-    """
-    (c10,c01) = params2
-
-    l = F[0,0]
-    ll = l*l
-
-    # Construct invariants from stretch
-    I1 = ll + 2/l
-
-    # Assemble the awful pressure expression
-    p1 = 1/l 
-    p2 = I1/l - 1/ll
-
-    return 2*(c10*p1 + c01*p2)
 
 def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
     # Collate the data
@@ -74,6 +62,8 @@ def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
     else:
         return total_error + lam*penalty + lam2*regularize
 
+
+
 def automatic_fits(setups,cost,min_method='Powell',reg=1.0):
     results = {}
     for setup in setups:
@@ -82,11 +72,15 @@ def automatic_fits(setups,cost,min_method='Powell',reg=1.0):
                         callback=print, method=min_method)
     return results
 
+
+
 def sweep_auto_fits(initials,cost,min_method='Powell',reg=1.0):
     penalty_parameters = [0,1,10,100,1000]
     setups = [[ini+[n] for n in penalty_parameters] for ini in initials]
     fits = automatic_fits(sum(setups,[]),cost_kaveh,min_method,reg)
     return [(k,fits[k]['x'],fits[k]['fun']) for k in fits.keys()]
+
+
 
 def test_drucker(params,tangent_stiffness,points):
     res = [lin.is_positive_definite(el.voigt(tangent_stiffness(pt,*params)))
@@ -96,6 +90,8 @@ def test_drucker(params,tangent_stiffness,points):
     falses = [p for (p,r) in labeled if r==False]
     return (trues,falses,labeled)
     
+
+
 def test_mr_drucker(F,pressure,*params):
     def tstiff(F,*p):
         pressure = general_pressure_PK1(F,mr.constitutive_model,*p)
@@ -103,6 +99,8 @@ def test_mr_drucker(F,pressure,*params):
 
     trues = test_drucker(params,tstiff,[F])[0]
     return len(trues)>0
+
+
 
 def analyze_params_uniaxial_mr(params):
     def tstiff(F,*p):
