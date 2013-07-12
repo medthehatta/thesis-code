@@ -21,7 +21,7 @@ def random_F(scale=1.0):
 
 
 
-def general_pressure_PK1(F,constitutive_model,*params):
+def general_pressure_PK1(F,constitutive_model,*params,vanishing=(1,1)):
     """
     Get the pressure from the constitutive model.
     constitutive_model(F,pressure,*params)
@@ -29,7 +29,7 @@ def general_pressure_PK1(F,constitutive_model,*params):
     """
     P_nop = constitutive_model(F,0,*params)
     pI = np.dot(P_nop,F.T)
-    return pI[0,0]
+    return pI[vanishing]
 
 
 
@@ -46,8 +46,7 @@ def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
 
     # Penalty error
     if lam>0:
-        tests = [test_mr_drucker(f,*params),*params) 
-                 for f in pkc.deformations]
+        tests = [test_mr_drucker(f,*params) for f in pkc.deformations]
         penalty = tests.count(False)/len(tests)
     else:
         penalty = 0
