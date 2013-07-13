@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import elastic as el
 import lintools as lin
@@ -30,19 +31,29 @@ dt = 0.001
 F = np.eye(3)
 Ws = []
 EVs = []
-for j in range(1000):
+counts = 0
+while np.abs(F[0,0])<3 and 1/np.abs(F[0,0])>0.3 and counts<1000:
+    counts+=1
     W = strain_energy(F,*params)
     print(W)
     Ws.append(W)
 
     D = el.voigt(tangent_stiffness(F,*params))
     (eigvals,eigvecs) = np.linalg.eigh(D)
-    positive_directions = [i for (i,v) in zip(count(),eigvals) if v<0]
-    if len(positive_directions)>0:
-        direction = eigvecs[positive_directions[0]]
-        F += dt*vec_to_mat(direction)
-        EVs.append(eigvals[positive_directions[0]])
-    else:
-        break
+    positive_directions = [i for (i,v) in zip(count(),eigvals) if v>0]
+    direction = eigvecs[positive_directions[-1]]
+    F += dt*vec_to_mat(direction)
+    EVs.append(eigvals[positive_directions[-1]])
     
+rand = np.random.randint(99999)
+print(rand)
+
+plt.cla()
+plt.plot(Ws)
+plt.savefig("/home/med/astro/public_html/stuff/test_plots/W_{}.png".format(rand))
+
+plt.cla()
+plt.plot(EVs)
+plt.savefig("/home/med/astro/public_html/stuff/test_plots/EV_{}.png".format(rand))
+
 
