@@ -5,10 +5,6 @@ import elastic as el
 import lintools as lin
 from itertools import count
 
-def vec_to_mat(vec):
-    (n1,n2,n3,s1,s2,s3) = vec
-    return np.array([[n1,s3,s2],[s3,n2,s1],[s2,s1,n3]])
-
 def general_pressure_PK1(F,constitutive_model,*params,vanishing=(1,1)):
     """
     Get the pressure from the constitutive model.
@@ -26,33 +22,45 @@ constitutive_model = lambda F, *p: mr.constitutive_model(F, general_pressure_PK1
 tangent_stiffness = lambda F, *p: mr.material_tangent_stiffness(F, general_pressure_PK1(F, mr.constitutive_model, *p), *p)
 strain_energy = lambda F, *p: mr.strain_energy_density(F, *p)
 
-params = [-1.01,1.49]
-dt = 0.01
 
-# Let's try equibiaxial loading, maybe?
-Ws = []
-EVs = []
-for l in np.arange(1,1.3,0.01):
-    F = np.diagflat([l,l,1/(l*l)])
-    W = strain_energy(F,*params)
-    Ws.append(W)
+def uniaxial_loading(stretch1,stretch2):
+    return np.array([np.diagflat([l,1/np.sqrt(l),1/np.sqrt(l)]) 
+                     for l in np.linspace(stretch1,stretch2,200)])
 
-plt.cla()
+def equibiaxial_loading(stretch1,stretch2):
+    return np.array([np.diagflat([l,l,1/(l*l)]) 
+                     for l in np.linspace(stretch1,stretch2,200)])
 
-major_title = (" ".join(sys.argv[1:])).title()
-minor_title = "dt: {}   p: {}".format(dt,params)
-plt.suptitle(major_title+"\n"+minor_title)
+# I hope that stress-free unloaded direction is the correct B.C.
+(e1,e2,e3) = np.eye(3)
+def pure_shear(stretch1,stretch2):
+    return np.array([l*lin.symmetric(np.outer(e1,e2))
+                     for l in np.linspace(stretch1,stretch2,200)])
 
-plt.subplot(211)
-plt.plot(Ws)
 
-plt.subplot(212)
-plt.plot(EVs)
+def plot_loading_curves(params,loading,title="",start=1,stop=1.5):
+    Ws = [strain_energy(F,*params) for F in loading(start,stop)]
+    Ps = [constitutive_model(F,*params) for F in loading(start,stop)]
 
-rand = np.random.randint(99999)
-path = "stuff/test_plots/G_{}.png".format(rand)
-plt.savefig("/home/med/astro/public_html/"+path)
-print("http://astro.temple.edu/~tud48344/"+path)
+    plt.cla()
 
+    major_title = (title.title())
+    minor_title = "dt: {}   p: {}".format(dt,params)
+    plt.suptitle(major_title+"\n"+minor_title)
+
+    plt.subplot(211)
+    plt.title("Strain energy")
+    plt.plot(Ws)
+
+    plt.subplot(212)
+    plt.title("First component of PK1 stress")
+    plt.plot(Ps)
+
+    rand = np.random.randint(99999)
+    path = "stuff/test_plots/G_{}.png".format(rand)
+    plt.savefig("/home/med/astro/public_html/"+path)
+    print("http://astro.temple.edu/~tud48344/"+path)
+
+    return (Ws,Ps)
 
 
