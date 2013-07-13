@@ -89,4 +89,19 @@ def constitutive_model(F,pressure,*p):
     return volumetric + 2*(part1 + part2)
 
 
+def strain_energy_density(F,*p):
+    """
+    Strain energy density.
+    """
+    
+    # Extract model parameters
+    (c10,c01) = p
 
+    # Right Cauchy-Green
+    C = np.dot(F.T,F)
+
+    # Compute invariants
+    I1 = np.trace(C)
+    I2 = 0.5*(I1*I1 - np.trace(np.dot(C,C)))
+
+    return c10*(I1 - 3) + c01*(I2 - 3)
