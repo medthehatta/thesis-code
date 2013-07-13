@@ -109,3 +109,12 @@ def orthotropic_projectors(P):
 
     return np.array([A1,A2,A3])
 
+def pressure_PK1(F,constitutive_model,*params,P=0,component=(-1,-1)):
+    """
+    Get the pressure from the constitutive model.
+    constitutive_model(F,pressure,*params)
+    """
+    P0 = constitutive_model(F,0,*params)
+    Fit = np.linalg.inv(F.T)
+    return (P0 - P)[component]/Fit[component]
+

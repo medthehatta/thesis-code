@@ -5,17 +5,6 @@ import elastic as el
 import lintools as lin
 from itertools import count
 
-def general_pressure_PK1(F,constitutive_model,*params,vanishing=(1,1)):
-    """
-    Get the pressure from the constitutive model.
-    constitutive_model(F,pressure,*params)
-    I hope this works.
-    """
-    P_nop = constitutive_model(F,0,*params)
-    pI = np.dot(P_nop,F.T)
-    return pI[vanishing]
-
-
 # Use mooney-rivlin
 import mooney_rivlin as mr
 constitutive_model = lambda F, *p: mr.constitutive_model(F, general_pressure_PK1(F, mr.constitutive_model, *p), *p)
