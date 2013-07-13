@@ -28,7 +28,9 @@ def pure_shear_loading(stretch1,stretch2):
 def plot_loading_curves(params,loading,title="",start=1,stop=1.5):
     Ws = np.array([strain_energy(F,*params) for F in loading(start,stop)])
     Ps = np.array([constitutive_model(F,*params) for F in loading(start,stop)])
+    return plot_W_P(Ws,Ps,title)
 
+def plot_W_P(Ws,Ps,title=""):
     plt.clf()
 
     (f, (ax1, ax2)) = plt.subplots(2, sharex=True)
@@ -55,6 +57,5 @@ def plot_loading_curves(params,loading,title="",start=1,stop=1.5):
     plt.savefig("/home/med/astro/public_html/"+path)
     print("http://astro.temple.edu/~tud48344/"+path)
 
-    return (Ws,Ps,plt)
-
+    return (Ws,Ps)
 
