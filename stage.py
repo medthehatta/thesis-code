@@ -7,6 +7,7 @@ import parse_kaveh_compression as pkc
 import mooney_rivlin as mr
 import scipy.optimize as so
 
+import log_regression as lr
 
 
 def det1_3d(mat2d):
@@ -70,7 +71,7 @@ def automatic_fits(setups,cost,min_method='Powell',reg=1.0):
 
 
 def sweep_auto_fits(initials,cost,min_method='Powell',reg=1.0):
-    penalty_parameters = [0,1,10,100,1000]
+    penalty_parameters = [0,1,10,100,1e6]
     setups = [[ini+[n] for n in penalty_parameters] for ini in initials]
     fits = automatic_fits(sum(setups,[]),cost_kaveh,min_method,reg)
     return [(k,fits[k]['x'],fits[k]['fun']) for k in fits.keys()]
@@ -97,29 +98,37 @@ def test_mr_drucker(F,*params):
 
 
 
-def analyze_params_uniaxial_mr(params):
+def analyze_params_mr(params):
     def tstiff(F,*p):
         pressure = general_pressure_PK1(F,mr.constitutive_model,*p)
         return mr.material_tangent_stiffness(F,pressure,*p)
 
-    identity = np.eye(3)
-    regional = 0.01 + 2.0*np.random.random(100)
-    regional_mats = [np.diagflat([r,1/np.sqrt(r),1/np.sqrt(r)]) for r in regional]
 
+    identity = np.eye(3)
     identity_result = test_drucker(params,tstiff,[identity])
     id_true = bool(len(identity_result[0]))
 
+    # biaxial
+    regional = 0.01 + (1.6-0.01)*np.random.random((800,2))
+    regional_mats = [np.diagflat([r1,r2,1/(r1*r2)]) for (r1,r2) in regional]
     region_result = test_drucker(params,tstiff,regional_mats)
     r_num_true = len(region_result[0])
     r_num_false = len(region_result[1])
     r_pct_true = 100*r_num_true/(r_num_true + r_num_false)
     r_pct_false = 100*r_num_false/(r_num_true + r_num_false)
 
-    data_result = test_drucker(params,tstiff,pkc.right_cauchy_green)
+    data_result = test_drucker(params,tstiff,pkc.deformations)
     d_num_true = len(data_result[0])
     d_num_false = len(data_result[1])
     d_pct_true = 100*d_num_true/(d_num_true + d_num_false)
     d_pct_false = 100*d_num_false/(d_num_true + d_num_false)
+
+    (trues,falses,_) = region_result
+    values = np.array([1]*len(trues) + [0]*len(falses))
+    samples_m = np.concatenate([f for f in [trues,falses] if len(f)>0])
+    samples = np.diagonal(samples_m,axis1=1,axis2=2)[:,:2] - [1,1]
+    poly_samples = lr.monomialize_vector(samples, lr.dim2_deg4[:,None,:])
+    cal = lr.calibrate_logistic(poly_samples, values, lam=0.1)
 
     id_text = "Stable at identity: " + str(id_true).upper()
 
@@ -136,5 +145,10 @@ def analyze_params_uniaxial_mr(params):
     else:
         print("(Unstable over data)")
 
-    return sorted([(np.trace(c), 0.5*(np.trace(c)**2 - np.trace(np.dot(c,c))), r) for (c,r) in region_result[2]],key=lambda x:x[-1])
+    print("Fitness:")
+    print(cost_kaveh(params,debug=True))
+    print("4th Order Classifier:")
+    print(cal['x'])
+
+    return (cal['x'],np.array(trues),np.array(falses))
 
