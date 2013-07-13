@@ -21,7 +21,7 @@ def random_F(scale=1.0):
 
 
 
-def general_pressure_PK1(F,constitutive_model,*params,vanishing=(1,1)):
+def general_pressure_PK1(F,constitutive_model,*params,vanishing=(-1,-1)):
     """
     Get the pressure from the constitutive model.
     constitutive_model(F,pressure,*params)
