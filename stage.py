@@ -27,9 +27,7 @@ def general_pressure_PK1(F,constitutive_model,*params,vanishing=(-1,-1)):
     constitutive_model(F,pressure,*params)
     I hope this works.
     """
-    P_nop = constitutive_model(F,0,*params)
-    pI = np.dot(P_nop,F.T)
-    return pI[vanishing]
+    return el.pressure_PK1(F,constitutive_model,*params,P=0,component=vanishing)
 
 
 
