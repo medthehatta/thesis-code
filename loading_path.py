@@ -27,36 +27,28 @@ def pure_shear_loading(stretch1,stretch2):
 
 def plot_loading_curves(params,loading,title="",start=1,stop=1.5):
     Ws = np.array([strain_energy(F,*params) for F in loading(start,stop)])
-    Cs = np.array([np.dot(F.T,F) for F in loading(start,stop)])
     Ps = np.array([constitutive_model(F,*params) for F in loading(start,stop)])
 
     plt.clf()
 
+    (f, (ax1, ax2)) = plt.subplots(2, sharex=True)
+
     major_title = (title.title())
-    plt.suptitle(major_title)
+    f.suptitle(major_title)
 
-    plt.subplot(311)
-    plt.title("Strain Energy")
-    plt.plot(Ws,'k-')
+    ax1.set_ylabel("Energy Density")
+    ax1.plot(Ws)
+    ax1.tick_params(labelsize=10)
+    ax1.grid(True)
 
-    plt.subplot(312)
-    plt.title("Principal Stretch Invariants")
-    cI1s = [np.trace(P) for P in Ps]
-    cI2s = [0.5*(np.trace(P)**2 - np.trace(np.dot(P,P))) for P in Ps]
-    cJs = [np.linalg.det(P) for P in Ps]
-    plt.plot(cI1s,'k-'label=r'$I_1$')
-    plt.plot(cI2s,'k-.'label=r'$I_2$')
-
-    plt.subplot(313)
-    plt.title("PK1 Stress Invariants")
+    ax2.set_ylabel("PK1 Stress Invariants")
     I1s = [np.trace(P) for P in Ps]
     I2s = [0.5*(np.trace(P)**2 - np.trace(np.dot(P,P))) for P in Ps]
     Js = [np.linalg.det(P) for P in Ps]
-    plt.plot(I1s,'k-'label=r'$I_1$')
-    plt.plot(I2s,'k-.'label=r'$I_2$')
-
-    plt.tight_layout()
-    plt.subplots_adjust(top=0.9)
+    ax2.plot(I1s,label=r'$I_1$')
+    ax2.plot(I2s,label=r'$I_2$')
+    ax2.tick_params(labelsize=10)
+    ax2.grid(True)
 
     rand = np.random.randint(99999)
     path = "stuff/test_plots/G_{}.png".format(rand)
