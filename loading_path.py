@@ -26,25 +26,16 @@ constitutive_model = lambda F, *p: mr.constitutive_model(F, general_pressure_PK1
 tangent_stiffness = lambda F, *p: mr.material_tangent_stiffness(F, general_pressure_PK1(F, mr.constitutive_model, *p), *p)
 strain_energy = lambda F, *p: mr.strain_energy_density(F, *p)
 
-params = [2.01,-1.49]
+params = [-1.01,1.49]
 dt = 0.01
 
-F = np.eye(3)
+# Let's try equibiaxial loading, maybe?
 Ws = []
 EVs = []
-for j in range(700):
+for l in np.arange(1,1.3,0.01):
+    F = np.diagflat([l,l,1/(l*l)])
     W = strain_energy(F,*params)
     Ws.append(W)
-
-    D = el.voigt(tangent_stiffness(F,*params))
-    (eigvals,eigvecs) = np.linalg.eigh(D)
-    positive_directions = [i for (i,v) in zip(count(),eigvals) if v>0]
-    EVs.append(eigvals[positive_directions[0]])
-    direction = eigvecs[positive_directions[0]]
-
-    F += dt*vec_to_mat(direction)
-
-
 
 plt.cla()
 
