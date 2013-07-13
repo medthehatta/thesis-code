@@ -20,6 +20,10 @@ def equibiaxial_loading(stretch1,stretch2):
     return np.array([np.diagflat([l,l,1/(l*l)]) 
                      for l in np.linspace(stretch1,stretch2,200)])
 
+def pure_shear_loading(stretch1,stretch2):
+    return np.array([np.array([[0,l/2.,0],[l/2.,0,0],[0,0,4./(l*l)]])
+                     for l in np.linspace(stretch1,stretch2,200)])
+
 def plot_loading_curves(params,loading,title="",start=1,stop=1.5):
     Ws = np.array([strain_energy(F,*params) for F in loading(start,stop)])
     Ps = np.array([constitutive_model(F,*params) for F in loading(start,stop)])
