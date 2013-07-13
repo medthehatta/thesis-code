@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import sys
 import numpy as np
 import elastic as el
 import lintools as lin
@@ -46,13 +47,21 @@ for j in range(700):
 
 
 plt.cla()
+
+major_title = (" ".join(sys.argv[1:])).title()
+minor_title = "dt: {}   p: {}".format(dt,params)
+plt.suptitle(major_title+"\n"+minor_title)
+
 plt.subplot(211)
 plt.plot(Ws)
 
 plt.subplot(212)
 plt.plot(EVs)
 
+rand = np.random.randint(99999)
+path = "stuff/test_plots/G_{}.png".format(rand)
+plt.savefig("/home/med/astro/public_html/"+path)
+print("http://astro.temple.edu/~tud48344/"+path)
 
-plt.show()
 
 
