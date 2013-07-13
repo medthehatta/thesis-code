@@ -117,12 +117,6 @@ def analyze_params_mr(params):
     r_pct_true = 100*r_num_true/(r_num_true + r_num_false)
     r_pct_false = 100*r_num_false/(r_num_true + r_num_false)
 
-    data_result = test_drucker(params,tstiff,pkc.deformations)
-    d_num_true = len(data_result[0])
-    d_num_false = len(data_result[1])
-    d_pct_true = 100*d_num_true/(d_num_true + d_num_false)
-    d_pct_false = 100*d_num_false/(d_num_true + d_num_false)
-
     (trues,falses,_) = region_result
     values = np.array([1]*len(trues) + [0]*len(falses))
     samples_m = np.concatenate([f for f in [trues,falses] if len(f)>0])
@@ -130,23 +124,16 @@ def analyze_params_mr(params):
     poly_samples = lr.monomialize_vector(samples, lr.dim2_deg4[:,None,:])
     cal = lr.calibrate_logistic(poly_samples, values, lam=0.1)
 
-    id_text = "Stable at identity: " + str(id_true).upper()
+    print("Stable at identity: " + str(id_true).upper())
+    print("Eigensystem at identity:")
+    (eigvals,eigvecs) = np.linalg.eigh(el.voigt(tstiff(np.eye(3),*params)))
+    for (eigva,eigve) in zip(eigvals,eigvecs.T):
+        print("{}\n  {}".format(eigva,eigve))
 
     r1_t = "Stable at {} and unstable at {} of {} points sampled from region ({}%)"
     r1_text = r1_t.format(r_num_true,r_num_false,r_num_true+r_num_false,r_pct_true)
+    print(r1_text)
 
-    d1_t = "Stable at {} and unstable at {} of {} data points ({}%)"
-    d1_text = d1_t.format(d_num_true,d_num_false,d_num_true+d_num_false,d_pct_true)
-
-    print("\n".join([str(params),id_text,r1_text,d1_text]))
-
-    if d_pct_true == 100:
-        print("== STABLE OVER DATA ==")
-    else:
-        print("(Unstable over data)")
-
-    print("Fitness:")
-    print(cost_kaveh(params,debug=True))
     print("4th Order Classifier:")
     for (monom,coeff) in zip(lr.dim2_deg4,cal['x']):
         print("{}  {}".format(monom,coeff))
