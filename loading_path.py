@@ -25,35 +25,34 @@ constitutive_model = lambda F, *p: mr.constitutive_model(F, general_pressure_PK1
 tangent_stiffness = lambda F, *p: mr.material_tangent_stiffness(F, general_pressure_PK1(F, mr.constitutive_model, *p), *p)
 strain_energy = lambda F, *p: mr.strain_energy_density(F, *p)
 
-params = [-1.01,1.49]
-dt = 0.001
+params = [2.01,-1.49]
+dt = 0.01
 
 F = np.eye(3)
 Ws = []
 EVs = []
-counts = 0
-while np.abs(F[0,0])<3 and 1/np.abs(F[0,0])>0.3 and counts<1000:
-    counts+=1
+for j in range(700):
     W = strain_energy(F,*params)
-    print(W)
     Ws.append(W)
 
     D = el.voigt(tangent_stiffness(F,*params))
     (eigvals,eigvecs) = np.linalg.eigh(D)
     positive_directions = [i for (i,v) in zip(count(),eigvals) if v>0]
-    direction = eigvecs[positive_directions[-1]]
+    EVs.append(eigvals[positive_directions[0]])
+    direction = eigvecs[positive_directions[0]]
+
     F += dt*vec_to_mat(direction)
-    EVs.append(eigvals[positive_directions[-1]])
-    
-rand = np.random.randint(99999)
-print(rand)
+
+
 
 plt.cla()
+plt.subplot(211)
 plt.plot(Ws)
-plt.savefig("/home/med/astro/public_html/stuff/test_plots/W_{}.png".format(rand))
 
-plt.cla()
+plt.subplot(212)
 plt.plot(EVs)
-plt.savefig("/home/med/astro/public_html/stuff/test_plots/EV_{}.png".format(rand))
+
+
+plt.show()
 
 
