@@ -148,7 +148,8 @@ def analyze_params_mr(params):
     print("Fitness:")
     print(cost_kaveh(params,debug=True))
     print("4th Order Classifier:")
-    print(cal['x'])
+    for (monom,coeff) in zip(lr.dim2_deg4,cal['x']):
+        print("{}  {}".format(monom,coeff))
 
     return (cal['x'],np.array(trues),np.array(falses))
 
