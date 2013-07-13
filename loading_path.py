@@ -21,7 +21,8 @@ def equibiaxial_loading(stretch1,stretch2):
                      for l in np.linspace(stretch1,stretch2,200)])
 
 def pure_shear_loading(stretch1,stretch2):
-    return np.array([np.array([[0,l/2.,0],[l/2.,0,0],[0,0,4./(l*l)]])
+    fix_J = lambda mat: lin.direct_sum(mat,np.diagflat([1/np.linalg.det(mat)]))
+    return np.array([fix_J(np.array([[1,l/2.],[l/2.,1]]))
                      for l in np.linspace(stretch1,stretch2,200)])
 
 def plot_loading_curves(params,loading,title="",start=1,stop=1.5):
