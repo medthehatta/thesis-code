@@ -38,14 +38,19 @@ def plot_loading_curves(params,loading,title="",start=1,stop=1.5):
     plt.plot(Ws)
 
     plt.subplot(212)
-    plt.title("First component of PK1 stress")
-    plt.plot(Ps[:,0,0])
+    plt.title("PK1 Stress Invariants")
+    I1s = [np.trace(P) for P in Ps]
+    I2s = [0.5*(np.trace(P)**2 - np.trace(np.dot(P,P))) for P in Ps]
+    Js = [np.linalg.det(P) for P in Ps]
+    plt.plot(I1s,label=r'$I_1$')
+    plt.plot(I2s,label=r'$I_2$')
+    plt.plot(Js,label=r'$J$')
 
     rand = np.random.randint(99999)
     path = "stuff/test_plots/G_{}.png".format(rand)
     plt.savefig("/home/med/astro/public_html/"+path)
     print("http://astro.temple.edu/~tud48344/"+path)
 
-    return (Ws,Ps)
+    return (Ws,Ps,plt)
 
 
