@@ -32,14 +32,13 @@ def equibiaxial_loading(stretch1,stretch2):
                      for l in np.linspace(stretch1,stretch2,200)])
 
 def plot_loading_curves(params,loading,title="",start=1,stop=1.5):
-    Ws = [strain_energy(F,*params) for F in loading(start,stop)]
-    Ps = [constitutive_model(F,*params) for F in loading(start,stop)]
+    Ws = np.array([strain_energy(F,*params) for F in loading(start,stop)])
+    Ps = np.array([constitutive_model(F,*params) for F in loading(start,stop)])
 
-    plt.cla()
+    plt.clf()
 
     major_title = (title.title())
-    minor_title = "dt: {}   p: {}".format(dt,params)
-    plt.suptitle(major_title+"\n"+minor_title)
+    plt.suptitle(major_title)
 
     plt.subplot(211)
     plt.title("Strain energy")
@@ -47,7 +46,7 @@ def plot_loading_curves(params,loading,title="",start=1,stop=1.5):
 
     plt.subplot(212)
     plt.title("First component of PK1 stress")
-    plt.plot(Ps)
+    plt.plot(Ps[:,0,0])
 
     rand = np.random.randint(99999)
     path = "stuff/test_plots/G_{}.png".format(rand)
