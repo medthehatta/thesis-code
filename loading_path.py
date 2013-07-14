@@ -1,3 +1,5 @@
+import argparse
+import os.path
 import matplotlib.pyplot as plt
 import sys
 import numpy as np
@@ -25,12 +27,12 @@ def pure_shear_loading(stretch1,stretch2):
     return np.array([fix_J(np.array([[1,l/2.],[l/2.,1]]))
                      for l in np.linspace(stretch1,stretch2,200)])
 
-def plot_loading_curves(params,loading,title="",start=1,stop=1.5):
+def plot_loading_curves(params,loading,title="",start=1,stop=1.5,prefix="/tmp"):
     Ws = np.array([strain_energy(F,*params) for F in loading(start,stop)])
     Ps = np.array([constitutive_model(F,*params) for F in loading(start,stop)])
-    return plot_W_P(Ws,Ps,title)
+    return plot_W_P(Ws,Ps,title,prefix)
 
-def plot_W_P(Ws,Ps,title=""):
+def plot_W_P(Ws,Ps,title="",prefix="/tmp"):
     plt.clf()
 
     (f, (ax1, ax2)) = plt.subplots(2, sharex=True)
@@ -53,9 +55,44 @@ def plot_W_P(Ws,Ps,title=""):
     ax2.grid(True)
 
     rand = np.random.randint(99999)
-    path = "stuff/test_plots/G_{}.png".format(rand)
-    plt.savefig("/home/med/astro/public_html/"+path)
-    print("http://astro.temple.edu/~tud48344/"+path)
+    subpath = "G_{}.png".format(rand)
+    plt.savefig(os.path.join(prefix,subpath))
+    print(os.path.join(prefix,subpath))
 
     return (Ws,Ps)
+
+
+LOADINGS = { 'uniaxial':uniaxial_loading,
+             'equibiaxial':equibiaxial_loading,
+             'shear':pure_shear_loading }
+
+
+if __name__=='__main__':
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('loading', choices=list(LOADINGS.keys()),
+                        help="loading mode")
+
+    parser.add_argument('parameters', type=float, nargs='+',
+                        help="model parameters")
+
+    parser.add_argument('-s', '--start', type=float, default=1.0,
+                        help="initial loading parameter")
+
+    parser.add_argument('-e', '--end', type=float, default=1.5,
+                        help="final loading parameter")
+
+    parser.add_argument('-t', '--title', default="Deformation path",
+                        help="title to use on plots")
+
+    parser.add_argument('-p', '--prefix', default="/tmp",
+                        help="directory plots are output to")
+
+    args = parser.parse_args()
+
+    plot_loading_curves(params=args.parameters,
+                        loading=LOADINGS.get(args.loading),
+                        title=args.title,
+                        start=args.start,
+                        stop=args.end)
 

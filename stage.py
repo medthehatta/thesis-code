@@ -9,6 +9,8 @@ import scipy.optimize as so
 
 import log_regression as lr
 
+import argparse
+
 
 def det1_3d(mat2d):
     J0 = np.linalg.det(mat2d)
@@ -139,4 +141,11 @@ def analyze_params_mr(params):
         print("{}  {}".format(monom,coeff))
 
     return (cal['x'],np.array(trues),np.array(falses))
+
+if __name__=='__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('parameters',type=float,nargs='+',
+                        help='mooney-rivlin model parameters to test')
+    args = parser.parse_args()
+    analyze_params_mr(args.parameters)
 
