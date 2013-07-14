@@ -115,7 +115,8 @@ def analyze_params_mr(params):
     id_true = bool(len(identity_result[0]))
 
     # biaxial
-    regional = 0.01 + (1.6-0.01)*np.random.random((800,2))
+    small = 0.01; big = 1.6
+    regional = small + (big - small)*np.random.random((800,2))
     regional_mats = [np.diagflat([r1,r2,1/(r1*r2)]) for (r1,r2) in regional]
     region_result = test_drucker(params,tstiff,regional_mats)
     r_num_true = len(region_result[0])
@@ -126,7 +127,10 @@ def analyze_params_mr(params):
     (trues,falses,_) = region_result
     values = np.array([1]*len(trues) + [0]*len(falses))
     samples_m = np.concatenate([f for f in [trues,falses] if len(f)>0])
-    samples = np.diagonal(samples_m,axis1=1,axis2=2)[:,:2] - [1,1]
+
+    # Normalize the samples so we can use a classifier on them
+    samples = (np.diagonal(samples_m,axis1=1,axis2=2)[:,:2] - [(big-small)/2]*2)/(big-small)
+
     poly_samples = lr.monomialize_vector(samples, lr.dim2_deg4[:,None,:])
     cal = lr.calibrate_logistic(poly_samples, values, lam=0.1)
 
