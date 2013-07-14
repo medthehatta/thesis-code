@@ -14,11 +14,7 @@ def material_tangent_stiffness(F,pressure,*p):
     """
     
     # Extract the model parameters
-    if len(p)==2:
-        (c1,c2) = p
-        c3 = 0
-    else:
-        (c1,c2,c3) = p
+    (c10,c01) = p
 
     # Compute the other required generating tensors for the expression
     C = np.dot(F.T,F)
@@ -32,7 +28,7 @@ def material_tangent_stiffness(F,pressure,*p):
     # Alias the index manipulations for the various tensor products
     tensor = '...ab,...cd->abcd'
     kronecker = '...ac,...bd->abcd'
-    cokronecker = '...ad,...cb->abcd'
+    cokronecker = '...ad,...bc->abcd'
 
     # Compute the relevant products of I
     IxI = np.einsum(tensor,I,I)
@@ -61,7 +57,7 @@ def material_tangent_stiffness(F,pressure,*p):
     part22 = IxI - IsI
     part2 = (2/3.)*part21 + part22
 
-    return pressure*part0 + 4*(c1*(1/3.)*part1 + c2*part2)
+    return pressure*part0 + 4*(c10*(1/3.)*part1 + c01*part2)
 
 
 def constitutive_model(F,pressure,*p):
