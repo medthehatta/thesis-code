@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+# coding: utf8
+#
+
 import numpy as np
 import lintools as lin
 import mooney_rivlin as mr
