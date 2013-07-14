@@ -50,11 +50,8 @@ for j in range(200):
     # Convert to matrix
     mat = voigt_vec_to_mat(selected)
 
-    # Exponentiate (is this necessary?)
-    Q = expm(dt*mat)
-
-    # Advance F
-    F = np.dot(Q,np.dot(F,Q.T))
+    # Try adding instead of adjoint action
+    F = F + dt*mat
     Fs.append(F)
 
 Ws = [sedf(F,*params) for F in Fs]
