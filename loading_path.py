@@ -18,23 +18,34 @@ tangent_stiffness = lambda F, *p: mr.material_tangent_stiffness(F, el.pressure_P
 strain_energy = lambda F, *p: mr.strain_energy_density(F, *p)
 
 
-def uniaxial_loading(stretch1,stretch2):
-    return np.array([np.diagflat([l,1/np.sqrt(l),1/np.sqrt(l)]) 
-                     for l in np.linspace(stretch1,stretch2,200)])
 
-def equibiaxial_loading(stretch1,stretch2):
-    return np.array([np.diagflat([l,l,1/(l*l)]) 
-                     for l in np.linspace(stretch1,stretch2,200)])
+def uniaxial_loading(s):
+    return np.diagflat([s, 1/np.sqrt(s), 1/np.sqrt(s)])
+
+def equibiaxial_loading(s):
+    return np.diagflat([s,s,1/(s*s)])
 
 def pure_shear_loading(stretch1,stretch2):
     fix_J = lambda mat: lin.direct_sum(mat,np.diagflat([1/np.linalg.det(mat)]))
-    return np.array([fix_J(np.array([[1,l/2.],[l/2.,1]]))
-                     for l in np.linspace(stretch1,stretch2,200)])
+    return fix_J(np.array([[1,s/2.],[s/2.,1]]))
+
+
+
+def load(loading, start, end):
+    return np.array([loading(s) for s in np.linspace(start,end,200)])
+
+
 
 def plot_loading_curves(params,loading,title="",start=1,stop=1.5,prefix="/tmp"):
-    Ws = np.array([strain_energy(F,*params) for F in loading(start,stop)])
-    Ps = np.array([constitutive_model(F,*params) for F in loading(start,stop)])
+    Ws = np.array([strain_energy(F,*params) 
+                   for F in load(loading,start,stop)])
+
+    Ps = np.array([constitutive_model(F,*params) 
+                  for F in load(loading,start,stop)])
+
     return plot_W_P(Ws,Ps,title,prefix)
+
+
 
 def plot_W_P(Ws,Ps,title="",prefix="/tmp"):
     plt.clf()
