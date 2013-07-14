@@ -36,12 +36,12 @@ def load(loading, start, end):
 
 
 
-def plot_loading_curves(params,loading,title="",start=1,stop=1.5,prefix="/tmp"):
+def plot_loading_curves(params,loading,title="",start=1,end=1.5,prefix="/tmp"):
     Ws = np.array([strain_energy(F,*params) 
-                   for F in load(loading,start,stop)])
+                   for F in load(loading,start,end)])
 
     Ps = np.array([constitutive_model(F,*params) 
-                  for F in load(loading,start,stop)])
+                  for F in load(loading,start,end)])
 
     return plot_W_P(Ws,Ps,title,prefix)
 
@@ -74,8 +74,15 @@ def plot_W_P(Ws,Ps,title="",prefix="/tmp"):
     plt.savefig(os.path.join(prefix,subpath))
     print(os.path.join(prefix,subpath))
 
-    return (Ws,Ps)
+    return (Ws,Ps,subpath)
 
+def plot_loadingspec(params, loadingspec):
+    loading = loadingspec.get('loading')
+    title = loadingspec.get('title')
+    start = loadingspec.get('start') or 1.0
+    end = loadingspec.get('end') or 1.4
+    prefix = loadingspec.get('prefix') or "/tmp"
+    return plot_loading_curves(params,loading,title,start,end,prefix)
 
 LOADINGS = { 'uniaxial':uniaxial_loading,
              'equibiaxial':equibiaxial_loading,
