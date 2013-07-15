@@ -50,7 +50,7 @@ def material_tangent_stiffness(F,pressure,*p):
     CvI = CxI + IxC
 
     # Assemble the expression
-    part0 = CixCi - 2*CisCi
+    part0 = CixCi - 2*CisCi  # 4*(1/2)*( (1/2)CixCi - CisCi )
     part1 = I1*(CisCi + (1/3.)*CixCi) - CivI
 
     part21 = CvCi - I1*CivI + I2*(CisCi + (2/3.)*CixCi)
