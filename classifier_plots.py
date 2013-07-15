@@ -19,7 +19,7 @@ def plot_classifier(cal,trues,falses):
     ax.contour(X,Y,Z,levels=np.linspace(np.min(Z),np.max(Z),20),colors='k')
 
     # adjust for the way the random samples were distributed
-    adjustment = (1.6-0.01)/2
+    adjustment = (2.0-0.01)/2
 
     if len(falses)>0:
         falses = np.diagonal(falses,axis1=1,axis2=2)[:,:2] - [adjustment]*2
@@ -34,7 +34,7 @@ def plot_classifier(cal,trues,falses):
 def plot_classifier_here(cal,trues,falses,title=""):
     fig = plot_classifier(cal,trues,falses)
     fig.suptitle(title)
-    PFX = "/home/med/astro/public_html/stuff/test_plots"
+    PFX = "/home/med/astro/stuff/test_plots"
     file = "C_{}.png".format(np.random.randint(999))
     fig.savefig(os.path.join(PFX,file))
     print("http://astro.temple.edu/~tud48344/stuff/test_plots/{}".format(file))

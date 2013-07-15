@@ -115,7 +115,7 @@ def analyze_params_mr(params):
     id_true = bool(len(identity_result[0]))
 
     # biaxial
-    small = 0.01; big = 1.6
+    small = 0.01; big = 2.0
     regional = small + (big - small)*np.random.random((800,2))
     regional_mats = [np.diagflat([r1,r2,1/(r1*r2)]) for (r1,r2) in regional]
     region_result = test_drucker(params,tstiff,regional_mats)
