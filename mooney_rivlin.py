@@ -57,7 +57,8 @@ def material_tangent_stiffness(F,pressure,*p):
     part22 = 2*IxI - IsI
     part2 = (2/3.)*part21 + part22
 
-    return pressure*part0 + 4*(c10*(1/3.)*part1 + c01*part2)
+    # TODO: I have to insert this minus sign by hand.  Why?
+    return -(pressure*part0 + 4*(c10*(1/3.)*part1 + c01*part2))
 
 
 def constitutive_model(F,pressure,*p):
@@ -101,3 +102,4 @@ def strain_energy_density(F,*p):
     I2 = 0.5*(I1*I1 - np.trace(np.dot(C,C)))
 
     return c10*(I1 - 3) + c01*(I2 - 3)
+
