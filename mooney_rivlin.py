@@ -61,6 +61,31 @@ def material_tangent_stiffness(F,pressure,*p):
     return -(pressure*part0 + 4*(c10*(1/3.)*part1 + c01*part2))
 
 
+def spatial_constitutive_model(b,pressure,*p):
+    """
+    Cauchy stress as a function of the deformation gradient and model parameters.
+    Assume incompressibility.  (So this is also Kirchhoff stress.)
+    """
+
+    # Extract the model parameters
+    (c10,c01) = p
+
+    # Compute the other required generating tensors for the expression
+    I = np.eye(3)
+    bb = np.dot(b,b)
+
+    # Alias the invariants of b
+    I1 = np.trace(b)
+    I2 = 0.5*(I1*I1 - np.trace(np.dot(b,b)))
+
+    # Assemble the expression
+    volumetric = -pressure*I
+    part1 = c10*b
+    part2 = c01*(2*I1*b - bb)
+
+    return volumetric + 2*(part1 + part2)
+
+
 def constitutive_model(F,pressure,*p):
     """
     PK1 stress as a function of the deformation gradient and model parameters.

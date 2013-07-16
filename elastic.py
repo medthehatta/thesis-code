@@ -124,8 +124,13 @@ def pressure_PK2(E,constitutive_model,*params,S=0,component=(-1,-1)):
     constitutive_model(E,pressure,*params)
     """
     S0 = constitutive_model(E,0,*params)
-    C = 2*E - np.eye(3)
+    C = 2*E + np.eye(3)
     Ci = np.linalg.inv(C)
     return (S0 - S)[component]/Ci[component]
 
-
+def pressure(b,constitutive_model,*params,sigma=0,component=(-1,-1)):
+    """
+    Get the pressure from the spatial constitutive model.
+    """
+    sigma0 = constitutive_model(b,0,*params)
+    return (sigma0 - sigma)[component]
