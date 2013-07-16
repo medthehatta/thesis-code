@@ -19,7 +19,7 @@ def plot_classifier(cal,trues,falses):
     ax.contour(X,Y,Z,levels=np.linspace(np.min(Z),np.max(Z),20),colors='k')
 
     # adjust for the way the random samples were distributed
-    adjustment = (2.0-0.01)/2
+    adjustment = 1
 
     if len(falses)>0:
         falses = np.diagonal(falses,axis1=1,axis2=2)[:,:2] - [adjustment]*2
