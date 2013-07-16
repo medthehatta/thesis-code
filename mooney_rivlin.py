@@ -86,6 +86,31 @@ def constitutive_model(F,pressure,*p):
     return volumetric + 2*(part1 + part2)
 
 
+def material_constitutive_model(E,pressure,*p):
+    """
+    PK2 stress as a function of the Lagrangian strain and model parameters.
+    """
+   
+    # Extract the model parameters
+    (c10,c01) = p
+
+    # Compute the other required generating tensors for the expression
+    I = np.eye(3)
+    C = 2*E + I
+    Ci = np.linalg.inv(C)
+
+    # Alias the invariants of C
+    I1 = np.trace(C)
+    I2 = 0.5*(I1*I1 - np.trace(np.dot(C,C)))
+
+    # Assemble the expression
+    volumetric = -pressure*Ci
+    part1 = c10*I
+    part2 = c01*(2*I1*I - C)
+
+    return volumetric + 2*(part1 + part2)
+
+
 def strain_energy_density(F,*p):
     """
     Strain energy density.
