@@ -7,6 +7,18 @@
 
 import numpy as np
 
+def first_elasticity(F,pressure,*p):
+    """
+    d^2 W / dF^2
+    """
+    I = np.eye(3)
+    D = material_tangent_stiffness(F,pressure,*p)
+    E = 0.5*(np.dot(F.T,F) - I)
+    S = material_constitutive_model(E,pressure,*p)
+
+    return np.einsum('mjnl,kn,im->ijkl',D,F,F) + np.einsum('jl,ik->ijkl',S,I)
+
+
 def material_tangent_stiffness(F,pressure,*p):
     """
     Material Tangent stiffness as a function of the deformation gradient and
