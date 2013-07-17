@@ -31,8 +31,11 @@ def pure_shear_loading(stretch1,stretch2):
 
 
 
-def load(loading, start, end):
-    return np.array([loading(s) for s in np.linspace(start,end,200)])
+def load(loading, start, end=None):
+    if end is None: 
+        return loading(start)
+    else:
+        return np.array([loading(s) for s in np.linspace(start,end,200)])
 
 
 
