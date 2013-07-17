@@ -69,8 +69,7 @@ def material_tangent_stiffness(F,pressure,*p):
     part22 = 2*IxI - IsI
     part2 = (2/3.)*part21 + part22
 
-    # TODO: I have to insert this minus sign by hand.  Why?
-    return -(pressure*part0 + 4*(c10*(1/3.)*part1 + c01*part2))
+    return pressure*part0 + 4*(c10*(1/3.)*part1 + c01*part2)
 
 
 def spatial_constitutive_model(b,pressure,*p):
