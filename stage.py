@@ -38,7 +38,7 @@ def general_pressure_PK1(F,constitutive_model,*params,vanishing=(-1,-1)):
 
 
 
-def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
+def cost_kaveh(params, lam=1e2, lam2=1., lamp=500., debug=False):
     # Collate the data
     data = zip(pkc.deformations, pkc.PK1)
 
@@ -56,13 +56,19 @@ def cost_kaveh(params, lam=1e2, lam2=1., debug=False):
     else:
         penalty = 0
 
+    # Penalty error 2: "physicality"
+    if sum(params)<0:
+        penalty2 = lamp
+    else:
+        penalty2 = 0
+
     # Regularization
     regularize = sum([p*p for p in params])
 
     if debug==True:
-        return (total_error, penalty, lam*penalty, regularize, lam2*regularize)
+        return (total_error, penalty, penalty2, regularize)
     else:
-        return total_error + lam*penalty + lam2*regularize
+        return total_error + lam*penalty + lam2*regularize + penalty2
 
 
 
