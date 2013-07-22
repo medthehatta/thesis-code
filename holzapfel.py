@@ -5,17 +5,14 @@ Constitutive model and tangent stiffness for the Holzapfel aorta model.
 """
 import numpy as np
 
-def constitutive_model(C,A1,A2,*params):
+def iso_material_model(F,H,*params):
     """
-    PK2 stress vs C for the Holzapfel model.
+    Distortional PK2 stress vs F for the Holzapfel model.
     Assume J=1 (incompressibility).
-
-    TODO: Shouldn't there be pressure in here someplace?
-          I guess this is the "distortional" stress.
 
     Parameters
     ----------
-    C : right Cauchy-Green tensor
+    F : deformation gradient
     A1, A2 : projection operators along fiber directions
     params : c, k1, k2
 
@@ -25,9 +22,11 @@ def constitutive_model(C,A1,A2,*params):
     """
     
     # Extract parameters from parameter vector
+    (A1,A2) = H
     (c,k1,k2) = params
 
     # Compute necessary basis tensors for the expression
+    C = np.dot(F.T,F)
     I = np.eye(3)
     Ci = np.linalg.inv(C)
 
@@ -49,11 +48,17 @@ def constitutive_model(C,A1,A2,*params):
     return isotropic_part + fiber_part1 + fiber_part2
 
 
-def tangent_stiffness(C,A1,A2,*params):
+def iso_material_elasticity(F,H,*params):
+    """
+    Isochoric material elasticity tensor from F, structure tensors in
+    H, and parameters.
+    """
     # Extract parameters from the parameter vector
+    (A1,A2) = H
     (c,k1,k2) = params
 
     # Compute the necessary basis tensors
+    C = np.dot(F.T,F)
     I = np.eye(3)
     Ci = np.linalg.inv(C)
 
@@ -105,3 +110,35 @@ def tangent_stiffness(C,A1,A2,*params):
            distortional01*(distortional11 + distortional21) + \
            distortional02*(distortional12 + distortional22)
 
+
+
+def vol_spatial_model(F,p,H,*params):
+    I = np.eye(3)
+    return -p*I
+
+
+def iso_spatial_model(F,H,*params):
+    So = material_constitutive_model(F,H,*params)
+    return np.dot(F,np.dot(S,F.T))
+
+
+def vol_model(F,p,H,*params):
+    Fi = np.linalg.inv(F)
+    return -p*Fi
+
+
+def iso_model(F,H,*params):
+    So = material_constitutive_model(F,H,*params)
+    return np.dot(F,So)
+
+
+def vol_material_model(F,p,H,*params):
+    C = np.dot(F.T,F)
+    Ci = np.linalg.inv(C)
+    return -p*Ci
+
+
+def vol_material_elasticity(F,p,pt,H,*params):
+    C = np.dot(F.T,F)
+    Ci = np.linalg.inv(C)
+    return pt*lin.tensor(Ci,Ci) - 2*p*lin.symmetric_kronecker(Ci,Ci)
