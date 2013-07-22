@@ -111,33 +111,6 @@ def iso_material_elasticity(F,H,*params):
            distortional02*(distortional12 + distortional22)
 
 
-
-def vol_spatial_model(F,p,H,*params):
-    I = np.eye(3)
-    return -p*I
-
-
-def iso_spatial_model(F,H,*params):
-    So = material_constitutive_model(F,H,*params)
-    return np.dot(F,np.dot(S,F.T))
-
-
-def vol_model(F,p,H,*params):
-    Fi = np.linalg.inv(F)
-    return -p*Fi
-
-
-def iso_model(F,H,*params):
-    So = material_constitutive_model(F,H,*params)
-    return np.dot(F,So)
-
-
-def vol_material_model(F,p,H,*params):
-    C = np.dot(F.T,F)
-    Ci = np.linalg.inv(C)
-    return -p*Ci
-
-
 def vol_material_elasticity(F,p,pt,H,*params):
     C = np.dot(F.T,F)
     Ci = np.linalg.inv(C)
