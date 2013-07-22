@@ -6,27 +6,16 @@
 #
 
 import numpy as np
+import lintools as lin
 
-def first_elasticity(F,pressure,*p):
+def iso_material_elasticity(F,H,*params):
     """
-    d^2 W / dF^2
-    """
-    I = np.eye(3)
-    D = material_tangent_stiffness(F,pressure,*p)
-    E = 0.5*(np.dot(F.T,F) - I)
-    S = material_constitutive_model(E,pressure,*p)
-
-    return np.einsum('mjnl,kn,im->ijkl',D,F,F) + np.einsum('jl,ik->ijkl',S,I)
-
-
-def material_tangent_stiffness(F,pressure,*p):
-    """
-    Material Tangent stiffness as a function of the deformation gradient and
-    the two parameters: p=c1,c2
+    Isochoric Material elasticity tensor as a function of the deformation
+    gradient and the two parameters: p=c1,c2
     """
     
     # Extract the model parameters
-    (c10,c01) = p
+    (c10,c01) = params
 
     # Compute the other required generating tensors for the expression
     C = np.dot(F.T,F)
@@ -62,77 +51,26 @@ def material_tangent_stiffness(F,pressure,*p):
     CvI = CxI + IxC
 
     # Assemble the expression
-    part0 = CixCi - 2*CisCi  # 4*(1/2)*( (1/2)CixCi - CisCi )
     part1 = I1*(CisCi + (1/3.)*CixCi) - CivI
 
     part21 = CvCi - 2*I1*CivI + I2*(CisCi + (2/3.)*CixCi)
     part22 = 2*IxI - IsI
     part2 = (2/3.)*part21 + part22
 
-    return pressure*part0 + 4*(c10*(1/3.)*part1 + c01*part2)
+    return 4*(c10*(1/3.)*part1 + c01*part2)
 
 
-def spatial_constitutive_model(b,pressure,*p):
+def iso_material_model(F,H,*params):
     """
-    Cauchy stress as a function of the deformation gradient and model parameters.
-    Assume incompressibility.  (So this is also Kirchhoff stress.)
+    Isochoric PK2 stress as a function of the deformation gradient and model
+    parameters.
     """
-
     # Extract the model parameters
-    (c10,c01) = p
+    (c10,c01) = params
 
     # Compute the other required generating tensors for the expression
     I = np.eye(3)
-    bb = np.dot(b,b)
-
-    # Alias the invariants of b
-    I1 = np.trace(b)
-    I2 = 0.5*(I1*I1 - np.trace(np.dot(b,b)))
-
-    # Assemble the expression
-    volumetric = -pressure*I
-    part1 = c10*b
-    part2 = c01*(2*I1*b - bb)
-
-    return volumetric + 2*(part1 + part2)
-
-
-def constitutive_model(F,pressure,*p):
-    """
-    PK1 stress as a function of the deformation gradient and model parameters.
-    """
-   
-    # Extract the model parameters
-    (c10,c01) = p
-
-    # Compute the other required generating tensors for the expression
     C = np.dot(F.T,F)
-    Fit = np.linalg.inv(F.T)
-    FC = np.dot(F,C)
-
-    # Alias the invariants of C
-    I1 = np.trace(C)
-    I2 = 0.5*(I1*I1 - np.trace(np.dot(C,C)))
-
-    # Assemble the expression
-    volumetric = -pressure*Fit
-    part1 = c10*F
-    part2 = c01*(2*I1*F - FC)
-
-    return volumetric + 2*(part1 + part2)
-
-
-def material_constitutive_model(E,pressure,*p):
-    """
-    PK2 stress as a function of the Lagrangian strain and model parameters.
-    """
-   
-    # Extract the model parameters
-    (c10,c01) = p
-
-    # Compute the other required generating tensors for the expression
-    I = np.eye(3)
-    C = 2*E + I
     Ci = np.linalg.inv(C)
 
     # Alias the invariants of C
@@ -140,20 +78,18 @@ def material_constitutive_model(E,pressure,*p):
     I2 = 0.5*(I1*I1 - np.trace(np.dot(C,C)))
 
     # Assemble the expression
-    volumetric = -pressure*Ci
-    part1 = c10*I
-    part2 = c01*(2*I1*I - C)
+    part1 = 2*c10*I
+    part2 = 2*c01*(2*I1*I - C)
 
-    return volumetric + 2*(part1 + part2)
+    return part1 + part2
 
 
-def strain_energy_density(F,*p):
+def strain_energy_density(F,H,*params):
     """
     Strain energy density.
     """
-    
     # Extract model parameters
-    (c10,c01) = p
+    (c10,c01) = params
 
     # Right Cauchy-Green
     C = np.dot(F.T,F)
@@ -163,4 +99,50 @@ def strain_energy_density(F,*p):
     I2 = 0.5*(I1*I1 - np.trace(np.dot(C,C)))
 
     return c10*(I1 - 3) + c01*(I2 - 3)
+
+
+def vol_spatial_model(F,p,H,*params):
+    I = np.eye(3)
+    return -p*I
+
+
+def iso_spatial_model(F,H,*params):
+    So = material_constitutive_model(F,H,*params)
+    return np.dot(F,np.dot(S,F.T))
+
+
+def vol_model(F,p,H,*params):
+    Fi = np.linalg.inv(F)
+    return -p*Fi
+
+
+def iso_model(F,H,*params):
+    So = material_constitutive_model(F,H,*params)
+    return np.dot(F,So)
+
+
+def vol_material_model(F,p,H,*params):
+    C = np.dot(F.T,F)
+    Ci = np.linalg.inv(C)
+    return -p*Ci
+
+
+def vol_material_elasticity(F,p,pt,H,*params):
+    C = np.dot(F.T,F)
+    Ci = np.linalg.inv(C)
+    return pt*lin.tensor(Ci,Ci) - 2*p*lin.symmetric_kronecker(Ci,Ci)
+
+
+# Dunno how to implement this yet.  How deal with pressure here?
+#def first_elasticity(F,H,*params):
+#    """
+#    d^2 W / dF^2
+#    """
+#    I = np.eye(3)
+#    D = material_elasticity(F,H,*params)
+#    E = 0.5*(np.dot(F.T,F) - I)
+#    S = material_model(F,H,*params)
+#
+#    return np.einsum('mjnl,kn,im->ijkl',D,F,F) + np.einsum('jl,ik->ijkl',S,I)
+
 
