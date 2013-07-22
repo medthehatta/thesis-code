@@ -38,6 +38,54 @@ def load(loading, start, end=None):
         return np.array([loading(s) for s in np.linspace(start,end,200)])
 
 
+def compute_vars(F, H, model, *params):
+    def pressure(F, H, *params):
+        So = model.iso_material_model(F,H,*params)
+        sigma = np.dot(F,np.dot(So,F.T))
+        return sigma[-1,-1]
+
+    def get_S(F, p, H, *params):
+        C = np.dot(F.T,F)
+        Ci = np.linalg.inv(C)
+        return -p*Ci + model.iso_material_model(F,H,*params)
+
+    def get_CC(F, p, H, *params):
+        Co = model.iso_material_elasticity(F,H,*params)
+        # pt = p: assuming dp/dJ=0
+        Cv = model.vol_material_elasticity(F,p,p,H,*params)
+        return Cv + Co
+
+    def get_AA(CC, F, S):
+        return np.einsum('mjnl,kn,im',CC,F,F) +\
+               lin.kronecker(np.eye(3),S)
+
+
+    # Deformation
+    I = np.eye(3)
+    C = [np.dot(f.T,f) for f in F]
+    B = [np.dot(f,f.T) for f in F]
+    E = [0.5*(c - I) for c in C]
+    Is = [[np.trace(c), 0.5*(np.trace(c) - np.trace(np.dot(c,c)))] for c in C]
+
+    # Energy
+    W = [model.strain_energy_density(f,H,*params) for f in F]
+
+    # Stress
+    press = [pressure(f,H,*params) for f in F]
+    S = [get_S(f,p,H,*params) for (f,p) in zip(F,press)]
+    P = [np.dot(f,s) for (f,s) in zip(F,S)]
+    sigma = [np.dot(p,f.T) for (f,p) in zip(F,P)]
+
+    # Elasticity
+    CC = [get_CC(f,p,H,*params) for (f,p) in zip(F,press)]
+    AA = [get_AA(cc,f,s) for (cc,f,s) in zip(CC,F,S)]
+
+    # Return this behemoth in a dictionary
+    return {'F':F, 'C':C, 'B':B, 'E':E, 'Is':Is, 'W':W, 'press':press, 'S':S,
+            'P':P, 'sigma':sigma, 'CC':CC, 'AA':AA}
+    
+    
+
 
 def plot_loading_curves(params,loading,title="",start=1,end=1.5,prefix="/tmp"):
     Ws = np.array([strain_energy(F,*params) 
