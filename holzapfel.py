@@ -4,6 +4,25 @@ holzapfel.py
 Constitutive model and tangent stiffness for the Holzapfel aorta model.
 """
 import numpy as np
+import lintools as lin
+
+def strain_energy_density(F,H,*params):
+    (A1,A2) = H
+    (c,k1,k2) = params
+
+    C = np.dot(F.T,F)
+
+    # Alias the invariants of C
+    I0 = np.trace(C)
+    I1 = np.tensordot(C,A1)
+    I2 = np.tensordot(C,A2)
+
+    part0 = c/2.*(I0 - 3)
+    part1 = k1/(2*k2)*(np.exp(k2*(I1-1)**2)-1)
+    part2 = k1/(2*k2)*(np.exp(k2*(I2-1)**2)-1)
+
+    return part0 + part1 + part2
+
 
 def iso_material_model(F,H,*params):
     """
