@@ -35,10 +35,11 @@ def load(loading, start, end=None):
     if end is None: 
         return loading(start)
     else:
-        return np.array([loading(s) for s in np.linspace(start,end,200)])
+        points = np.linspace(start,end,200)
+        return [points, np.array([loading(s) for s in points])]
 
 
-def compute_vars(F, H, model, *params):
+def compute_vars(loads, H, model, *params):
     def pressure(F, H, *params):
         So = model.iso_material_model(F,H,*params)
         sigma = np.dot(F,np.dot(So,F.T))
@@ -60,12 +61,14 @@ def compute_vars(F, H, model, *params):
                lin.kronecker(np.eye(3),S)
 
 
+    # Get the loading parameter and deformation
+    (par, F) = loads
+
     # Deformation
     I = np.eye(3)
     C = [np.dot(f.T,f) for f in F]
     B = [np.dot(f,f.T) for f in F]
     E = [0.5*(c - I) for c in C]
-    Is = [[np.trace(c), 0.5*(np.trace(c) - np.trace(np.dot(c,c)))] for c in C]
 
     # Energy
     W = [model.strain_energy_density(f,H,*params) for f in F]
@@ -81,8 +84,8 @@ def compute_vars(F, H, model, *params):
     AA = [get_AA(cc,f,s) for (cc,f,s) in zip(CC,F,S)]
 
     # Return this behemoth in a dictionary
-    return {'F':F, 'C':C, 'B':B, 'E':E, 'Is':Is, 'W':W, 'press':press, 'S':S,
-            'P':P, 'sigma':sigma, 'CC':CC, 'AA':AA}
+    return {'F':F, 'C':C, 'B':B, 'E':E, 'W':W, 'press':press, 'S':S, 'P':P,
+            'sigma':sigma, 'CC':CC, 'AA':AA, 'par':par}
     
     
 
@@ -98,42 +101,92 @@ def plot_loading_curves(params,loading,title="",start=1,end=1.5,prefix="/tmp"):
 
 
 
-def plot_W_P(Ws,Ps,title="",prefix="/tmp"):
+def plot_curve(VARS,title="",prefix="/tmp"):
     plt.clf()
 
-    (f, (ax1, ax2)) = plt.subplots(2, sharex=True)
-
+    fig = plt.figure(figsize=(11,17))
     major_title = (title.title())
-    f.suptitle(major_title)
+    fig.suptitle(major_title, fontsize=14, fontweight='bold')
 
-    ax1.set_ylabel("Energy Density")
-    ax1.plot(Ws)
-    ax1.tick_params(labelsize=10)
-    ax1.grid(True)
 
-    ax2.set_ylabel("PK1 Stress Invariants")
-    I1s = [np.trace(P) for P in Ps]
-    I2s = [0.5*(np.trace(P)**2 - np.trace(np.dot(P,P))) for P in Ps]
-    Js = [np.linalg.det(P) for P in Ps]
-    ax2.plot(I1s,label=r'$I_1$')
-    ax2.plot(I2s,label=r'$I_2$')
-    ax2.tick_params(labelsize=10)
-    ax2.grid(True)
+    # Energy density (added without any precalc necessary)
 
+    # PK1 invariants
+    I1p = [np.trace(P) for P in VARS['P']]
+    I2p = [0.5*(np.trace(P)**2 - np.trace(np.dot(P,P))) for P in VARS['P']]
+
+    # PK2 invariants
+    I1s = [np.trace(S) for S in VARS['S']]
+    I2s = [0.5*(np.trace(S)**2 - np.trace(np.dot(S,S))) for S in VARS['S']]
+
+    # Principal stretches
+    (stre1,stre2,stre3) = np.transpose([np.linalg.eigvalsh(c) for c in VARS['C']])
+
+    # Pressure (added without any precalc necessary)
+
+
+    # Add the data to the plot
+    to_plot = []
+    to_plot.append(["Energy Density", [(VARS['W'], None)]])
+    to_plot.append(["Principal Stretches", [(np.sqrt(stre1),r'$\lambda_1$'),
+                                            (np.sqrt(stre2),r'$\lambda_2$'),
+                                            (np.sqrt(stre3),r'$\lambda_3$')]])
+
+    max_PK = max(I1p+I2p+I1s+I2s)
+    min_PK = min(I1p+I2p+I1s+I2s)
+    to_plot.append(["PK1 Invariants", [(I1p, r'$I_1$'), (I2p, r'$I_2$')], (min_PK,max_PK)])
+
+    to_plot.append(["PK2 Invariants", [(I1s, r'$I_1$'), (I2s, r'$I_2$')], (min_PK,max_PK)])
+    to_plot.append(["Pressure", [(VARS['press'],None)]])
+
+
+    # Make a list of axes
+    my_axes = []
+    for v in range(len(to_plot)):
+        if v>0:
+            my_axes.append(fig.add_subplot(len(to_plot),1,v+1,sharex=my_axes[0]))
+        else:
+            my_axes.append(fig.add_subplot(len(to_plot),1,v+1))
+
+    # Actually plot each item
+    for (ax, plot_setup) in zip(my_axes,to_plot):
+        
+        # Get the title, plots, and maybe ylimits
+        (ax_title,plots) = plot_setup[:2]
+        if len(plot_setup)==3:
+            ax.set_ylim(*plot_setup[-1])
+        ax.set_ylabel(ax_title)
+
+        # Loop through the plots in each item
+        for (plot_dat,plot_lab) in plots:
+            if plot_lab is not None:
+                ax.plot(VARS['par'],plot_dat,label=plot_lab)
+            else: 
+                ax.plot(VARS['par'],plot_dat)
+
+        # If the x-axis is *de*creasing, flip
+        if VARS['par'][0] > VARS['par'][-1]:
+           ax.invert_xaxis() 
+
+        # Set some common axis parameters
+        ax.tick_params(labelsize=10)
+        ax.grid(True)
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
+        ax.legend(loc='center left', bbox_to_anchor=(1.1,0.5))
+
+    # Generate an ID and save the plot
     rand = np.random.randint(99999)
     subpath = "G_{}.png".format(rand)
     plt.savefig(os.path.join(prefix,subpath))
     print(os.path.join(prefix,subpath))
 
-    return (Ws,Ps,subpath)
+    return subpath
 
-def plot_loadingspec(params, loadingspec):
-    loading = loadingspec.get('loading')
-    title = loadingspec.get('title')
-    start = loadingspec.get('start') or 1.0
-    end = loadingspec.get('end') or 1.4
-    prefix = loadingspec.get('prefix') or "/tmp"
-    return plot_loading_curves(params,loading,title,start,end,prefix)
+
+
+
+
 
 LOADINGS = { 'uniaxial':uniaxial_loading,
              'equibiaxial':equibiaxial_loading,
