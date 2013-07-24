@@ -61,8 +61,8 @@ def iso_material_model(F,H,*params):
 
     # Collect the constituent terms in the stress
     isotropic_part = c*(I - (1/3.)*I0*Ci)
-    fiber_part1 = k1*Q1*np.exp(k2*Q1*Q1)*(A1 - (1/3.)*I1*Ci)
-    fiber_part2 = k2*Q2*np.exp(k2*Q2*Q2)*(A2 - (1/3.)*I2*Ci)
+    fiber_part1 = 2*k1*Q1*np.exp(k2*Q1*Q1)*(A1 - (1/3.)*I1*Ci)
+    fiber_part2 = 2*k1*Q2*np.exp(k2*Q2*Q2)*(A2 - (1/3.)*I2*Ci)
 
     return isotropic_part + fiber_part1 + fiber_part2
 
