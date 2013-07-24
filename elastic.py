@@ -66,12 +66,6 @@ def voigt(A,nine_component=False):
   else:
       return lin.reorder_matrix(lin.np_voigt(A),VOIGT_ORDER)[:6,:6]
 
-def voigt_vec(A):
-  """
-  Returns the voigt-ified version of a *list* of 4th or 2nd rank tensors.
-  """
-  return lin.reorder_matrix(lin.np_voigt_vec(A),VOIGT_ORDER)
-
 def unvoigt(CC):
   """
   Double the rank of a voigt matrix to a 4th rank tensor, or vector -> matrix.
@@ -88,49 +82,4 @@ def unvoigt(CC):
 VOIGT_ORDER = [0,4,8,5,6,1,7,2,3]
 VOIGT_ORDER_INVERSE = [0,5,7,8,1,3,4,6,2]
 
-def standard_orthotropic_P(e1=[1,0,0],e2=[0,1,0]):
-    """
-    Returns the single irreducible structure tensor for orthotropy given the
-    unit normals of two of the orthogonal reflection planes.
-    """
-    return np.outer(e1,e1) - np.outer(e2,e2)
 
-def orthotropic_projectors(P):
-    """
-    Given the irreducible orthotropic structure tensor, returns projection
-    operators along normals to each of the planes of orthotropy.
-    """
-    I = np.eye(3)
-    PP = np.dot(P,P)
-
-    A1 = 0.5*(PP + P)
-    A2 = 0.5*(PP - P)
-    A3 = I - A1 - A2
-
-    return np.array([A1,A2,A3])
-
-def pressure_PK1(F,constitutive_model,*params,P=0,component=(-1,-1)):
-    """
-    Get the pressure from the constitutive model.
-    constitutive_model(F,pressure,*params)
-    """
-    P0 = constitutive_model(F,0,*params)
-    Fit = np.linalg.inv(F.T)
-    return (P0 - P)[component]/Fit[component]
-
-def pressure_PK2(E,constitutive_model,*params,S=0,component=(-1,-1)):
-    """
-    Get the pressure from the constitutive model.
-    constitutive_model(E,pressure,*params)
-    """
-    S0 = constitutive_model(E,0,*params)
-    C = 2*E + np.eye(3)
-    Ci = np.linalg.inv(C)
-    return (S0 - S)[component]/Ci[component]
-
-def pressure(b,constitutive_model,*params,sigma=0,component=(-1,-1)):
-    """
-    Get the pressure from the spatial constitutive model.
-    """
-    sigma0 = constitutive_model(b,0,*params)
-    return (sigma0 - sigma)[component]
