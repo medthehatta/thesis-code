@@ -4,8 +4,6 @@ lintools.py
 Some miscellaneous array / linear algebra tricks.
 """
 import numpy as np
-from itertools import count
-
 
 
 def np_voigt(A):
@@ -161,7 +159,7 @@ def matrix_from_utri(flat,dim=3):
   utri_flat
   """
   m = np.empty((dim,dim))
-  for (k,(i,j)) in zip(count(),utri_indices(dim)):
+  for (k,(i,j)) in enumerate(utri_indices(dim)):
     m[i,j]=flat[k]
     m[j,i]=m[i,j]
   return  m
