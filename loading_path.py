@@ -22,10 +22,19 @@ strain_energy = lambda F, *p: mr.strain_energy_density(F, *p)
 def uniaxial_loading(s):
     return np.diagflat([s, 1/np.sqrt(s), 1/np.sqrt(s)])
 
+def uniaxial_loading2(s):
+    return np.diagflat([1/np.sqrt(s), s, 1/np.sqrt(s)])
+
+def uniaxial_loading3(s):
+    return np.diagflat([0.7*s, 1.1*s, 1/np.sqrt(0.7*1.1*s*s)])
+
 def equibiaxial_loading(s):
     return np.diagflat([s,s,1/(s*s)])
 
-def pure_shear_loading(stretch1,stretch2):
+def equibiaxial_loading2(s):
+    return np.diagflat([s*np.cos(np.pi/3.),s*np.sin(np.pi/3.),1/(s*s)])
+
+def pure_shear_loading(s):
     fix_J = lambda mat: lin.direct_sum(mat,np.diagflat([1/np.linalg.det(mat)]))
     return fix_J(np.array([[1,s/2.],[s/2.,1]]))
 
@@ -101,10 +110,10 @@ def plot_loading_curves(params,loading,title="",start=1,end=1.5,prefix="/tmp"):
 
 
 
-def plot_curve(VARS,title="",prefix="/tmp"):
+def plot_curve(VARS,title="",prefix="/tmp",filename=None):
     plt.clf()
 
-    fig = plt.figure(figsize=(11,17))
+    fig = plt.figure(figsize=(8.5,11))
     major_title = (title.title())
     fig.suptitle(major_title, fontsize=14, fontweight='bold')
 
@@ -137,7 +146,7 @@ def plot_curve(VARS,title="",prefix="/tmp"):
     to_plot.append(["PK1 Invariants", [(I1p, r'$I_1$'), (I2p, r'$I_2$')], (min_PK,max_PK)])
 
     to_plot.append(["PK2 Invariants", [(I1s, r'$I_1$'), (I2s, r'$I_2$')], (min_PK,max_PK)])
-    to_plot.append(["Pressure", [(VARS['press'],None)]])
+    #to_plot.append(["Pressure", [(VARS['press'],None)]])
 
 
     # Make a list of axes
@@ -175,9 +184,12 @@ def plot_curve(VARS,title="",prefix="/tmp"):
         ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
         ax.legend(loc='center left', bbox_to_anchor=(1.1,0.5))
 
-    # Generate an ID and save the plot
-    rand = np.random.randint(99999)
-    subpath = "G_{}.png".format(rand)
+    # Generate an ID or use the name and save the plot
+    if filename is None:
+        rand = np.random.randint(99999)
+        subpath = "G_{}.png".format(rand)
+    else:
+        subpath = filename
     plt.savefig(os.path.join(prefix,subpath))
     print(os.path.join(prefix,subpath))
 
