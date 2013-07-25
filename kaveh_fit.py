@@ -16,18 +16,6 @@ import log_regression as lr
 import argparse
 
 
-def det1_3d(mat2d):
-    J0 = np.linalg.det(mat2d)
-    return lin.direct_sum(mat2d,np.diagflat([1/J0]))
-
-
-
-def random_F(scale=1.0):
-    F0 = np.eye(2) + scale*np.random.random((2,2))
-    return det1_3d(F0)
-
-
-
 def general_pressure_PK1(F,constitutive_model,*params,vanishing=(-1,-1)):
     """
     Get the pressure from the constitutive model.
@@ -109,52 +97,6 @@ def test_mr_drucker(F,*params):
     return len(trues)>0
 
 
-
-def analyze_params_mr(params):
-    def tstiff(F,*p):
-        pressure = general_pressure_PK1(F,mr.constitutive_model,*p)
-        return mr.material_tangent_stiffness(F,pressure,*p)
-
-
-    identity = np.eye(3)
-    identity_result = test_drucker(params,tstiff,[identity])
-    id_true = bool(len(identity_result[0]))
-
-    # biaxial
-    small = 0.0; big = 2.0
-    regional = small + (big - small)*np.random.random((1000,2))
-    regional_mats = [np.diagflat([r1,r2,1/(r1*r2)]) for (r1,r2) in regional]
-    region_result = test_drucker(params,tstiff,regional_mats)
-    r_num_true = len(region_result[0])
-    r_num_false = len(region_result[1])
-    r_pct_true = 100*r_num_true/(r_num_true + r_num_false)
-    r_pct_false = 100*r_num_false/(r_num_true + r_num_false)
-
-    (trues,falses,_) = region_result
-    values = np.array([1]*len(trues) + [0]*len(falses))
-    samples_m = np.concatenate([f for f in [trues,falses] if len(f)>0])
-
-    # Normalize the samples so we can use a classifier on them
-    samples = (np.diagonal(samples_m,axis1=1,axis2=2)[:,:2] - [(big-small)/2]*2)/(big-small)
-
-    poly_samples = lr.monomialize_vector(samples, lr.dim2_deg4[:,None,:])
-    cal = lr.calibrate_logistic(poly_samples, values, lam=0.1)
-
-    print("Stable at identity: " + str(id_true).upper())
-    print("Eigensystem at identity:")
-    (eigvals,eigvecs) = np.linalg.eigh(el.voigt(tstiff(np.eye(3),*params)))
-    for (eigva,eigve) in zip(eigvals,eigvecs.T):
-        print("{}\n  {}".format(eigva,eigve))
-
-    r1_t = "Stable at {} and unstable at {} of {} points sampled from region ({}%)"
-    r1_text = r1_t.format(r_num_true,r_num_false,r_num_true+r_num_false,r_pct_true)
-    print(r1_text)
-
-    print("4th Order Classifier:")
-    for (monom,coeff) in zip(lr.dim2_deg4,cal['x']):
-        print("{}  {}".format(monom,coeff))
-
-    return (cal['x'],np.array(trues),np.array(falses))
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
