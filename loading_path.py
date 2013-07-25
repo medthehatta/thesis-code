@@ -18,6 +18,8 @@ tangent_stiffness = lambda F, *p: mr.material_tangent_stiffness(F, el.pressure_P
 strain_energy = lambda F, *p: mr.strain_energy_density(F, *p)
 
 
+def fix_J(mat):
+    return lin.direct_sum(mat,np.diagflat([1/np.linalg.det(mat)]))
 
 def uniaxial_loading(s):
     return np.diagflat([s, 1/np.sqrt(s), 1/np.sqrt(s)])
@@ -26,16 +28,15 @@ def uniaxial_loading2(s):
     return np.diagflat([1/np.sqrt(s), s, 1/np.sqrt(s)])
 
 def uniaxial_loading3(s):
-    return np.diagflat([0.7*s, 1.1*s, 1/np.sqrt(0.7*1.1*s*s)])
+    return fix_J(np.diagflat([0.7*(s-(1-1/0.7)), 1.1*(s - (1-1/1.1))]))
 
 def equibiaxial_loading(s):
     return np.diagflat([s,s,1/(s*s)])
 
 def equibiaxial_loading2(s):
-    return np.diagflat([s*np.cos(np.pi/3.),s*np.sin(np.pi/3.),1/(s*s)])
+    return fix_J(np.diagflat([s*np.cos(np.pi/3.),s*np.sin(np.pi/3.)]))
 
 def pure_shear_loading(s):
-    fix_J = lambda mat: lin.direct_sum(mat,np.diagflat([1/np.linalg.det(mat)]))
     return fix_J(np.array([[1,s/2.],[s/2.,1]]))
 
 
