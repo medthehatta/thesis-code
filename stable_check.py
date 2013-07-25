@@ -1,57 +1,49 @@
 """
 stable_check.py
-
-Find boundaries between the stable and unstable regions for a given model.
 """
-import log_regression as reg
 import numpy as np
 import lintools as lin
 
-def positive_definite_samples(model_D, deformation_map, lowcorner, hicorner, 
-                              *params, ptsdensity=0.2):
-  """
-  The penalty for a model having a non-positive-definite tangent stiffness over
-  some portion of the deformation domain which we require to have
-  positive-definite tangent stiffnesses.
-  
-  Arguments
-  -----------
-  - ``model_D`` - Function taking deformation and model parameters to tangent
-    stiffness
-  - ``deformation_map`` - Function taking deformation parameters to
-    deformations
-  - ``lowcorner`` - The low corner of the rectangular desired deformation
-    parameter region 
-  - ``hicorner`` - The high corner of the rectangular desired deformation
-    parameter region
-  - ``params`` - The model parameters being evaluated
-  - ``ptsdensity`` - Density of points to sample with
-  """
-  # Generate sample points with given density
-  num_pts = ptsdensity*np.product((hicorner-lowcorner).ravel())
-  if num_pts < 5:
-    raise Exception("Point density not high enough, or admissible domain too",
-                    "small.")
-  # This generates ``numpts`` random numbers between 0 and 1 and reshapes the
-  # array so it can be multiplied by the difference between ``lowcorner`` and
-  # ``hicorner``.
-  unit_pts = np.random.random([num_pts]+list(lowcorner.shape))
-                                     
-  # Generate the points
-  pts = lowcorner + (hicorner-lowcorner)*unit_pts
-  deformations = deformation_map(pts)
 
-  # Check positive-definiteness of tangent stiffnesses at each point
-  tangent_stiffnesses = model_D(deformations, *params)
-  # Convenience function for finding Voigt representation of a 4th rk tensor
-  def voigt(d):
-    return lin.reorder_matrix(lin.np_voigt(d),lin.VOIGT_ORDER)
-  acceptable = np.array([lin.is_positive_definite(voigt(d)) for 
-                         d in tangent_stiffnesses])
 
-  # Return stable and unstable points in two separate arrays
-  return (pts[acceptable==True,:],
-          pts[acceptable==False,:])
+
+def test_condition_at_pts(condition,points,params=None):
+    """
+    Performs a test for ``condition`` at the supplied ``points``.
+
+    If the condition also depends on a fixed parameter, pass that through
+    ``params``.
+
+    Return the points that met the condition, those that didn't, and a list
+    labeling each point with true or false.
+    """
+    if params is None:
+        res = [condition(pt) for pt in points]
+    else:
+        res = [condition(pt,*params) for pt in points]
+
+    labeled = list(zip(points,res))
+    trues = [p for (p,r) in labeled if r==True]
+    falses = [p for (p,r) in labeled if r!=True]
+    return (trues,falses,labeled)
+
+
+def points_in_box(low,hi,num=1000):
+    """
+    Samples ``num`` points from a box in R^n whose lower corner is at ``low``
+    and whose opposite corner is at ``hi``.
+    """
+    return low + (hi - low)*np.random.random([num]+list(low.shape))
+
+
+def det_J1(mat):
+    """
+    Takes a matrix and returns the unit determinant matrix obtained by adding
+    the reciprocal determinant to the diagonal (as a direct sum).
+    """
+    return lin.direct_sum(mat,np.diagflat([1/np.linalg.det(mat)]))
+
+
 
 
 
