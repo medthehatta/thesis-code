@@ -123,7 +123,7 @@ def iso_material_elasticity(F,H,*params):
     distortional11 = Q1*(0.5*I1*CipCi - (1/3.)*CivA1)
     distortional12 = Q2*(0.5*I2*CipCi - (1/3.)*CivA2)
     distortional21 = (1+2*k2*Q1*Q1)*(A1xA1 + (1/9.)*I1*I1*CixCi - (1/3.)*I1*CivA1)
-    distortional22 = (1+2*k2*Q2*Q2)*(A2xA2 + (1/9.)*I2*I2*CixCi - (2/3.)*I2*CivA2)
+    distortional22 = (1+2*k2*Q2*Q2)*(A2xA2 + (1/9.)*I2*I2*CixCi - (1/3.)*I2*CivA2)
 
     return isotropic1 + \
            distortional01*(distortional11 + distortional21) + \
