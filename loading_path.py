@@ -33,8 +33,15 @@ def uniaxial_loading3(s):
 def equibiaxial_loading(s):
     return np.diagflat([s,s,1/(s*s)])
 
-def equibiaxial_loading2(s):
-    return fix_J(np.diagflat([s*np.cos(np.pi/3.),s*np.sin(np.pi/3.)]))
+def asymmetric_biaxial(s,aspect=3):
+    return np.diagflat([s/aspect,s,aspect/(s*s)])
+
+def asymmetric_biaxial2(s,aspect=3,angle=4*np.pi/7):
+    F0 = asymmetric_biaxial(s,aspect)[:2,:2]
+    co = np.cos(angle)
+    si = np.sin(angle)
+    Q = np.array([[co,-si],[si,co]])
+    return fix_J(np.dot(Q,np.dot(F0,Q.T)))
 
 def pure_shear_loading(s):
     return fix_J(np.array([[1,s/2.],[s/2.,1]]))
